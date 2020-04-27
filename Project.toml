@@ -1,0 +1,13 @@
+name = "RandomBattles"
+uuid = "02d78f1d-6942-4113-b550-739f20f5c505"
+authors = ["PvPisistratus"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
