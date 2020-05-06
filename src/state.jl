@@ -38,8 +38,8 @@ struct Pokemon
 end
 
 function Pokemon(i::Int64)
-    rankings = JSON.parsefile("RandomBattles/data/rankings-1500.json")
-    gamemaster = JSON.parsefile("RandomBattles/data/gamemaster.json")
+    rankings = JSON.parsefile("../data/rankings-1500.json")
+    gamemaster = JSON.parsefile("../data/gamemaster.json")
     cpm = CSV.read("CPMperLevel.csv", header = false)
     moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"], gamemaster)
