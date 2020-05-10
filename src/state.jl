@@ -1,5 +1,8 @@
 using JSON, CSV, StaticArrays
 
+const r_s = "/home/pisistratus/.julia/dev/RandomBattles/data/rankings-1500.json"
+const gm_s = "/home/pisistratus/.julia/dev/RandomBattles/data/gamemaster.json"
+
 struct Stats
     attack::Float32
     defense::Float32
@@ -38,8 +41,8 @@ struct Pokemon
 end
 
 function Pokemon(i::Int64)
-    rankings = JSON.parsefile("/home/pisistratus/.julia/dev/RandomBattles/data/rankings-1500.json")
-    gamemaster = JSON.parsefile("/home/pisistratus/.julia/dev/RandomBattles/data/gamemaster.json")
+    rankings = JSON.parsefile(r_s)
+    gamemaster = JSON.parsefile(gm_s)
     cpm = CSV.read("CPMperLevel.csv", header = false)
     moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"], gamemaster)
@@ -199,4 +202,7 @@ State(team::Array{Int64}) = State(
     SwitchAction(0, 0),
 )
 
-State(team::Array{String}) = State(convert_indices.(team))
+State(team::Array{String}) = State(convert_indices.(
+        team,
+        Ref(JSON.parsefile(r_s)),
+    ))
