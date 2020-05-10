@@ -111,10 +111,10 @@ function apply_buffs(state::State)
 end
 
 function convert_indices(name, rankings)
-    ranking = Int16(0)
+    ranking = 0
     for i = 1:length(rankings)
         if rankings[i]["speciesId"] == name
-            ranking = Int16(i)
+            ranking = i
         end
     end
     return ranking
