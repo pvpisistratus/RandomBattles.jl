@@ -6,6 +6,6 @@ include("utility_functions.jl")
 include("decisions.jl")
 include("battle_logic.jl")
 
-export State, get_battle_scores
+export State, get_battle_scores, convert_indices
 
 end # module
