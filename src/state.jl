@@ -198,3 +198,5 @@ State(team::Array{Int64}) = State(
     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
     SwitchAction(0, 0),
 )
+
+State(team::Array{String}) = State(convert_indices.(team))
