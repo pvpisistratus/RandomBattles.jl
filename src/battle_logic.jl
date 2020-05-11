@@ -21,6 +21,7 @@ function get_weights(state)
     weights = zeros(8)
     activeTeam = state.teams[state.agent]
     activeMon = activeTeam.mons[activeTeam.active]
+    switchTo = 0
     if activeMon.hp > 0
         weights[1] = 1.0
         if activeMon.fastMoveCooldown == 0
