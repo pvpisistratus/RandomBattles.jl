@@ -1,7 +1,7 @@
 const possible_decisions = 14
 
 mutable struct DecisionMatrix
-    decision_matrix::Array{Tuple{Float64, Float64}, 2}
+    decision_matrix::Array{Tuple{Float64,Float64},2}
 end
 
 DecisionMatrix() = DecisionMatrix([
@@ -76,15 +76,24 @@ function get_decision_matrix(state)
             if decisions2 == []
                 finished = true
                 score = get_battle_score(next_state)
-                d_matrix.decision_matrix[decision1, :] .= (score, score)
+                d_matrix.decision_matrix[decision1, :] = [(score, score) (
+                    score,
+                    score,
+                ) (score, score) (score, score) (score, score) (score, score) (
+                    score,
+                    score,
+                ) (score, score) (score, score) (score, score) (score, score) (
+                    score,
+                    score,
+                ) (score, score) (score, score)]
             else
                 for decision2 in decisions2
                     next_next_state = play_decision(next_state, decision2)
                     scores = get_battle_scores(next_next_state, 1000)
-                    d_matrix.decision_matrix[
-                        decision1,
-                        decision2,
-                    ] = (minimum(scores), maximum(scores))
+                    d_matrix.decision_matrix[decision1, decision2] = (
+                        minimum(scores),
+                        maximum(scores),
+                    )
                 end
             end
         end
@@ -106,7 +115,7 @@ function minimax(dmat::DecisionMatrix)
             maxes[j] = last(dmat.decision_matrix[i, j])
         end
     end
-    replace!(maxes, 0.0=>1.0)
+    replace!(maxes, 0.0 => 1.0)
     maximin = argmin(maxes)
     return (minimax, maximin)
 end
@@ -116,8 +125,8 @@ function is_empty(dmat::DecisionMatrix)
 end
 
 mutable struct Strategy
-    decisions::Array{Tuple{Int64, Int64}}
-    minimaxes::Array{Tuple{Float64, Float64}}
+    decisions::Array{Tuple{Int64,Int64}}
+    minimaxes::Array{Tuple{Float64,Float64}}
     history::Array{State}
 end
 
