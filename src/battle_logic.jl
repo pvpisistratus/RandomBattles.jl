@@ -75,15 +75,13 @@ function get_possible_decisions(state)
         for i = 1:3
             if i != activeTeam.active &&
                activeTeam.mons[i].hp != 0 && activeTeam.switchCooldown == 0
-                push!(decisions, 2 * i + 7)
-                push!(decisions, 2 * i + 8)
+                push!(decisions, i + 8)
             end
         end
     else
         for i = 1:3
             if i != activeTeam.active && activeTeam.mons[i].hp != 0
-                push!(decisions, 2 * i + 13)
-                push!(decisions, 2 * i + 14)
+                push!(decisions, i + 11)
             end
         end
     end
@@ -130,29 +128,17 @@ function play_decision(state, decision)
     elseif decision == 8
         next_state = do_charged_move(state, 2, false)
     elseif decision == 9
-        next_state = do_unforced_switch(state, 1, true)
+        next_state = do_unforced_switch(state, 1)
     elseif decision == 10
-        next_state = do_unforced_switch(state, 1, false)
+        next_state = do_unforced_switch(state, 2)
     elseif decision == 11
-        next_state = do_unforced_switch(state, 2, true)
+        next_state = do_unforced_switch(state, 3)
     elseif decision == 12
-        next_state = do_unforced_switch(state, 2, false)
+        next_state = do_forced_switch(state, 1)
     elseif decision == 13
-        next_state = do_unforced_switch(state, 3, true)
+        next_state = do_forced_switch(state, 2)
     elseif decision == 14
-        next_state = do_unforced_switch(state, 3, false)
-    elseif decision == 15
-        next_state = do_forced_switch(state, 1, true)
-    elseif decision == 16
-        next_state = do_forced_switch(state, 1, false)
-    elseif decision == 17
-        next_state = do_forced_switch(state, 2, true)
-    elseif decision == 18
-        next_state = do_forced_switch(state, 2, false)
-    elseif decision == 19
-        next_state = do_forced_switch(state, 3, true)
-    elseif decision == 20
-        next_state = do_forced_switch(state, 3, false)
+        next_state = do_forced_switch(state, 3)
     end
     return next_state
 end
