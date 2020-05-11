@@ -66,11 +66,7 @@ function get_decision_matrix(state)
                     d_matrix.decision_matrix[
                         decision1,
                         decision2,
-                    ].first = minimum(scores)
-                    d_matrix.decision_matrix[
-                        decision1,
-                        decision2,
-                    ].second = maximum(scores)
+                    ] = (minimum(scores), maximum(scores))
                 end
             end
         end
@@ -81,15 +77,15 @@ end
 function minimax(dmat::DecisionMatrix)
     mins = ones(20)
     for i = 1:20, j = 1:20
-        if dmat.decision_matrix[i, j].first < mins[i]
-            mins[i] = dmat.decision_matrix[i, j].first
+        if first(dmat.decision_matrix[i, j]) < mins[i]
+            mins[i] = first(dmat.decision_matrix[i, j])
         end
     end
     minimax = argmax(mins)
     maxes = zeros(20)
     for i = 1:20, j = 1:20
-        if dmat.decision_matrix[i, j].second > maxes[j]
-            maxes[j] = dmat.decision_matrix[i, j].second
+        if second(dmat.decision_matrix[i, j]) > maxes[j]
+            maxes[j] = second(dmat.decision_matrix[i, j])
         end
     end
     replace!(maxes, 0.0=>1.0)
@@ -120,10 +116,10 @@ function Strategy(state)
             push!(strategy.decisions, decision)
             push!(
                 strategy.minimaxes,
-                d_matrix.decision_matrix[decision.first.decision.second],
+                d_matrix.decision_matrix[first(decision), second(decision)],
             )
-            current_state = play_decision(current_state, decision.first)
-            current_state = play_decision(current_state, decision.second)
+            current_state = play_decision(current_state, first(decision))
+            current_state = play_decision(current_state, second(decision))
         end
         push!(strategy.history, current_state)
     end
