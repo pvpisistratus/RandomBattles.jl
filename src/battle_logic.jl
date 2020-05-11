@@ -163,7 +163,7 @@ function get_battle_scores(initial_state::State, N)
             if sum(weights) == 0
                 break
             end
-            decision = rand(Categorical(get_weights(state)))
+            decision = rand(Categorical(weights))
             state = play_decision(state, decision, switchTo)
             if state.agent == 1
                 state = @set state.switchPending = SwitchAction(0, 0)
