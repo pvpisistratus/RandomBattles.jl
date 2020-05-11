@@ -45,9 +45,9 @@ DecisionMatrix() = DecisionMatrix([
     ) (0.0, 0.0) (0.0, 0.0) (0.0, 0.0)
 ])
 
-function DecisionMatrix(state)
+function get_decision_matrix(state)
     finished = false
-    d_matrix = decision_matrix()
+    d_matrix = DecisionMatrix()
     decisions1 = get_possible_decisions(state)
     if decisions1 == []
         finished = true
@@ -114,7 +114,7 @@ function Strategy(state)
     finished = false
     current_state = state
     while !finished
-        d_matrix, finished = DecisionMatrix(current_state)
+        d_matrix, finished = get_decision_matrix(current_state)
         if !is_empty(d_matrix)
             decision = minimax(d_matrix)
             push!(strategy.decisions, decision)
