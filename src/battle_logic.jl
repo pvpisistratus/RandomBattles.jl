@@ -47,7 +47,9 @@ function get_weights(state)
             end
         end
     end
-    weights ./= sum(weights)
+    if sum(weights) > 0
+        weights ./= sum(weights)
+    end
     return weights, switchTo
 end
 
