@@ -43,6 +43,7 @@ function get_weights(state)
             if i != activeTeam.active &&
                activeTeam.mons[i].hp != 0
                 weights[i+5] = 1.0
+            end
         end
     end
     weights ./= sum(weights)
