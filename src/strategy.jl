@@ -66,11 +66,11 @@ function get_decision_matrix(state)
                     d_matrix.decision_matrix[
                         decision1,
                         decision2,
-                    ] = minimum(scores)
+                    ].first = minimum(scores)
                     d_matrix.decision_matrix[
                         decision1,
                         decision2,
-                    ] = maximum(scores)
+                    ].second = maximum(scores)
                 end
             end
         end
