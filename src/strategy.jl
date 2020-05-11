@@ -102,8 +102,8 @@ function minimax(dmat::DecisionMatrix)
     minimax = argmax(mins)
     maxes = zeros(possible_decisions)
     for i = 1:possible_decisions, j = 1:possible_decisions
-        if second(dmat.decision_matrix[i, j]) > maxes[j]
-            maxes[j] = second(dmat.decision_matrix[i, j])
+        if last(dmat.decision_matrix[i, j]) > maxes[j]
+            maxes[j] = last(dmat.decision_matrix[i, j])
         end
     end
     replace!(maxes, 0.0=>1.0)
@@ -134,10 +134,10 @@ function Strategy(state)
             push!(strategy.decisions, decision)
             push!(
                 strategy.minimaxes,
-                d_matrix.decision_matrix[first(decision), second(decision)],
+                d_matrix.decision_matrix[first(decision), last(decision)],
             )
             current_state = play_decision(current_state, first(decision))
-            current_state = play_decision(current_state, second(decision))
+            current_state = play_decision(current_state, last(decision))
         end
         push!(strategy.history, current_state)
     end
