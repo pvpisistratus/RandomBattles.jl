@@ -111,35 +111,33 @@ end
 
 function play_decision(state, decision)
     next_state = state
-    if decision == 1
-        next_state = do_nothing(state, true)
-    elseif decision == 2
-        next_state = do_nothing(state, false)
-    elseif decision == 3
-        next_state = do_fast_move(state, true)
-    elseif decision == 4
-        next_state = do_fast_move(state, false)
-    elseif decision == 5
-        next_state = do_charged_move(state, 1, true)
-    elseif decision == 6
-        next_state = do_charged_move(state, 1, false)
-    elseif decision == 7
-        next_state = do_charged_move(state, 2, true)
-    elseif decision == 8
-        next_state = do_charged_move(state, 2, false)
-    elseif decision == 9
+    if iseven(decision)
+        next_state = @set next_state.teams[next_state.agent].shielding = true
+    else
+        next_state = @set next_state.teams[next_state.agent].shielding = false
+    end
+    if 1 <= decision <= 2
+        next_state = do_nothing(state)
+    elseif decision <= 4
+        next_state = do_fast_move(state)
+    elseif decision <= 6
+        next_state = do_charged_move(state, 1)
+    elseif decision <= 8
+        next_state = do_charged_move(state, 2)
+    elseif decision <= 10
         next_state = do_unforced_switch(state, 1)
-    elseif decision == 10
+    elseif decision <= 12
         next_state = do_unforced_switch(state, 2)
-    elseif decision == 11
+    elseif decision <= 14
         next_state = do_unforced_switch(state, 3)
-    elseif decision == 12
+    elseif decision <= 16
         next_state = do_forced_switch(state, 1)
-    elseif decision == 13
+    elseif decision <= 18
         next_state = do_forced_switch(state, 2)
-    elseif decision == 14
+    elseif decision <= 20
         next_state = do_forced_switch(state, 3)
     end
+
     return next_state
 end
 
@@ -160,6 +158,8 @@ function get_battle_scores(initial_state::State, N)
                     Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1),
                     0,
                 )
+                state = @set state.teams[1].shielding = rand(Bool)
+                state = @set state.teams[2].shielding = rand(Bool)
             end
         end
         scores[i] = get_battle_score(state)

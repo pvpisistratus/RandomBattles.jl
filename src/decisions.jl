@@ -1,6 +1,6 @@
 using Setfield
 
-function do_nothing(state::State, shielding = rand(Bool))
+function do_nothing(state::State)
     if state.agent == 1
         state = @set state.agent = 2
     else
@@ -45,7 +45,7 @@ function do_nothing(state::State, shielding = rand(Bool))
                 0,
                 state.teams[2].switchCooldown - 10000,
             )
-            if state.teams[2].shields > 0 && shielding
+            if state.teams[2].shields > 0 && state.teams[2].shielding
                 state = @set state.teams[2].shields -= 1
             else
                 state = @set state.teams[2].mons[state.teams[2].active].hp = max(
@@ -66,7 +66,7 @@ function do_nothing(state::State, shielding = rand(Bool))
     return state
 end
 
-function do_fast_move(state::State, shielding = rand(Bool))
+function do_fast_move(state::State)
     if state.agent == 1
         state = @set state.teams[1].mons[state.teams[1].active].fastMoveCooldown = state.teams[1].mons[state.teams[1].active].fastMove.cooldown
         state = @set state.teams[1].mons[state.teams[1].active].energy += state.teams[1].mons[state.teams[1].active].fastMove.energy
@@ -137,7 +137,7 @@ function do_fast_move(state::State, shielding = rand(Bool))
                 0,
                 state.teams[2].switchCooldown - 10000,
             )
-            if state.teams[2].shields > 0 && shielding
+            if state.teams[2].shields > 0 && state.teams[2].shielding
                 state = @set state.teams[2].shields -= 1
             else
                 state = @set state.teams[2].mons[state.teams[2].active].hp = max(
@@ -158,7 +158,7 @@ function do_fast_move(state::State, shielding = rand(Bool))
     return state
 end
 
-function do_charged_move(state::State, move::Integer, shielding = rand(Bool))
+function do_charged_move(state::State, move::Integer)
     if state.agent == 1
         state = @set state.chargedMovePending = ChargedAction(
             state.teams[1].mons[state.teams[1].active].chargedMoves[move],
@@ -215,7 +215,7 @@ function do_charged_move(state::State, move::Integer, shielding = rand(Bool))
                 0,
                 state.teams[2].switchCooldown - 10000,
             )
-            if state.teams[1].shields > 0 && shielding
+            if state.teams[1].shields > 0 && state.teams[1].shielding
                 state = @set state.teams[1].shields -= 1
             else
                 state = @set state.teams[1].mons[state.teams[1].active].hp = max(
@@ -244,7 +244,7 @@ function do_charged_move(state::State, move::Integer, shielding = rand(Bool))
                 0,
                 state.teams[2].switchCooldown - 10000,
             )
-            if state.teams[2].shields > 0 && shielding
+            if state.teams[2].shields > 0 && state.teams[2].shielding
                 state = @set state.teams[2].shields -= 1
             else
                 state = @set state.teams[2].mons[state.teams[2].active].hp = max(

@@ -1,67 +1,20 @@
-const possible_decisions = 14
+const possible_decisions = 20
 
 mutable struct DecisionMatrix
     decision_matrix::Array{Tuple{Float64,Float64},2}
 end
 
-DecisionMatrix() = DecisionMatrix([
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-        (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (0, 0) (
-            0,
-            0,
-        ) (0, 0) (0, 0) (0, 0)
-    ])
+function DecisionMatrix()
+    dmat = Array{Tuple{Float64,Float64}}(
+        undef,
+        possible_decisions,
+        possible_decisions,
+    )
+    for i = 1:possible_decisions, j = 1:possible_decisions
+        dmat[i, j] = (0.0, 0.0)
+    end
+    return DecisionMatrix(dmat)
+end
 
 function get_decision_matrix(state)
     finished = false
@@ -76,16 +29,11 @@ function get_decision_matrix(state)
             if decisions2 == []
                 finished = true
                 score = get_battle_score(next_state)
-                d_matrix.decision_matrix[decision1, :] = [(score, score) (
-                    score,
-                    score,
-                ) (score, score) (score, score) (score, score) (score, score) (
-                    score,
-                    score,
-                ) (score, score) (score, score) (score, score) (score, score) (
-                    score,
-                    score,
-                ) (score, score) (score, score)]
+                d_row = Array{Tuple{Float64,Float64}}(undef, possible_decisions)
+                for i = 1:possible_decisions
+                    d_row[i] = (score, score)
+                end
+                d_matrix.decision_matrix[decision1, :] = d_row
             else
                 for decision2 in decisions2
                     next_next_state = play_decision(next_state, decision2)

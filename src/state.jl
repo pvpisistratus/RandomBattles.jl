@@ -167,6 +167,7 @@ struct Team
     switchCooldown::Int64    #Initially 0
     shields::Int8            #Initially 2
     active::Int64            #Initially 1 (the lead)
+    shielding::Bool          #Initially random
 end
 
 struct ChargedAction
@@ -188,13 +189,21 @@ end
 
 State(team::Array{Int64}) = State(
     [
-     Team(Pokemon.(team[1:(length(team)÷2)]), StatBuffs(0, 0), 0, 2, 1),
+     Team(
+         Pokemon.(team[1:(length(team)÷2)]),
+         StatBuffs(0, 0),
+         0,
+         2,
+         1,
+         rand(Bool),
+     ),
      Team(
          Pokemon.(team[(length(team)÷2+1):length(team)]),
          StatBuffs(0, 0),
          0,
          2,
          1,
+         rand(Bool),
      ),
     ],
     1,
@@ -202,7 +211,5 @@ State(team::Array{Int64}) = State(
     SwitchAction(0, 0),
 )
 
-State(team::Array{String}) = State(convert_indices.(
-        team,
-        Ref(JSON.parsefile(r_s)),
-    ))
+State(team::Array{String}) =
+    State(convert_indices.(team, Ref(JSON.parsefile(r_s))))
