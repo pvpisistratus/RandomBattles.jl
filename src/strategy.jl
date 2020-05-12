@@ -85,6 +85,7 @@ function Strategy(state)
     finished = false
     current_state = state
     while !finished
+        print(".")
         d_matrix, finished = get_decision_matrix(current_state)
         if !is_empty(d_matrix)
             decision = minimax(d_matrix)
