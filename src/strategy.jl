@@ -16,7 +16,7 @@ function DecisionMatrix()
     return DecisionMatrix(dmat)
 end
 
-function get_decision_matrix(state)
+function get_decision_matrix(state::State, N::Int64)
     finished = false
     d_matrix = DecisionMatrix()
     decisions1 = get_possible_decisions(state)
@@ -37,7 +37,7 @@ function get_decision_matrix(state)
             else
                 for decision2 in decisions2
                     next_next_state = play_decision(next_state, decision2)
-                    scores = get_battle_scores(next_next_state, 1000)
+                    scores = get_battle_scores(next_next_state, N)
                     d_matrix.decision_matrix[decision1, decision2] = (
                         minimum(scores),
                         maximum(scores),
@@ -80,13 +80,13 @@ end
 
 Strategy() = Strategy([], [], [])
 
-function Strategy(state)
+function Strategy(state::State, N::Int64)
     strategy = Strategy()
     finished = false
     current_state = state
     while !finished
         print(".")
-        d_matrix, finished = get_decision_matrix(current_state)
+        d_matrix, finished = get_decision_matrix(current_state, N)
         if !is_empty(d_matrix)
             decision = minimax(d_matrix)
             push!(strategy.decisions, decision)
