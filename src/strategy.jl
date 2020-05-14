@@ -66,7 +66,6 @@ function minimax(dmat::DecisionMatrix)
     end
     replace!(maxes, 0.0 => 1.0)
     minimax = argmin(maxes)
-    return (minimax, maximin)
     maxes = zeros(possible_decisions)
     for i = 1:possible_decisions, j = 1:possible_decisions
         if last(dmat.decision_matrix[i, j]) > maxes[j]
