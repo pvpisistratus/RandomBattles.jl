@@ -75,13 +75,15 @@ function get_possible_decisions(state)
         for i = 1:3
             if i != activeTeam.active &&
                activeTeam.mons[i].hp != 0 && activeTeam.switchCooldown == 0
-                push!(decisions, i + 8)
+                push!(decisions, 2 * i + 7)
+                push!(decisions, 2 * i + 8)
             end
         end
     else
         for i = 1:3
             if i != activeTeam.active && activeTeam.mons[i].hp != 0
-                push!(decisions, i + 11)
+                push!(decisions, 2 * i + 13)
+                push!(decisions, 2 * i + 14)
             end
         end
     end
