@@ -50,22 +50,14 @@ function get_decision_matrix(state)
 end
 
 function minimax(dmat::DecisionMatrix)
-    #mins = ones(possible_decisions)
-    #for i = 1:possible_decisions, j = 1:possible_decisions
-    #    if first(dmat.decision_matrix[i, j]) < mins[i]
-    #        mins[i] = first(dmat.decision_matrix[i, j])
-    #    end
-    #end
-    #replace!(mins, 1.0 => 0.0)
-    #minimax = argmax(mins)
-    maxes = zeros(possible_decisions)
+    mins = ones(possible_decisions)
     for i = 1:possible_decisions, j = 1:possible_decisions
-        if last(dmat.decision_matrix[i, j]) > maxes[i]
-            maxes[i] = first(dmat.decision_matrix[i, j])
+        if first(dmat.decision_matrix[i, j]) < mins[i]
+            mins[i] = first(dmat.decision_matrix[i, j])
         end
     end
-    replace!(maxes, 0.0 => 1.0)
-    minimax = argmin(maxes)
+    replace!(mins, 1.0 => 0.0)
+    minimax = argmax(mins)
     maxes = zeros(possible_decisions)
     for i = 1:possible_decisions, j = 1:possible_decisions
         if last(dmat.decision_matrix[i, j]) > maxes[j]
