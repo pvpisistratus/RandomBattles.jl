@@ -37,7 +37,7 @@ function get_decision_matrix(state)
             else
                 for decision2 in decisions2
                     next_next_state = play_decision(next_state, decision2)
-                    scores = get_battle_scores(next_next_state, 10)
+                    scores = get_battle_scores(next_next_state, 1000)
                     d_matrix.decision_matrix[decision1, decision2] = (
                         minimum(scores),
                         maximum(scores),
