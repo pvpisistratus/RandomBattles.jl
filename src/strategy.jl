@@ -11,7 +11,7 @@ function DecisionMatrix()
         possible_decisions,
     )
     for i = 1:possible_decisions, j = 1:possible_decisions
-        dmat[i, j] = (0.0, 0.0)
+        dmat[i, j] = (1.0, 0.0)
     end
     return DecisionMatrix(dmat)
 end
