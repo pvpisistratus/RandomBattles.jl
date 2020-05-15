@@ -1,8 +1,8 @@
 using JSON, CSV, StaticArrays
 
-const r_s = "/home/pisistratus/.julia/dev/RandomBattles/data/rankings-1500.json"
-const gm_s = "/home/pisistratus/.julia/dev/RandomBattles/data/gamemaster.json"
-const cpm_s = "/home/pisistratus/.julia/dev/RandomBattles/data/CPMperLevel.csv"
+const r_s = joinpath(@__DIR__, "../data/rankings-1500.json")
+const gm_s = joinpath(@__DIR__, "../data/gamemaster.json")
+const cpm_s = joinpath(@__DIR__, "../data/CPMperLevel.csv")
 
 struct Stats
     attack::Float32
