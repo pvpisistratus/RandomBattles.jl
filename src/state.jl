@@ -1,7 +1,7 @@
 using JSON, CSV, StaticArrays
 
-const r_s = "/home/pisistratus/.julia/dev/RandomBattles/data/rankings-1500.json"
-const gm_s = "/home/pisistratus/.julia/dev/RandomBattles/data/gamemaster.json"
+const r_s = "~/rankings-1500.json"
+const gm_s = "~/gamemaster.json"
 
 struct Stats
     attack::Float32
