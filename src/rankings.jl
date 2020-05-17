@@ -15,11 +15,17 @@ function get_empirical_teams(filename::String)
         end
     end
     weights = data[:, 4]
-    for i = 1:numEmpiricalTeams
+    i = 1
+    while true
+        if i > length(empiricalTeams)
+            break
+        end
         if !isassigned(empiricalTeams, i)
             deleteat!(empiricalTeams, i)
             deleteat!(weights, i)
+            i -= 1
         end
+        i += 1
     end
     return empiricalTeams, weights
 end;
