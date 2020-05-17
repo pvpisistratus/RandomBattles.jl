@@ -74,9 +74,9 @@ function run_empirical_teams(
     weights::Array{Int64},
 )
     histogram = Hist(0.0:0.025:1.0)
-    @simd for i = 1:length(awayTeams)
-        @simd for j = 1:weights[i]
-            fit!(
+    for i = 1:length(awayTeams)
+        for j = 1:weights[i]
+            @inbounds fit!(
                 histogram,
                 play_battle(State(homeTeam, awayTeams[i])),
             )
