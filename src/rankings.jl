@@ -76,7 +76,7 @@ function run_empirical_teams(
     histogram = Hist(0.0:0.025:1.0)
     @simd for i = 1:length(awayTeams)
         @simd for j = 1:weights[i]
-            @inbounds fit!(
+            fit!(
                 histogram,
                 play_battle(State(homeTeam, awayTeams[i])),
             )
