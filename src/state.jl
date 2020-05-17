@@ -36,6 +36,7 @@ struct Pokemon
     stats::Stats
     fastMove::Move
     chargedMoves::SVector{2,Move}
+    toString::String
 
     #These values are initialized, but change throughout the battle
     hp::Int16                 #Initially hp stat of mon
@@ -149,11 +150,15 @@ function Pokemon(i::Int64)
         Int(chargedMove2Gm["buffs"][2]) : 0,
     )
     chargedMoves = [chargedMove1, chargedMove2]
+    toString = rankings[i]["speciesId"] * "," * fastMovesAvailable[moves[1]+1] *
+               "," * chargedMovesAvailable[moves[2]] * "," *
+               chargedMovesAvailable[moves[3]]
     return Pokemon(
         types,
         stats,
         fastMove,
         chargedMoves,
+        toString,
         hitpoints,
         0,
         fastMove.cooldown,
