@@ -143,28 +143,32 @@ function play_decision(state, decision)
     return next_state
 end
 
+function play_battle(initial_state::State)
+    state = initial_state
+    while true
+        weights, switchTo = get_weights(state)
+        if sum(weights) == 0
+            break
+        end
+        decision = rand(Categorical(weights))
+        state = play_decision(state, decision, switchTo)
+        if state.agent == 1
+            state = @set state.switchPending = SwitchAction(0, 0)
+            state = @set state.chargedMovePending = ChargedAction(
+                Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1),
+                0,
+            )
+            state = @set state.teams[1].shielding = rand(Bool)
+            state = @set state.teams[2].shielding = rand(Bool)
+        end
+    end
+    return get_battle_score(state)
+end
+
 function get_battle_scores(initial_state::State, N)
     scores = zeros(N)
     for i = 1:N
-        state = initial_state
-        while true
-            weights, switchTo = get_weights(state)
-            if sum(weights) == 0
-                break
-            end
-            decision = rand(Categorical(weights))
-            state = play_decision(state, decision, switchTo)
-            if state.agent == 1
-                state = @set state.switchPending = SwitchAction(0, 0)
-                state = @set state.chargedMovePending = ChargedAction(
-                    Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1),
-                    0,
-                )
-                state = @set state.teams[1].shielding = rand(Bool)
-                state = @set state.teams[2].shielding = rand(Bool)
-            end
-        end
-        scores[i] = get_battle_score(state)
+        scores[i] = play_battle(initial_state)
     end
     return scores
 end;

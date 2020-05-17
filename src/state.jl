@@ -187,10 +187,17 @@ struct State
     switchPending::SwitchAction
 end
 
-State(team::Array{Int64}) = State(
+State(team1::Team, team2::Team) = State(
+    [team1, team2],
+    1,
+    ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
+    SwitchAction(0, 0),
+)
+
+State(teams::Array{Int64}) = State(
     [
      Team(
-         Pokemon.(team[1:(length(team)÷2)]),
+         Pokemon.(teams[1:(length(teams)÷2)]),
          StatBuffs(0, 0),
          0,
          2,
@@ -198,7 +205,7 @@ State(team::Array{Int64}) = State(
          rand(Bool),
      ),
      Team(
-         Pokemon.(team[(length(team)÷2+1):length(team)]),
+         Pokemon.(teams[(length(teams)÷2+1):length(teams)]),
          StatBuffs(0, 0),
          0,
          2,
@@ -211,5 +218,5 @@ State(team::Array{Int64}) = State(
     SwitchAction(0, 0),
 )
 
-State(team::Array{String}) =
-    State(convert_indices.(team, Ref(rankings)))
+State(teams::Array{String}) =
+    State(convert_indices.(teams, Ref(rankings)))
