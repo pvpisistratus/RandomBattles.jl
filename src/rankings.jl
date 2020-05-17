@@ -119,7 +119,7 @@ end;
 
 function rank(numMons, indigo_file, outfile)
     println("Constructing Empirical Teams...")
-    empiricalTeams, weights = get_empirical_teams(filename)
+    empiricalTeams, weights = get_empirical_teams(indigo_file)
     println("Constructing Theoretical Teams...")
     theoreticalTeams = get_theoretical_teams(numMons)
     println("Running Battles...")
