@@ -1,6 +1,7 @@
 module RandomBattles
 
 include("types.jl")
+include("cpm.jl")
 include("state.jl")
 include("utility_functions.jl")
 include("decisions.jl")

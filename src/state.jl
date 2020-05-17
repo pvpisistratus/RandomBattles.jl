@@ -1,8 +1,10 @@
-using JSON, CSV, StaticArrays
+using JSON, StaticArrays
 
-const r_s = joinpath(@__DIR__, "../data/rankings-1500.json")
-const gm_s = joinpath(@__DIR__, "../data/gamemaster.json")
-const cpm_s = joinpath(@__DIR__, "../data/CPMperLevel.csv")
+const rankings = JSON.parsefile(joinpath(
+    @__DIR__,
+    "../data/rankings-1500.json",
+))
+const gamemaster = JSON.parsefile(joinpath(@__DIR__, "../data/gamemaster.json"))
 
 struct Stats
     attack::Float32
@@ -42,20 +44,17 @@ struct Pokemon
 end
 
 function Pokemon(i::Int64)
-    rankings = JSON.parsefile(r_s)
-    gamemaster = JSON.parsefile(gm_s)
-    cpm = CSV.read(cpm_s, header = false)
     moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"], gamemaster)
     gm = gamemaster["pokemon"][gmid]
     types = get_type_id.(convert(Array{String}, gm["types"]))
-    level = Int(2 * gm["defaultIVs"]["cp1500"][1] - 1)
+    level = gm["defaultIVs"]["cp1500"][1]
     atk = gm["defaultIVs"]["cp1500"][2]
     def = gm["defaultIVs"]["cp1500"][3]
     hp = gm["defaultIVs"]["cp1500"][4]
-    attack = (atk + gm["baseStats"]["atk"]) * cpm[level, 2]
-    defense = (def + gm["baseStats"]["def"]) * cpm[level, 2]
-    hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[level, 2])
+    attack = (atk + gm["baseStats"]["atk"]) * cpm[level]
+    defense = (def + gm["baseStats"]["def"]) * cpm[level]
+    hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
     fastMovesAvailable = gm["fastMoves"]
     sort!(fastMovesAvailable)

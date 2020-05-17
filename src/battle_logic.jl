@@ -1,4 +1,4 @@
-using Distributions, JSON, CSV, StaticArrays, Setfield
+using Distributions, JSON, StaticArrays, Setfield
 
 function get_battle_score(state::State)
     return (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
