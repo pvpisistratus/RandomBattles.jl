@@ -12,6 +12,7 @@ function get_empirical_teams(filename::String)
             empiricalTeams[i] = Team([data[i, 1] data[i, 2] data[i, 3]])
         else
             @warn "Ignoring team $(data[i, 1]), $(data[i, 2]), $(data[i, 3])"
+        end
     end
     return empiricalTeams, data[:, 4]
 end;
