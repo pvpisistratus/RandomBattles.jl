@@ -82,16 +82,16 @@ function get_theoretical_teams(numMons::Int64)
 end;
 
 function run_empirical_teams(
-    homeTeam::Team,
-    awayTeams::Array{Team},
+    theoreticalTeam::Team,
+    empiricalTeams::Array{Team},
     weights::Array{Int64},
 )
     histogram = Hist(0.0:0.025:1.0)
-    @simd for i = 1:length(awayTeams)
+    @simd for i = 1:length(empiricalTeams)
         @simd for j = 1:weights[i]
             fit!(
                 histogram,
-                play_battle(State(homeTeam, awayTeams[i])),
+                play_battle(State(theoreticalTeam, empiricalTeams[i])),
             )
         end
     end
@@ -99,15 +99,15 @@ function run_empirical_teams(
 end;
 
 function run_theoretical_teams(
-    homeTeams::Array{Team},
-    awayTeams::Array{Team},
+    theoreticalTeams::Array{Team},
+    empiricalTeams::Array{Team},
     weights,
 )
-    histograms = Array{Hist}(undef, length(homeTeams))
-    @showprogress for i = 1:length(homeTeams)
+    histograms = Array{Hist}(undef, length(theoreticalTeams))
+    @showprogress for i = 1:length(theoreticalTeams)
         @inbounds histograms[i] = run_empirical_teams(
-            homeTeams[i],
-            awayTeams,
+            theoreticalTeams[i],
+            empiricalTeams,
             weights,
         )
     end
@@ -116,22 +116,22 @@ function run_theoretical_teams(
     return (histograms, expected_wins, expected_battle_score)
 end;
 
-function get_expected_win(histogram::Hist, numOpponentTeams::Int64)
-    sum(histogram.counts[21:40]) / (numOpponentTeams / 5)
+function get_expected_win(histogram::Hist, numEmpiricalTeams::Int64)
+    sum(histogram.counts[21:40]) / (numEmpiricalTeams / 5)
 end;
 
 function get_summary_stats(
     histograms,
     expected_wins,
     expected_battle_score,
-    homeTeams,
+    theoreticalTeams,
 )
-    summaryStats = Array{Any}(undef, numHomeTeams, 5)
-    for i = 1:numHomeTeams
+    summaryStats = Array{Any}(undef, length(theoreticalTeams), 5)
+    for i = 1:length(theoreticalTeams)
         @inbounds summaryStats[
             i,
             :,
-        ] = [expected_wins[i] expected_battle_score[i] homeTeams[i].mons[1].toString homeTeams[i].mons[2].toString homeTeams[i].mons[3].toString]
+        ] = [expected_wins[i] expected_battle_score[i] theoreticalTeams[i].mons[1].toString theoreticalTeams[i].mons[2].toString theoreticalTeams[i].mons[3].toString]
     end
     return summaryStats
 end;
@@ -152,7 +152,7 @@ function rank(numMons, indigo_file, outfile)
         histograms,
         expected_wins,
         expected_battle_score,
-        homeTeams,
+        theoreticalTeams,
     )
     summaryStats = sortslices(
         summaryStats,
