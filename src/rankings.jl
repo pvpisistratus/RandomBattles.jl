@@ -20,7 +20,7 @@ end;
 function get_theoretical_teams(numMons::Int64)
     theoreticalMons = Array{String}(undef, numMons)
     for i = 1:numMons
-        theoreticalMons = rankings[i]["speciesId"]
+        theoreticalMons[i] = rankings[i]["speciesId"]
     end
     dexDict = Dict{Int16,Array{Int64,1}}()
     for i = 1:numMons
