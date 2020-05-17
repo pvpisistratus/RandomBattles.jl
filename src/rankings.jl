@@ -14,7 +14,14 @@ function get_empirical_teams(filename::String)
             @warn "Ignoring team $(data[i, 1]), $(data[i, 2]), $(data[i, 3])"
         end
     end
-    return empiricalTeams, data[:, 4]
+    weights = data[:, 4]
+    for i = 1:numEmpiricalTeams
+        if !isassigned(empiricalTeams[i])
+            deleteat!(empiricalTeams, i)
+            deleteat!(weights, i)
+        end
+    end
+    return empiricalTeams, weights
 end;
 
 function get_theoretical_teams(numMons::Int64)
@@ -74,8 +81,8 @@ function run_empirical_teams(
     weights::Array{Int64},
 )
     histogram = Hist(0.0:0.025:1.0)
-    for i = 1:length(awayTeams)
-        for j = 1:weights[i]
+    @simd for i = 1:length(awayTeams)
+        @simd for j = 1:weights[i]
             fit!(
                 histogram,
                 play_battle(State(homeTeam, awayTeams[i])),
