@@ -119,3 +119,19 @@ function convert_indices(name, rankings)
     end
     return ranking
 end;
+
+function team_count_to_pvpoke(name::String)
+    name = lowercase(name)
+    replace!(name, "_normal" => "")
+    replace!(name, "mr. " => "mr_")
+    replace!(name, "ho-oh" => "ho_oh")
+    replace!(name, "alola" => "alolan")
+    replace!(name, "sunshine" => "sunny")
+    replace!(name, "porygon-z" => "porygon_z")
+    replace!(name, "basculin_red" => "basculin")
+    replace!(name, "basculin_blue" => "basculin")
+    replace!(name, "darmanitan" => "darmanitan_standard")
+    replace!(name, "gastrodon_blue" => "gastrodon_west_sea")
+    replace!(name, "gastrodon_pink" => "gastrodon_east_sea")
+    return name
+end;
