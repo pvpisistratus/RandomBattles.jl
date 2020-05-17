@@ -170,6 +170,18 @@ struct Team
     shielding::Bool          #Initially random
 end
 
+Team(mons::Array{Int64}) = Team(
+    Pokemon.(mons),
+    StatBuffs(0, 0),
+    0,
+    2,
+    1,
+    rand(Bool),
+)
+
+Team(mons::Array{String}) =
+    Team(convert_indices.(mons, Ref(rankings)))
+
 struct ChargedAction
     move::Move
     charge::Float64
