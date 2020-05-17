@@ -24,7 +24,7 @@ function get_theoretical_teams(numMons::Int64)
     end
     dexDict = Dict{Int16,Array{Int64,1}}()
     for i = 1:numMons
-        @inbounds dex = gamemaster["pokemon"][get_gamemaster_mon_id(theoreticalMons[i])]["dex"]
+        @inbounds dex = gamemaster["pokemon"][get_gamemaster_mon_id(theoreticalMons[i], rankings)]["dex"]
         if haskey(dexDict, dex)
             push!(dexDict[dex], i)
         else
