@@ -212,4 +212,4 @@ State(team::Array{Int64}) = State(
 )
 
 State(team::Array{String}) =
-    State(convert_indices.(team, Ref(JSON.parsefile(r_s))))
+    State(convert_indices.(team, Ref(rankings)))
