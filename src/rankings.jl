@@ -6,6 +6,11 @@ function get_empirical_teams(filename::String)
     data = hcat(team_count_to_pvpoke.(data[:, 1:3]), data[:, 4])
     empiricalTeams = Array{Team}(undef, numEmpiricalTeams)
     for i = 1:numEmpiricalTeams
+        print(data[i, 1])
+        print(",")
+        print(data[i, 2])
+        print(",")
+        print(data[i, 3])
         empiricalTeams[i] = Team([data[i, 1] data[i, 2] data[i, 3]])
     end
     return empiricalTeams, data[:, 4]
