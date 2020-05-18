@@ -163,5 +163,5 @@ function rank(numMons, indigo_file, outfile)
     df = DataFrame(summaryStats)
     CSV.write(outfile, df)
     println("Done.")
-    return df, histograms, expected_wins, expected_battle_score
+    return df
 end;
