@@ -45,10 +45,14 @@ function Pokemon(i::Int64; league = "great")
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
     types = get_type_id.(convert(Array{String}, gm["types"]))
-    level = league == "master" ? 40 : gm["defaultIVs"]["cp$(cp_limit)"][1]
-    atk = league == "master" ? 15 : gm["defaultIVs"]["cp$(cp_limit)"][2]
-    def = league == "master" ? 15 : gm["defaultIVs"]["cp$(cp_limit)"][3]
-    hp = league == "master" ? 15 : gm["defaultIVs"]["cp$(cp_limit)"][4]
+    if league == "master"
+        level, atk, def, hp = 40, 15, 15, 15
+    else
+        level = gm["defaultIVs"]["cp$(cp_limit)"][1]
+        atk = gm["defaultIVs"]["cp$(cp_limit)"][2]
+        def = gm["defaultIVs"]["cp$(cp_limit)"][3]
+        hp = gm["defaultIVs"]["cp$(cp_limit)"][4]
+    end
     attack = (atk + gm["baseStats"]["atk"]) * cpm[level]
     defense = (def + gm["baseStats"]["def"]) * cpm[level]
     hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[level])
