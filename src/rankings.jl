@@ -79,7 +79,7 @@ function get_theoretical_teams(numMons::Int64; league = "great")
                     @inbounds @fastmath theoreticalTeams[index:(index+toAdd-1)] = [Team(
                         [l, m, n],
                         league = league,
-                    ) for l in dexes(i), m in dexes(j), n in dexes(k)
+                    )] for l in dexes(i), m in dexes(j), n in dexes(k)
                     index += toAdd
                 end
             end
