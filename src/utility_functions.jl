@@ -1,6 +1,6 @@
 using Setfield
 
-function get_gamemaster_mon_id(name::String, gamemaster::Dict{String,Any})
+function get_gamemaster_mon_id(name::String)
     for i = 1:length(gamemaster["pokemon"])
         if gamemaster["pokemon"][i]["speciesId"] == name
             return i
@@ -8,7 +8,7 @@ function get_gamemaster_mon_id(name::String, gamemaster::Dict{String,Any})
     end
 end
 
-function get_gamemaster_move_id(name::String, gamemaster::Dict{String,Any})
+function get_gamemaster_move_id(name::String)
     for i = 1:length(gamemaster["moves"])
         if gamemaster["moves"][i]["moveId"] == name
             return i

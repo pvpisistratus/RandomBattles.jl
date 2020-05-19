@@ -1,11 +1,5 @@
 using JSON, StaticArrays
 
-const rankings = JSON.parsefile(joinpath(
-    @__DIR__,
-    "../data/rankings-1500.json",
-))
-const gamemaster = JSON.parsefile(joinpath(@__DIR__, "../data/gamemaster.json"))
-
 struct Stats
     attack::Float32
     defense::Float32
@@ -44,25 +38,24 @@ struct Pokemon
     fastMoveCooldown::Int16   #Initially based on fast move
 end
 
-function Pokemon(i::Int64)
+function Pokemon(i::Int64; league = "great")
+    rankings = get_rankings(league)
+    cp_limit = get_cp_limit(league)
     moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
-    gmid = get_gamemaster_mon_id(rankings[i]["speciesId"], gamemaster)
+    gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
     types = get_type_id.(convert(Array{String}, gm["types"]))
-    level = gm["defaultIVs"]["cp1500"][1]
-    atk = gm["defaultIVs"]["cp1500"][2]
-    def = gm["defaultIVs"]["cp1500"][3]
-    hp = gm["defaultIVs"]["cp1500"][4]
+    level = gm["defaultIVs"]["cp$(cp_limit)"][1]
+    atk = gm["defaultIVs"]["cp$(cp_limit)"][2]
+    def = gm["defaultIVs"]["cp$(cp_limit)"][3]
+    hp = gm["defaultIVs"]["cp$(cp_limit)"][4]
     attack = (atk + gm["baseStats"]["atk"]) * cpm[level]
     defense = (def + gm["baseStats"]["def"]) * cpm[level]
     hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
     fastMovesAvailable = gm["fastMoves"]
     sort!(fastMovesAvailable)
-    fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(
-        fastMovesAvailable[moves[1]+1],
-        gamemaster,
-    )]
+    fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(fastMovesAvailable[moves[1]+1],)]
     fastMove = Move(
         get_type_id(fastMoveGm["type"]),
         (get_type_id(fastMoveGm["type"]) in types) ? 1.3 : 1,
@@ -77,20 +70,14 @@ function Pokemon(i::Int64)
     )
     chargedMovesAvailable = gm["chargedMoves"]
     if haskey(gm, "tags") &&
-       "shadoweligible" in gm["tags"] && gm["level25CP"] < 1500
+       "shadoweligible" in gm["tags"] && gm["level25CP"] < cp_limit
         push!(chargedMovesAvailable, "RETURN")
     elseif haskey(gm, "tags") && "shadow" in gm["tags"]
         push!(chargedMovesAvailable, "FRUSTRATION")
     end
     sort!(chargedMovesAvailable)
-    chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(
-        chargedMovesAvailable[moves[2]],
-        gamemaster,
-    )]
-    chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(
-        chargedMovesAvailable[moves[3]],
-        gamemaster,
-    )]
+    chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
+    chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[3]],)]
     chargedMove1 = Move(
         get_type_id(chargedMove1Gm["type"]),
         (get_type_id(chargedMove1Gm["type"]) in types) ? 1.2 : 1.0,
@@ -175,17 +162,11 @@ struct Team
     shielding::Bool          #Initially random
 end
 
-Team(mons::Array{Int64}) = Team(
-    Pokemon.(mons),
-    StatBuffs(0, 0),
-    0,
-    2,
-    1,
-    rand(Bool),
-)
+Team(mons::Array{Int64}; league = "great") =
+    Team(Pokemon.(mons, league = league), StatBuffs(0, 0), 0, 2, 1, rand(Bool))
 
-Team(mons::Array{String}) =
-    Team(convert_indices.(mons, Ref(rankings)))
+Team(mons::Array{String}; league = "great") =
+    Team(convert_indices.(mons, Ref(get_rankings(league))), league = league)
 
 struct ChargedAction
     move::Move
@@ -211,10 +192,10 @@ State(team1::Team, team2::Team) = State(
     SwitchAction(0, 0),
 )
 
-State(teams::Array{Int64}) = State(
+State(teams::Array{Int64}; league = "great") = State(
     [
      Team(
-         Pokemon.(teams[1:(length(teams)÷2)]),
+         Pokemon.(teams[1:(length(teams)÷2)], league = league),
          StatBuffs(0, 0),
          0,
          2,
@@ -222,7 +203,10 @@ State(teams::Array{Int64}) = State(
          rand(Bool),
      ),
      Team(
-         Pokemon.(teams[(length(teams)÷2+1):length(teams)]),
+         Pokemon.(
+             teams[(length(teams)÷2+1):length(teams)],
+             league = league,
+         ),
          StatBuffs(0, 0),
          0,
          2,
@@ -235,5 +219,5 @@ State(teams::Array{Int64}) = State(
     SwitchAction(0, 0),
 )
 
-State(teams::Array{String}) =
-    State(convert_indices.(teams, Ref(rankings)))
+State(teams::Array{String}; league = "great") =
+    State(convert_indices.(teams, Ref(get_rankings(league))), league = league)

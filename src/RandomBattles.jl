@@ -1,7 +1,6 @@
 module RandomBattles
 
-include("types.jl")
-include("cpm.jl")
+include("data.jl")
 include("state.jl")
 include("utility_functions.jl")
 include("decisions.jl")
@@ -14,7 +13,9 @@ export State,
        Strategy,
        get_battle_scores,
        gamemaster,
-       rankings,
+       greatRankings,
+       ultraRankings,
+       masterRankings,
        play_battle,
        rank
 

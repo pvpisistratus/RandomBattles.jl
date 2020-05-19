@@ -1,6 +1,6 @@
 using OnlineStats, CSV, ProgressMeter, IterTools, DataFrames
 
-function get_empirical_teams(filename::String)
+function get_empirical_teams(filename::String; league = "great")
     data = CSV.read(filename)
     numEmpiricalTeams = nrow(data)
     data = hcat(team_count_to_pvpoke.(data[:, 1:3]), data[:, 4])
@@ -9,7 +9,10 @@ function get_empirical_teams(filename::String)
         if convert_indices(data[i, 1], rankings) != 0 &&
            convert_indices(data[i, 2], rankings) != 0 &&
            convert_indices(data[i, 3], rankings) != 0
-            empiricalTeams[i] = Team([data[i, 1] data[i, 2] data[i, 3]])
+            empiricalTeams[i] = Team(
+                [data[i, 1] data[i, 2] data[i, 3]],
+                league = league,
+            )
         else
             @warn "Ignoring team $(data[i, 1]), $(data[i, 2]), $(data[i, 3])"
         end
@@ -30,14 +33,18 @@ function get_empirical_teams(filename::String)
     return empiricalTeams, weights
 end;
 
-function get_theoretical_teams(numMons::Int64)
+function get_theoretical_teams(numMons::Int64; league = "great")
     theoreticalMons = Array{String}(undef, numMons)
+    rankings = get_rankings(league)
     for i = 1:numMons
         theoreticalMons[i] = rankings[i]["speciesId"]
     end
     dexDict = Dict{Int16,Array{Int64,1}}()
     for i = 1:numMons
-        @inbounds dex = gamemaster["pokemon"][get_gamemaster_mon_id(theoreticalMons[i], gamemaster)]["dex"]
+        @inbounds dex = gamemaster["pokemon"][get_gamemaster_mon_id(
+            theoreticalMons[i],
+            league = league,
+        )]["dex"]
         if haskey(dexDict, dex)
             push!(dexDict[dex], i)
         else
@@ -61,6 +68,7 @@ function get_theoretical_teams(numMons::Int64)
     numTheoreticalTeams = index
     theoreticalTeams = Array{Team}(undef, numTheoreticalTeams)
     index = 1
+    dexes(x) = dexDict[dexKeys[x]]
     for i = 1:length(dexKeys)
         for j in Iterators.flatten((1:(i-1), (i+1):length(dexKeys)))
             for k = (j+1):length(dexKeys)
@@ -68,11 +76,10 @@ function get_theoretical_teams(numMons::Int64)
                     @inbounds @fastmath toAdd = length(dexDict[dexKeys[i]]) *
                                                 length(dexDict[dexKeys[j]]) *
                                                 length(dexDict[dexKeys[k]])
-                    @inbounds @fastmath theoreticalTeams[index:(index+toAdd-1)] = [Team([
-                        l,
-                        m,
-                        n,
-                    ]) for l in dexDict[dexKeys[i]], m in dexDict[dexKeys[j]], n in dexDict[dexKeys[k]]]
+                    @inbounds @fastmath theoreticalTeams[index:(index+toAdd-1)] = [Team(
+                        [l, m, n],
+                        league = league,
+                    ) for l in dexes(i), m in dexes(j), n in dexes(k)
                     index += toAdd
                 end
             end
@@ -136,7 +143,7 @@ function get_summary_stats(
     return summaryStats
 end;
 
-function rank(numMons, indigo_file, outfile)
+function rank(numMons, indigo_file, outfile; league = "great")
     println("Constructing Empirical Teams...")
     empiricalTeams, weights = get_empirical_teams(indigo_file)
     println("Constructing Theoretical Teams...")
