@@ -4,6 +4,7 @@ function get_empirical_teams(filename::String; league = "great")
     data = CSV.read(filename)
     numEmpiricalTeams = nrow(data)
     data = hcat(team_count_to_pvpoke.(data[:, 1:3]), data[:, 4])
+    rankings = get_rankings(league)
     empiricalTeams = Array{Team}(undef, numEmpiricalTeams)
     for i = 1:numEmpiricalTeams
         if convert_indices(data[i, 1], rankings) != 0 &&
