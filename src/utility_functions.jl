@@ -111,7 +111,7 @@ function apply_buffs(state::State)
 end
 
 function convert_indices(name; league = "great")
-    rankings = get_ranking(league)
+    rankings = get_rankings(league)
     ranking = 0
     for i = 1:length(rankings)
         if rankings[i]["speciesId"] == name
