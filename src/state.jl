@@ -166,7 +166,7 @@ Team(mons::Array{Int64}; league = "great") =
     Team(Pokemon.(mons, league = league), StatBuffs(0, 0), 0, 2, 1, rand(Bool))
 
 Team(mons::Array{String}; league = "great") =
-    Team(convert_indices.(mons, Ref(get_rankings(league))), league = league)
+    Team(convert_indices.(mons, Ref(league)), league = league)
 
 struct ChargedAction
     move::Move
@@ -220,4 +220,4 @@ State(teams::Array{Int64}; league = "great") = State(
 )
 
 State(teams::Array{String}; league = "great") =
-    State(convert_indices.(teams, Ref(get_rankings(league))), league = league)
+    State(convert_indices.(teams, Ref(league)), league = league)

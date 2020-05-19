@@ -7,9 +7,9 @@ function get_empirical_teams(filename::String; league = "great")
     rankings = get_rankings(league)
     empiricalTeams = Array{Team}(undef, numEmpiricalTeams)
     for i = 1:numEmpiricalTeams
-        if convert_indices(data[i, 1], rankings) != 0 &&
-           convert_indices(data[i, 2], rankings) != 0 &&
-           convert_indices(data[i, 3], rankings) != 0
+        if convert_indices(data[i, 1], league = league) != 0 &&
+           convert_indices(data[i, 2], league = league) != 0 &&
+           convert_indices(data[i, 3], league = league) != 0
             empiricalTeams[i] = Team(
                 [data[i, 1] data[i, 2] data[i, 3]],
                 league = league,
