@@ -7,11 +7,11 @@ const greatRankings = JSON.parsefile(joinpath(
 ))
 const ultraRankings = JSON.parsefile(joinpath(
     @__DIR__,
-    "../data/rankings-1500.json",
+    "../data/rankings-2500.json",
 ))
 const masterRankings = JSON.parsefile(joinpath(
     @__DIR__,
-    "../data/rankings-1500.json",
+    "../data/rankings-10000.json",
 ))
 
 function get_rankings(league::String)
