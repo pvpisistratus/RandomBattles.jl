@@ -143,9 +143,9 @@ end;
 
 function rank(numMons, indigo_file, outfile; league = "great")
     println("Constructing Empirical Teams...")
-    empiricalTeams, weights = get_empirical_teams(indigo_file)
+    empiricalTeams, weights = get_empirical_teams(indigo_file, league = league)
     println("Constructing Theoretical Teams...")
-    theoreticalTeams = get_theoretical_teams(numMons)
+    theoreticalTeams = get_theoretical_teams(numMons, league = league)
     println("Running Battles...")
     histograms, expected_wins, expected_battle_score = run_theoretical_teams(
         theoreticalTeams,
