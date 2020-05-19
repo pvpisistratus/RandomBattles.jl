@@ -166,7 +166,7 @@ Team(mons::Array{Int64}; league = "great") =
     Team(Pokemon.(mons, league = league), StatBuffs(0, 0), 0, 2, 1, rand(Bool))
 
 Team(mons::Array{String}; league = "great") =
-    Team(convert_indices.(mons, Ref(league)), league = league)
+    Team(convert_indices.(mons, league = league), league = league)
 
 struct ChargedAction
     move::Move
