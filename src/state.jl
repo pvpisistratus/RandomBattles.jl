@@ -55,10 +55,6 @@ function Pokemon(i::Int64; league = "great")
     end
     attack = (atk + gm["baseStats"]["atk"]) * cpm[level]
     defense = (def + gm["baseStats"]["def"]) * cpm[level]
-    attack *= haskey(gm, "tags") && "shadow" in gm["tags"] ?
-              gamemaster["settings"]["shadowAtkMultiplier"] : 1
-    defense *= haskey(gm, "tags") && "shadow" in gm["tags"] ?
-               gamemaster["settings"]["shadowDefMultiplier"] : 1
     hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
     fastMovesAvailable = gm["fastMoves"]
@@ -82,6 +78,8 @@ function Pokemon(i::Int64; league = "great")
         push!(chargedMovesAvailable, "RETURN")
     elseif haskey(gm, "tags") && "shadow" in gm["tags"]
         push!(chargedMovesAvailable, "FRUSTRATION")
+        attack *= gamemaster["settings"]["shadowAtkMult"]
+        defense *= gamemaster["settings"]["shadowDefMult"]
     end
     sort!(chargedMovesAvailable)
     chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
