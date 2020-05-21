@@ -1,114 +1,58 @@
 using Distributions, JSON, StaticArrays, Setfield
 
-function get_battle_score(state::State)
-    return (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
-             state.teams[1].mons[3].hp) /
-            (state.teams[1].mons[1].stats.hitpoints +
-             state.teams[1].mons[2].stats.hitpoints +
-             state.teams[1].mons[3].stats.hitpoints)) +
-           (0.5 * (state.teams[2].mons[1].stats.hitpoints -
-             state.teams[2].mons[1].hp +
-             state.teams[2].mons[2].stats.hitpoints -
-             state.teams[2].mons[2].hp +
-             state.teams[2].mons[3].stats.hitpoints -
-             state.teams[2].mons[3].hp) /
-            (state.teams[2].mons[1].stats.hitpoints +
-             state.teams[2].mons[2].stats.hitpoints +
-             state.teams[2].mons[3].stats.hitpoints))
-end
+const possible_decisions = 24
 
-function get_weights(state)
-    weights = zeros(8)
+function get_possible_decisions(state; allow_nothing = false)
+    decisions = zeros(possible_decisions)
     activeTeam = state.teams[state.agent]
     activeMon = activeTeam.mons[activeTeam.active]
-    switchTo = 0
     if activeMon.hp > 0
-        weights[1] = 1.0
+        decisions[1] = 1
+        decisions[2] = 1
         if activeMon.fastMoveCooldown == 0
-            weights[2] = 1.0
-        end
-        if activeMon.energy >= activeMon.chargedMoves[1].energy
-            weights[3] = 1.0
-        end
-        if activeMon.energy >= activeMon.chargedMoves[2].energy
-            weights[4] = 1.0
-        end
-        switchTo = rand(DiscreteUniform(1, 3))
-        if switchTo != activeTeam.active &&
-           activeTeam.mons[switchTo].hp != 0 &&
-           activeTeam.switchCooldown == 0
-            weights[5] = 1.0
-        end
-    else
-        for i = 1:3
-            if i != activeTeam.active &&
-               activeTeam.mons[i].hp != 0
-                weights[i+5] = 1.0
+            decisions[3] = 1
+            decisions[4] = 1
+            if !allow_nothing
+                decisions[1] = 0
+                decisions[2] = 0
             end
         end
-    end
-    if sum(weights) > 0
-        weights ./= sum(weights)
-    end
-    return weights, switchTo
-end
-
-function get_possible_decisions(state)
-    decisions = []
-    activeTeam = state.teams[state.agent]
-    activeMon = activeTeam.mons[activeTeam.active]
-    if activeMon.hp > 0
-        push!(decisions, 1)
-        push!(decisions, 2)
-        if activeMon.fastMoveCooldown == 0
-            push!(decisions, 3)
-            push!(decisions, 4)
-        end
         if activeMon.energy >= activeMon.chargedMoves[1].energy
-            push!(decisions, 5)
-            push!(decisions, 6)
+            decisions[5] = 1
+            decisions[6] = 1
         end
         if activeMon.energy >= activeMon.chargedMoves[2].energy
-            push!(decisions, 7)
-            push!(decisions, 8)
+            decisions[7] = 1
+            decisions[8] = 1
         end
         for i = 1:3
             if i != activeTeam.active &&
                activeTeam.mons[i].hp != 0 && activeTeam.switchCooldown == 0
-                push!(decisions, 2 * i + 7)
-                push!(decisions, 2 * i + 8)
+                decisions[2*i+7] = 1
+                decisions[2*i+8] = 1
             end
+        end
+        if activeMon.fastMoveCooldown == 0 &&
+           activeMon.energy +
+           activeMon.fastMove.energy >= activeMon.chargedMoves[1].energy
+            decisions[21] = 1
+            decisions[22] = 1
+        end
+        if activeMon.fastMoveCooldown == 0 &&
+           activeMon.energy +
+           activeMon.fastMove.energy >= activeMon.chargedMoves[2].energy
+            decisions[23] = 1
+            decisions[24] = 1
         end
     else
         for i = 1:3
             if i != activeTeam.active && activeTeam.mons[i].hp != 0
-                push!(decisions, 2 * i + 13)
-                push!(decisions, 2 * i + 14)
+                decisions[2*i+13] = 1
+                decisions[2*i+14] = 1
             end
         end
     end
     return decisions
-end
-
-function play_decision(state, decision, switchTo)
-    if decision == 1
-        next_state = do_nothing(state)
-    elseif decision == 2
-        next_state = do_fast_move(state)
-    elseif decision == 3
-        next_state = do_charged_move(state, 1)
-    elseif decision == 4
-        next_state = do_charged_move(state, 2)
-    elseif decision == 5
-        next_state = do_unforced_switch(state, switchTo)
-    elseif decision == 6
-        next_state = do_forced_switch(state, 1)
-    elseif decision == 7
-        next_state = do_forced_switch(state, 2)
-    else
-        next_state = do_forced_switch(state, 3)
-    end
-    return next_state
 end
 
 function play_decision(state, decision)
@@ -138,6 +82,12 @@ function play_decision(state, decision)
         next_state = do_forced_switch(state, 2)
     elseif decision <= 20
         next_state = do_forced_switch(state, 3)
+    elseif decision <= 22
+        next_state = do_fast_move(state)
+        next_state = do_charged_move(next_state, 1)
+    elseif decision <= 24
+        next_state = do_fast_move(state)
+        next_state = do_charged_move(next_state, 2)
     end
 
     return next_state
@@ -146,10 +96,12 @@ end
 function play_battle(initial_state::State)
     state = initial_state
     while true
-        weights, switchTo = get_weights(state)
+        weights = get_possible_decisions(state)
+        weights[9:14] /= 2
         if sum(weights) == 0
             break
         end
+        weights /= sum(weights)
         decision = rand(Categorical(weights))
         state = play_decision(state, decision, switchTo)
         if state.agent == 1

@@ -1,5 +1,3 @@
-const possible_decisions = 20
-
 mutable struct DecisionMatrix
     decision_matrix::Array{Tuple{Float64,Float64},2}
 end
@@ -20,13 +18,13 @@ function get_decision_matrix(state)
     finished = false
     d_matrix = DecisionMatrix()
     decisions1 = get_possible_decisions(state)
-    if decisions1 == []
+    if sum(decisions1) == 0
         finished = true
     else
-        for decision1 in decisions1
+        for decision1 in findall(isone, decisions1)
             next_state = play_decision(state, decision1)
             decisions2 = get_possible_decisions(next_state)
-            if decisions2 == []
+            if sum(decisions2) == 0
                 finished = true
                 score = get_battle_score(next_state)
                 d_row = Array{Tuple{Float64,Float64}}(undef, possible_decisions)
@@ -35,7 +33,7 @@ function get_decision_matrix(state)
                 end
                 d_matrix.decision_matrix[decision1, :] = d_row
             else
-                for decision2 in decisions2
+                for decision2 in findall(isone, decisions2)
                     next_next_state = play_decision(next_state, decision2)
                     scores = get_battle_scores(next_next_state, 1000)
                     d_matrix.decision_matrix[decision1, decision2] = (

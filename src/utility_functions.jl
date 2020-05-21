@@ -144,3 +144,20 @@ function team_count_to_pvpoke(name::String)
     name = replace(name, "gastrodon_pink" => "gastrodon_east_sea")
     return name
 end;
+
+function get_battle_score(state::State)
+    return (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
+             state.teams[1].mons[3].hp) /
+            (state.teams[1].mons[1].stats.hitpoints +
+             state.teams[1].mons[2].stats.hitpoints +
+             state.teams[1].mons[3].stats.hitpoints)) +
+           (0.5 * (state.teams[2].mons[1].stats.hitpoints -
+             state.teams[2].mons[1].hp +
+             state.teams[2].mons[2].stats.hitpoints -
+             state.teams[2].mons[2].hp +
+             state.teams[2].mons[3].stats.hitpoints -
+             state.teams[2].mons[3].hp) /
+            (state.teams[2].mons[1].stats.hitpoints +
+             state.teams[2].mons[2].stats.hitpoints +
+             state.teams[2].mons[3].stats.hitpoints))
+end

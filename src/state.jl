@@ -228,4 +228,4 @@ State(teams::Array{Int64}; league = "great") = State(
 )
 
 State(teams::Array{String}; league = "great") =
-    State(convert_indices.(teams, Ref(league)), league = league)
+    State(convert_indices.(teams, league = league), league = league)
