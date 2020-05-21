@@ -64,7 +64,11 @@ function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
 end
 
 function get_buff_modifier(buff::Int8)
-    return buff > 0 ? (4 + buff) / 4 : 4 / (4 - buff)
+    return buff > 0 ?
+           (gamemaster["settings"]["buffDivisor"] + buff) /
+           gamemaster["settings"]["buffDivisor"] :
+           gamemaster["settings"]["buffDivisor"] /
+           (gamemaster["settings"]["buffDivisor"] - buff)
 end
 
 function calculate_damage(
@@ -89,26 +93,26 @@ function apply_buffs(state::State)
         state = @set state.teams[receiver].buffs.atk = clamp(
             state.teams[receiver].buffs.atk +
             state.chargedMovePending.move.oppAtkModifier,
-            -4,
-            4,
+            -gamemaster["settings"]["maxBuffStages"],
+            gamemaster["settings"]["maxBuffStages"],
         )
         state = @set state.teams[receiver].buffs.def = clamp(
             state.teams[receiver].buffs.def +
             state.chargedMovePending.move.oppDefModifier,
-            -4,
-            4,
+            -gamemaster["settings"]["maxBuffStages"],
+            gamemaster["settings"]["maxBuffStages"],
         )
         state = @set state.teams[sender].buffs.atk = clamp(
             state.teams[sender].buffs.atk +
             state.chargedMovePending.move.selfAtkModifier,
-            -4,
-            4,
+            -gamemaster["settings"]["maxBuffStages"],
+            gamemaster["settings"]["maxBuffStages"],
         )
         state = @set state.teams[sender].buffs.def = clamp(
             state.teams[sender].buffs.def +
             state.chargedMovePending.move.selfDefModifier,
-            -4,
-            4,
+            -gamemaster["settings"]["maxBuffStages"],
+            gamemaster["settings"]["maxBuffStages"],
         )
     end
     return state

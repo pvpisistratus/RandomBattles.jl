@@ -55,6 +55,10 @@ function Pokemon(i::Int64; league = "great")
     end
     attack = (atk + gm["baseStats"]["atk"]) * cpm[level]
     defense = (def + gm["baseStats"]["def"]) * cpm[level]
+    attack *= "shadow" in gm["tags"] ?
+              gamemaster["settings"]["shadowAtkMultiplier"] : 1
+    defense *= "shadow" in gm["tags"] ?
+               gamemaster["settings"]["shadowDefMultiplier"] : 1
     hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
     fastMovesAvailable = gm["fastMoves"]
