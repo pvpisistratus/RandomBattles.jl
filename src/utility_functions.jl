@@ -63,6 +63,10 @@ function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
            type_effectiveness[defenderTypes[2], moveType]
 end
 
+function get_buff_modifier(buff::Int8)
+    return buff > 0 ? (4 + buff) / 4 : 4 / (4 - buff)
+end
+
 function calculate_damage(
     attacker::Pokemon,
     atkBuff::Int8,
@@ -72,8 +76,8 @@ function calculate_damage(
     charge::Float64,
 )
     return floor(move.power * move.stab *
-                 ((attacker.stats.attack * 4.0) / (4 - atkBuff) /
-                  (defender.stats.defense * (4 + defBuff) / 4.0)) *
+                 ((attacker.stats.attack * get_buff_modifier(atkBuff)) /
+                  (defender.stats.defense * get_buff_modifier(defBuff)) *
                  get_effectiveness(defender.types, move.moveType) * charge *
                  0.5 * 1.3) + 1
 end
