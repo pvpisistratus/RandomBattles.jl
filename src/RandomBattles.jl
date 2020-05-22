@@ -1,6 +1,8 @@
 module RandomBattles
 
 include("data.jl")
+include("pokemon.jl")
+include("team.jl")
 include("state.jl")
 include("utility_functions.jl")
 include("decisions.jl")
