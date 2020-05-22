@@ -1,4 +1,4 @@
-using JSON, StaticArrays
+using StaticArrays
 
 struct Stats
     attack::Float32

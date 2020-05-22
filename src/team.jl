@@ -1,4 +1,4 @@
-using JSON, StaticArrays
+using StaticArrays
 
 struct Team
     #These values are initialized, but change throughout the battle
