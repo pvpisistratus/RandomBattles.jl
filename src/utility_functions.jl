@@ -121,6 +121,7 @@ function reset_charged_moves_pending(state::State)
 end
 
 function step_timers(state::State)
+    state = state
     for i = 1:2
         team = state.teams[i]
         activeMon = team.mons[team.active]
