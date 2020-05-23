@@ -124,11 +124,11 @@ function step_timers(state::State)
     for i = 1:2
         team = state.teams[i]
         activeMon = team.mons[team.active]
-        state = @set team.switchCooldown = max(
+        state = @set state.teams[i].switchCooldown = max(
             0,
             team.switchCooldown - 500,
         )
-        state = @set activeMon.fastMoveCooldown = max(
+        state = @set state.teams[i].mons[state.teams[i].active].fastMoveCooldown = max(
             0,
             activeMon.fastMoveCooldown - 500,
         )
