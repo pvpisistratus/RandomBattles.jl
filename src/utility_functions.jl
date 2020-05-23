@@ -1,5 +1,7 @@
 using Setfield
 
+get_other_agent(agent) = agent == 1 ? agent = 2 : agent = 1
+
 function get_gamemaster_mon_id(name::String)
     for i = 1:length(gamemaster["pokemon"])
         if gamemaster["pokemon"][i]["speciesId"] == name
@@ -58,66 +60,6 @@ function get_type_id(typeName::String)
     return type_id
 end
 
-function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
-    return type_effectiveness[defenderTypes[1], moveType] *
-           type_effectiveness[defenderTypes[2], moveType]
-end
-
-function get_buff_modifier(buff::Int8)
-    return buff > 0 ?
-           (gamemaster["settings"]["buffDivisor"] + buff) /
-           gamemaster["settings"]["buffDivisor"] :
-           gamemaster["settings"]["buffDivisor"] /
-           (gamemaster["settings"]["buffDivisor"] - buff)
-end
-
-function calculate_damage(
-    attacker::Pokemon,
-    atkBuff::Int8,
-    defender::Pokemon,
-    defBuff::Int8,
-    move::Move,
-    charge::Float64,
-)
-    return floor(move.power * move.stab *
-                 ((attacker.stats.attack * get_buff_modifier(atkBuff)) /
-                  (defender.stats.defense * get_buff_modifier(defBuff))) *
-                 get_effectiveness(defender.types, move.moveType) * charge *
-                 0.5 * 1.3) + 1
-end
-
-function apply_buffs(state::State)
-    receiver = state.agent
-    sender = (receiver == 1) ? 2 : 1
-    if rand(Uniform(0, 1)) < state.chargedMovePending.move.buffChance
-        state = @set state.teams[receiver].buffs.atk = clamp(
-            state.teams[receiver].buffs.atk +
-            state.chargedMovePending.move.oppAtkModifier,
-            -gamemaster["settings"]["maxBuffStages"],
-            gamemaster["settings"]["maxBuffStages"],
-        )
-        state = @set state.teams[receiver].buffs.def = clamp(
-            state.teams[receiver].buffs.def +
-            state.chargedMovePending.move.oppDefModifier,
-            -gamemaster["settings"]["maxBuffStages"],
-            gamemaster["settings"]["maxBuffStages"],
-        )
-        state = @set state.teams[sender].buffs.atk = clamp(
-            state.teams[sender].buffs.atk +
-            state.chargedMovePending.move.selfAtkModifier,
-            -gamemaster["settings"]["maxBuffStages"],
-            gamemaster["settings"]["maxBuffStages"],
-        )
-        state = @set state.teams[sender].buffs.def = clamp(
-            state.teams[sender].buffs.def +
-            state.chargedMovePending.move.selfDefModifier,
-            -gamemaster["settings"]["maxBuffStages"],
-            gamemaster["settings"]["maxBuffStages"],
-        )
-    end
-    return state
-end
-
 function convert_indices(name; league = "great")
     rankings = get_rankings(league)
     ranking = 0
@@ -160,4 +102,36 @@ function get_battle_score(state::State)
             (state.teams[2].mons[1].stats.hitpoints +
              state.teams[2].mons[2].stats.hitpoints +
              state.teams[2].mons[3].stats.hitpoints))
+end
+
+function reset_switches_pending(state::State)
+    state = @set state.switchesPending = [
+        SwitchAction(0, 0),
+        SwitchAction(0, 0),
+    ]
+    return state
+end
+
+function reset_charged_moves_pending(state::State)
+    state = @set state.chargedMovesPending = [
+        ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
+        ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
+    ]
+    return state
+end
+
+function step_timers(state::State)
+    for i = 1:2
+        team = state.teams[i]
+        activeMon = team.mons[team.active]
+        state = @set team.switchCooldown = max(
+            0,
+            team.switchCooldown - 500,
+        )
+        state = @set activeMon.fastMoveCooldown = max(
+            0,
+            activeMon.fastMoveCooldown - 500,
+        )
+    end
+    return state
 end

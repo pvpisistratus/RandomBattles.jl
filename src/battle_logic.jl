@@ -62,32 +62,30 @@ function play_decision(state, decision)
     else
         next_state = @set next_state.teams[next_state.agent].shielding = false
     end
-    if 1 <= decision <= 2
-        next_state = do_nothing(state)
-    elseif decision <= 4
-        next_state = do_fast_move(state)
+    elseif 3 <= decision <= 4
+        next_state = fast_move(state)
     elseif decision <= 6
-        next_state = do_charged_move(state, 1)
+        next_state = queue_charged_move(state, 1)
     elseif decision <= 8
-        next_state = do_charged_move(state, 2)
+        next_state = queue_charged_move(state, 2)
     elseif decision <= 10
-        next_state = do_unforced_switch(state, 1)
+        next_state = queue_switch(state, 1)
     elseif decision <= 12
-        next_state = do_unforced_switch(state, 2)
+        next_state = queue_switch(state, 2)
     elseif decision <= 14
-        next_state = do_unforced_switch(state, 3)
+        next_state = queue_switch(state, 3)
     elseif decision <= 16
-        next_state = do_forced_switch(state, 1)
+        next_state = queue_switch(state, 1, time = 12_000)
     elseif decision <= 18
-        next_state = do_forced_switch(state, 2)
+        next_state = queue_switch(state, 2, time = 12_000)
     elseif decision <= 20
-        next_state = do_forced_switch(state, 3)
+        next_state = queue_switch(state, 3, time = 12_000)
     elseif decision <= 22
-        next_state = do_fast_move(state)
-        next_state = do_charged_move(next_state, 1)
+        next_state = fast_move(state)
+        next_state = queue_charged_move(next_state, 1)
     elseif decision <= 24
-        next_state = do_fast_move(state)
-        next_state = do_charged_move(next_state, 2)
+        next_state = fast_move(state)
+        next_state = queue_charged_move(next_state, 2)
     end
 
     return next_state
@@ -96,20 +94,21 @@ end
 function play_battle(initial_state::State)
     state = initial_state
     while true
-        weights = get_possible_decisions(state)
-        weights[9:14] /= 2
-        if sum(weights) == 0
-            break
+        for i = 1:2
+            weights = get_possible_decisions(state)
+            weights[9:14] /= 2
+            if sum(weights) == 0
+                break
+            end
+            decision = rand(Categorical(weights / sum(weights)))
+            state = play_decision(state, decision)
+            state = @set state.agent = get_other_agent(state.agent)
         end
-        weights /= sum(weights)
-        decision = rand(Categorical(weights))
-        state = play_decision(state, decision)
-        if state.agent == 1
-            state = @set state.switchPending = SwitchAction(0, 0)
-            state = @set state.chargedMovePending = ChargedAction(
-                Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1),
-                0,
-            )
+        state = evaluate_charged_moves(state)
+        state = reset_charged_moves_pending(state)
+        state = evaluate_switches(state)
+        state = reset_switches_pending(state)
+        state = step_timers(state)
         end
     end
     return get_battle_score(state)

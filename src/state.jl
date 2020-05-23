@@ -13,15 +13,18 @@ end
 struct State
     teams::SVector{2,Team}
     agent::Int64
-    chargedMovePending::ChargedAction
-    switchPending::SwitchAction
+    chargedMovesPending::SVector{2,ChargedAction}
+    switchesPending::SVector{2,SwitchAction}
 end
 
 State(team1::Team, team2::Team) = State(
     [team1, team2],
     1,
-    ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
-    SwitchAction(0, 0),
+    [
+     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
+     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
+    ],
+    [SwitchAction(0, 0), SwitchAction(0, 0)],
 )
 
 State(teams::Array{Int64}; league = "great") = State(
@@ -47,8 +50,11 @@ State(teams::Array{Int64}; league = "great") = State(
      ),
     ],
     1,
-    ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
-    SwitchAction(0, 0),
+    [
+     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
+     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
+    ],
+    [SwitchAction(0, 0), SwitchAction(0, 0)],
 )
 
 State(teams::Array{String}; league = "great") =
