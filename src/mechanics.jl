@@ -96,26 +96,22 @@ function apply_buffs(state::State, cmp::Int64)
     move = state.chargedMovesPending[cmp].move
     if rand(Uniform(0, 1)) < move.buffChance
         state = @set defendingTeam.buffs.atk = clamp(
-            defendingTeam.buffs.atk +
-            move.oppAtkModifier,
+            defendingTeam.buffs.atk + move.oppAtkModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
         state = @set defendingTeam.buffs.def = clamp(
-            defendingTeam.buffs.def +
-            move.oppDefModifier,
+            defendingTeam.buffs.def + move.oppDefModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
         state = @set attackingTeam.buffs.atk = clamp(
-            attackingTeam.buffs.atk +
-            move.selfAtkModifier,
+            attackingTeam.buffs.atk + move.selfAtkModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
         state = @set attackingTeam.buffs.def = clamp(
-            attackingTeam.buffs.def +
-            move.selfDefModifier,
+            attackingTeam.buffs.def + move.selfDefModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
@@ -143,8 +139,7 @@ function evaluate_charged_moves(state::State)
         else
             state = @set defender.hp = max(
                 0,
-                defender.hp -
-                calculate_damage(
+                defender.hp - calculate_damage(
                     attacker,
                     attackingTeam.buffs.atk,
                     defender,
