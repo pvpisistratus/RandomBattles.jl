@@ -62,7 +62,7 @@ function play_decision(state, decision)
     else
         next_state = @set next_state.teams[next_state.agent].shielding = false
     end
-    elseif 3 <= decision <= 4
+    if 3 <= decision <= 4
         next_state = fast_move(state)
     elseif decision <= 6
         next_state = queue_charged_move(state, 1)
