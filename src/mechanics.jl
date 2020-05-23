@@ -78,8 +78,8 @@ function get_cmp(state::State)
     elseif chargedActions[2].charge == 0 && chargedActions[2].charge != 0
         cmp = 2
     else
-        attack1 = state.teams[1].mons[state.teams[1].active].attack
-        attack2 = state.teams[2].mons[state.teams[2].active].attack
+        attack1 = state.teams[1].mons[state.teams[1].active].stats.attack
+        attack2 = state.teams[2].mons[state.teams[2].active].stats.attack
         if attack1 > attack2
             cmp = 1
         elseif attack2 < attack1
