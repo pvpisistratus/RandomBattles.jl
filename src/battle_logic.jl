@@ -98,7 +98,7 @@ function play_battle(initial_state::State)
             weights = get_possible_decisions(state)
             weights[9:14] /= 2
             if sum(weights) == 0
-                break
+                return get_battle_score(state)
             end
             decision = rand(Categorical(weights / sum(weights)))
             state = play_decision(state, decision)
@@ -109,10 +109,7 @@ function play_battle(initial_state::State)
         state = evaluate_switches(state)
         state = reset_switches_pending(state)
         state = step_timers(state)
-        end
     end
-    score = get_battle_score(state)
-    return score
 end
 
 function get_battle_scores(initial_state::State, N)
