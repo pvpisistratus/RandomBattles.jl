@@ -61,7 +61,7 @@ function queue_charged_move(state::State, move::Int64)
 end
 
 function queue_switch(state::State, switchTo::Int64; time::Int64 = 0)
-    state = @set state.switchPending[state.agent] = SwitchAction(
+    state = @set state.switchesPending[state.agent] = SwitchAction(
         switchTo,
         time,
     )
