@@ -51,8 +51,8 @@ State(teams::Array{Int64}; league = "great") = State(
     ],
     1,
     [
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 1), 0),
+     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
+     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
     ],
     [SwitchAction(0, 0), SwitchAction(0, 0)],
 )
