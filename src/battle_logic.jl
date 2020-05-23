@@ -111,7 +111,8 @@ function play_battle(initial_state::State)
         state = step_timers(state)
         end
     end
-    return get_battle_score(state)
+    score = get_battle_score(state)
+    return score
 end
 
 function get_battle_scores(initial_state::State, N)
