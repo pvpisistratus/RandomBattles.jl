@@ -29,20 +29,17 @@ function calculate_damage(
 end
 
 function fast_move(state::State)
-    attackingTeam = state.teams[state.agent]
-    attacker = attackingTeam.mons[attackingTeam.active]
-    defendingTeam = state.teams[get_other_agent(state.agent)]
-    defender = defendingTeam.mons[defendingTeam.active]
-    state = @set attacker.fastMoveCooldown = attacker.fastMove.cooldown
-    state = @set attacker.energy += attacker.fastMove.energy
-    state = @set defender.hp = max(
+    state = @set state.teams[state.agent].mons[state.teams[state.agent].active].fastMoveCooldown = state.teams[state.agent].mons[state.teams[state.agent].active].fastMove.cooldown
+    state = @set state.teams[state.agent].mons[state.teams[state.agent].active].energy += state.teams[state.agent].mons[state.teams[state.agent].active].fastMove.energy
+    state = @set state.teams[get_other_agent(state.agent)].mons[state.teams[get_other_agent(state.agent)].active].hp = max(
         0,
-        defender.hp - calculate_damage(
-            attacker,
-            attackingTeam.buffs.atk,
-            defender,
-            defendingTeam.buffs.def,
-            attacker.fastMove,
+        state.teams[get_other_agent(state.agent)].mons[state.teams[get_other_agent(state.agent)].active].hp -
+        calculate_damage(
+            state.teams[state.agent].mons[state.teams[state.agent].active],
+            state.teams[state.agent].buffs.atk,
+            state.teams[get_other_agent(state.agent)].mons[state.teams[get_other_agent(state.agent)].active],
+            state.teams[get_other_agent(state.agent)].buffs.def,
+            state.teams[state.agent].mons[state.teams[state.agent].active].fastMove,
             1.0,
         ),
     )
@@ -127,7 +124,7 @@ function evaluate_charged_moves(state::State)
         defendingTeam = state.teams[get_other_agent(cmp)]
         defender = defendingTeam.mons[defendingTeam.active]
         move = state.chargedMovesPending[cmp].move
-        state = @set attacker.energy -= move.energy
+        state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= move.energy
         for i = 1:2
             state = @set state.teams[i].switchCooldown = max(
                 0,
@@ -135,9 +132,9 @@ function evaluate_charged_moves(state::State)
             )
         end
         if defendingTeam.shields > 0 && defendingTeam.shielding
-            state = @set defendingTeam.shields -= 1
+            state = @set state.teams[get_other_agent(cmp)].shields -= 1
         else
-            state = @set defender.hp = max(
+            state = @set state.teams[get_other_agent(cmp)].mons[state.teams[get_other_agent(cmp)].active].hp = max(
                 0,
                 defender.hp - calculate_damage(
                     attacker,
