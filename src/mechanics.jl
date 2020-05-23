@@ -85,6 +85,7 @@ function get_cmp(state::State)
             cmp = rand(1:2)
         end
     end
+    return cmp
 end
 
 function apply_buffs(state::State, cmp::Int64)
