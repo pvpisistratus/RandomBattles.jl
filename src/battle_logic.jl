@@ -1,4 +1,4 @@
-using Distributions, JSON, StaticArrays, Setfield
+using Distributions, Setfield
 
 const possible_decisions = 24
 
