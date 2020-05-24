@@ -63,28 +63,28 @@ function play_decision(state, decision)
         next_state = @set next_state.teams[next_state.agent].shielding = false
     end
     if 3 <= decision <= 4
-        next_state = fast_move(state)
+        next_state = fast_move(next_state)
     elseif decision <= 6
-        next_state = queue_charged_move(state, 1)
+        next_state = queue_charged_move(next_state, 1)
     elseif decision <= 8
-        next_state = queue_charged_move(state, 2)
+        next_state = queue_charged_move(next_state, 2)
     elseif decision <= 10
-        next_state = queue_switch(state, 1)
+        next_state = queue_switch(next_state, 1)
     elseif decision <= 12
-        next_state = queue_switch(state, 2)
+        next_state = queue_switch(next_state, 2)
     elseif decision <= 14
-        next_state = queue_switch(state, 3)
+        next_state = queue_switch(next_state, 3)
     elseif decision <= 16
-        next_state = queue_switch(state, 1, time = 12_000)
+        next_state = queue_switch(next_state, 1, time = 12_000)
     elseif decision <= 18
-        next_state = queue_switch(state, 2, time = 12_000)
+        next_state = queue_switch(next_state, 2, time = 12_000)
     elseif decision <= 20
-        next_state = queue_switch(state, 3, time = 12_000)
+        next_state = queue_switch(next_state, 3, time = 12_000)
     elseif decision <= 22
-        next_state = fast_move(state)
+        next_state = fast_move(next_state)
         next_state = queue_charged_move(next_state, 1)
     elseif decision <= 24
-        next_state = fast_move(state)
+        next_state = fast_move(next_state)
         next_state = queue_charged_move(next_state, 2)
     end
 
