@@ -153,20 +153,32 @@ function evaluate_charged_moves(state::State)
 end
 
 function evaluate_switches(state::State)
-    for i = 1:2
-        switch = state.switchesPending[i]
-        if switch.pokemon != 0
-            j = get_other_agent(i)
-            state = @set state.teams[i].active = switch.pokemon
-            state = @set state.teams[i].buffs = StatBuffs(0, 0)
-            if switch.time != 0
-                state = @set state.teams[j].switchCooldown = max(
-                    0,
-                    state.teams[j].switchCooldown - switch.time - 500,
-                )
-            else
-                state = @set state.teams[i].switchCooldown = 60000
-            end
+    switch = state.switchesPending[1]
+    if switch.pokemon != 0
+        j = get_other_agent(1)
+        state = @set state.teams[1].active = switch.pokemon
+        state = @set state.teams[1].buffs = StatBuffs(0, 0)
+        if switch.time != 0
+            state = @set state.teams[2].switchCooldown = max(
+                0,
+                state.teams[2].switchCooldown - switch.time - 500,
+            )
+        else
+            state = @set state.teams[1].switchCooldown = 60000
+        end
+    end
+    switch = state.switchesPending[2]
+    if switch.pokemon != 0
+        j = get_other_agent(2)
+        state = @set state.teams[2].active = switch.pokemon
+        state = @set state.teams[2].buffs = StatBuffs(0, 0)
+        if switch.time != 0
+            state = @set state.teams[1].switchCooldown = max(
+                0,
+                state.teams[1].switchCooldown - switch.time - 500,
+            )
+        else
+            state = @set state.teams[2].switchCooldown = 60000
         end
     end
     return state
