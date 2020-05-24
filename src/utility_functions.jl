@@ -121,21 +121,26 @@ function reset_charged_moves_pending(state::State)
 end
 
 function step_timers(state::State)
-    state = state
-    for i = 1:2
-        team = state.teams[i]
-        activeMon = team.mons[team.active]
-        state = @set state.teams[i].switchCooldown = max(
-            0,
-            team.switchCooldown - 500,
-        )
-        state = @set state.teams[i].mons[state.teams[i].active].fastMoveCooldown = max(
-            0,
-            activeMon.fastMoveCooldown - 500,
-        )
+    team = state.teams[1]
+    activeMon = team.mons[team.active]
+    state = @set state.teams[1].switchCooldown = max(
+        0,
+        team.switchCooldown - 500,
+    )
+    state = @set state.teams[1].mons[state.teams[1].active].fastMoveCooldown = max(
+        0,
+        activeMon.fastMoveCooldown - 500,
+    )
+    team = state.teams[2]
+    activeMon = team.mons[team.active]
+    state = @set state.teams[2].switchCooldown = max(
+        0,
+        team.switchCooldown - 500,
+    )
+    state = @set state.teams[2].mons[state.teams[2].active].fastMoveCooldown = max(
+        0,
+        activeMon.fastMoveCooldown - 500,
+    )
 
-    end
-    println(state.teams[1].mons[state.teams[1].active].fastMoveCooldown)
-    println(state.teams[1].mons[state.teams[1].active].fastMoveCooldown)
     return state
 end
