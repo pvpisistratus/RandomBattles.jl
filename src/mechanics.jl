@@ -29,57 +29,51 @@ function calculate_damage(
 end
 
 function fast_move(state::State)
-    state = @set state.teams[state.agent].mons[state.teams[state.agent].active].fastMoveCooldown = state.teams[state.agent].mons[state.teams[state.agent].active].fastMove.cooldown
-    state = @set state.teams[state.agent].mons[state.teams[state.agent].active].energy += state.teams[state.agent].mons[state.teams[state.agent].active].fastMove.energy
-    state = @set state.teams[get_other_agent(state.agent)].mons[state.teams[get_other_agent(state.agent)].active].hp = max(
+    next_state = @set state.teams[state.agent].mons[state.teams[state.agent].active].fastMoveCooldown = state.teams[state.agent].mons[state.teams[state.agent].active].fastMove.cooldown
+    next_state = @set next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].energy += next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].fastMove.energy
+    next_state = @set next_state.teams[get_other_agent(next_state.agent)].mons[next_state.teams[get_other_agent(next_state.agent)].active].hp = max(
         0,
-        state.teams[get_other_agent(state.agent)].mons[state.teams[get_other_agent(state.agent)].active].hp -
+        next_state.teams[get_other_agent(next_state.agent)].mons[next_state.teams[get_other_agent(next_state.agent)].active].hp -
         calculate_damage(
-            state.teams[state.agent].mons[state.teams[state.agent].active],
-            state.teams[state.agent].buffs.atk,
-            state.teams[get_other_agent(state.agent)].mons[state.teams[get_other_agent(state.agent)].active],
-            state.teams[get_other_agent(state.agent)].buffs.def,
-            state.teams[state.agent].mons[state.teams[state.agent].active].fastMove,
+            next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active],
+            next_state.teams[next_state.agent].buffs.atk,
+            next_state.teams[get_other_agent(next_state.agent)].mons[next_state.teams[get_other_agent(next_state.agent)].active],
+            next_state.teams[get_other_agent(next_state.agent)].buffs.def,
+            next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].fastMove,
             1.0,
         ),
     )
-    return state
+    return next_state
 end
 
 function queue_charged_move(state::State, move::Int64)
-    agent = state.agent
-    attackingTeam = state.teams[agent]
-    attacker = attackingTeam.mons[attackingTeam.active]
-    state = @set state.chargedMovesPending[agent] = ChargedAction(
-        attacker.chargedMoves[move],
+    next_state = @set state.chargedMovesPending[state.agent] = ChargedAction(
+        state.teams[state.agent].mons[state.teams[state.agent].active].chargedMoves[move],
         1,
     )
-    return state
+    return next_state
 end
 
 function queue_switch(state::State, switchTo::Int64; time::Int64 = 0)
-    state = @set state.switchesPending[state.agent] = SwitchAction(
+    next_state = @set state.switchesPending[state.agent] = SwitchAction(
         switchTo,
         time,
     )
-    return state
+    return next_state
 end
 
 function get_cmp(state::State)
-    chargedActions = state.chargedMovesPending
     cmp = 0
-    if chargedActions[1].charge == 0 && chargedActions[2].charge == 0
+    if state.chargedMovesPending[1].charge == 0 && state.chargedMovesPending[2].charge == 0
         cmp = 0
-    elseif chargedActions[1].charge != 0 && chargedActions[2].charge == 0
+    elseif state.chargedMovesPending[1].charge != 0 && state.chargedMovesPending[2].charge == 0
         cmp = 1
-    elseif chargedActions[1].charge == 0 && chargedActions[2].charge != 0
+    elseif state.chargedMovesPending[1].charge == 0 && state.chargedMovesPending[2].charge != 0
         cmp = 2
     else
-        attack1 = state.teams[1].mons[state.teams[1].active].stats.attack
-        attack2 = state.teams[2].mons[state.teams[2].active].stats.attack
-        if attack1 > attack2
+        if state.teams[1].mons[state.teams[1].active].stats.attack > state.teams[2].mons[state.teams[2].active].stats.attack
             cmp = 1
-        elseif attack2 < attack1
+        elseif state.teams[2].mons[state.teams[2].active].stats.attack < state.teams[1].mons[state.teams[1].active].stats.attack
             cmp = 2
         else
             cmp = rand(1:2)
@@ -89,99 +83,89 @@ function get_cmp(state::State)
 end
 
 function apply_buffs(state::State, cmp::Int64)
-    attackingTeam = state.teams[cmp]
-    defendingTeam = state.teams[get_other_agent(cmp)]
-    move = state.chargedMovesPending[cmp].move
     if rand(Uniform(0, 1)) < move.buffChance
-        state = @set state.teams[get_other_agent(cmp)].buffs.atk = clamp(
-            defendingTeam.buffs.atk + move.oppAtkModifier,
+        next_state = @set state.teams[get_other_agent(cmp)].buffs.atk = clamp(
+            state.teams[get_other_agent(cmp)].buffs.atk + state.chargedMovesPending[cmp].move.oppAtkModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
-        state = @set state.teams[get_other_agent(cmp)].buffs.def = clamp(
-            defendingTeam.buffs.def + move.oppDefModifier,
+        next_state = @set next_state.teams[get_other_agent(cmp)].buffs.def = clamp(
+            next_state.teams[get_other_agent(cmp)].buffs.def + next_state.chargedMovesPending[cmp].move.oppDefModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
-        state = @set state.teams[cmp].buffs.atk = clamp(
-            attackingTeam.buffs.atk + move.selfAtkModifier,
+        next_state = @set next_state.teams[cmp].buffs.atk = clamp(
+            next_state.teams[cmp].buffs.atk + next_state.chargedMovesPending[cmp].move.selfAtkModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
-        state = @set state.teams[cmp].buffs.def = clamp(
-            attackingTeam.buffs.def + move.selfDefModifier,
+        next_state = @set next_state.teams[cmp].buffs.def = clamp(
+            next_state.teams[cmp].buffs.def + next_state.chargedMovesPending[cmp].move.selfDefModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
     end
-    return state
+    return next_state
 end
 
 function evaluate_charged_moves(state::State)
     cmp = get_cmp(state)
     if cmp != 0
-        attackingTeam = state.teams[cmp]
-        attacker = attackingTeam.mons[attackingTeam.active]
-        defendingTeam = state.teams[get_other_agent(cmp)]
-        defender = defendingTeam.mons[defendingTeam.active]
-        move = state.chargedMovesPending[cmp].move
-        state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= move.energy
-        state = @set state.teams[1].switchCooldown = max(
+        next_state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= state.chargedMovesPending[cmp].move.energy
+        next_state = @set next_state.teams[1].switchCooldown = max(
             0,
-            state.teams[1].switchCooldown - 10000,
+            next_state.teams[1].switchCooldown - 10000,
         )
-        state = @set state.teams[2].switchCooldown = max(
+        next_state = @set next_state.teams[2].switchCooldown = max(
             0,
-            state.teams[2].switchCooldown - 10000,
+            next_state.teams[2].switchCooldown - 10000,
         )
-        if defendingTeam.shields > 0 && defendingTeam.shielding
-            state = @set state.teams[get_other_agent(cmp)].shields -= 1
+        if next_state.teams[get_other_agent(cmp)].shields > 0 && next_state.teams[get_other_agent(cmp)].shielding
+            next_state = @set next_state.teams[get_other_agent(cmp)].shields -= 1
         else
-            state = @set state.teams[get_other_agent(cmp)].mons[state.teams[get_other_agent(cmp)].active].hp = max(
+            next_state = @set next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp = max(
                 0,
-                defender.hp - calculate_damage(
-                    attacker,
-                    attackingTeam.buffs.atk,
-                    defender,
-                    defendingTeam.buffs.def,
-                    move,
-                    state.chargedMovesPending[cmp].charge,
+                next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp - calculate_damage(
+                    next_state.teams[cmp].mons[next_state.teams[cmp].active],
+                    next_state.teams[cmp].buffs.atk,
+                    next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active],
+                    next_state.teams[get_other_agent(cmp)].buffs.def,
+                    next_state.chargedMovesPending[cmp].move,
+                    next_state.chargedMovesPending[cmp].charge,
                 ),
             )
         end
-        state = apply_buffs(state, cmp)
+        next_state = apply_buffs(next_state, cmp)
     end
-    return state
+    return next_state
 end
 
 function evaluate_switches(state::State)
-    switch = state.switchesPending[1]
-    if switch.pokemon != 0
-        j = get_other_agent(1)
-        state = @set state.teams[1].active = switch.pokemon
-        state = @set state.teams[1].buffs = StatBuffs(0, 0)
+    next_state = state
+    if next_state.switchesPending[1].pokemon != 0
+        next_state = @set next_state.teams[1].active = next_state.switchesPending[1].pokemon
+        next_state = @set next_state.teams[1].buffs = StatBuffs(0, 0)
         if switch.time != 0
-            state = @set state.teams[2].switchCooldown = max(
+            next_state = @set next_state.teams[2].switchCooldown = max(
                 0,
-                state.teams[2].switchCooldown - switch.time - 500,
+                next_state.teams[2].switchCooldown - switch.time - 500,
             )
         else
-            state = @set state.teams[1].switchCooldown = 60000
+            next_state = @set next_state.teams[1].switchCooldown = 60000
         end
     end
-    switch = state.switchesPending[2]
-    if switch.pokemon != 0
-        j = get_other_agent(2)
-        state = @set state.teams[2].active = switch.pokemon
-        state = @set state.teams[2].buffs = StatBuffs(0, 0)
-        if switch.time != 0
-            state = @set state.teams[1].switchCooldown = max(
+
+    if next_state.switchesPending[2].pokemon != 0
+        next_state = @set next_state.teams[2].active = next_state.switchesPending[2].pokemon
+        next_state = @set next_state.teams[2].buffs = StatBuffs(0, 0)
+        if next_state.switchesPending[2].time != 0
+            next_state = @set next_state.teams[1].switchCooldown = max(
                 0,
-                state.teams[1].switchCooldown - switch.time - 500,
+                next_state.teams[1].switchCooldown - next_state.switchesPending[2].time - 500,
             )
         else
-            state = @set state.teams[2].switchCooldown = 60000
+            next_state = @set next_state.teams[2].switchCooldown = 60000
         end
     end
-    return state
+    return next_state
 end

@@ -105,42 +105,42 @@ function get_battle_score(state::State)
 end
 
 function reset_switches_pending(state::State)
-    state = @set state.switchesPending = [
+    next_state = @set state.switchesPending = [
         SwitchAction(0, 0),
         SwitchAction(0, 0),
     ]
-    return state
+    return next_state
 end
 
 function reset_charged_moves_pending(state::State)
-    state = @set state.chargedMovesPending = [
+    next_state = @set state.chargedMovesPending = [
         ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
         ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
     ]
-    return state
+    return next_state
 end
 
 function step_timers(state::State)
     team = state.teams[1]
     activeMon = team.mons[team.active]
-    state = @set state.teams[1].switchCooldown = max(
+    next_state = @set state.teams[1].switchCooldown = max(
         0,
         team.switchCooldown - 500,
     )
-    state = @set state.teams[1].mons[state.teams[1].active].fastMoveCooldown = max(
+    next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = max(
         0,
         activeMon.fastMoveCooldown - 500,
     )
-    team = state.teams[2]
+    team = next_state.teams[2]
     activeMon = team.mons[team.active]
-    state = @set state.teams[2].switchCooldown = max(
+    next_state = @set next_state.teams[2].switchCooldown = max(
         0,
         team.switchCooldown - 500,
     )
-    state = @set state.teams[2].mons[state.teams[2].active].fastMoveCooldown = max(
+    next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = max(
         0,
         activeMon.fastMoveCooldown - 500,
     )
 
-    return state
+    return next_state
 end
