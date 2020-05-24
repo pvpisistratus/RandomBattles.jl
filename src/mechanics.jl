@@ -147,10 +147,10 @@ function evaluate_switches(state::State)
     if next_state.switchesPending[1].pokemon != 0
         next_state = @set next_state.teams[1].active = next_state.switchesPending[1].pokemon
         next_state = @set next_state.teams[1].buffs = StatBuffs(0, 0)
-        if switch.time != 0
+        if next_state.switchesPending[1].time != 0
             next_state = @set next_state.teams[2].switchCooldown = max(
                 0,
-                next_state.teams[2].switchCooldown - switch.time - 500,
+                next_state.teams[2].switchCooldown - next_state.switchesPending[1].time - 500,
             )
         else
             next_state = @set next_state.teams[1].switchCooldown = 60000
