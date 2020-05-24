@@ -83,7 +83,7 @@ function get_cmp(state::State)
 end
 
 function apply_buffs(state::State, cmp::Int64)
-    if rand(Uniform(0, 1)) < move.buffChance
+    if rand(Uniform(0, 1)) < state.chargedMovesPending[cmp].move.buffChance
         next_state = @set state.teams[get_other_agent(cmp)].buffs.atk = clamp(
             state.teams[get_other_agent(cmp)].buffs.atk + state.chargedMovesPending[cmp].move.oppAtkModifier,
             -gamemaster["settings"]["maxBuffStages"],
