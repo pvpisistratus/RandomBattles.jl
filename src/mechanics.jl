@@ -93,22 +93,22 @@ function apply_buffs(state::State, cmp::Int64)
     defendingTeam = state.teams[get_other_agent(cmp)]
     move = state.chargedMovesPending[cmp].move
     if rand(Uniform(0, 1)) < move.buffChance
-        state = @set defendingTeam.buffs.atk = clamp(
+        state = @set state.teams[get_other_agent(cmp)].buffs.atk = clamp(
             defendingTeam.buffs.atk + move.oppAtkModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
-        state = @set defendingTeam.buffs.def = clamp(
+        state = @set state.teams[get_other_agent(cmp)].buffs.def = clamp(
             defendingTeam.buffs.def + move.oppDefModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
-        state = @set attackingTeam.buffs.atk = clamp(
+        state = @set state.teams[cmp].buffs.atk = clamp(
             attackingTeam.buffs.atk + move.selfAtkModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
         )
-        state = @set attackingTeam.buffs.def = clamp(
+        state = @set state.teams[cmp].buffs.def = clamp(
             attackingTeam.buffs.def + move.selfDefModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
