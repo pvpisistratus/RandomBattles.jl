@@ -2,7 +2,7 @@ using Distributions, JSON, StaticArrays, Setfield
 
 const possible_decisions = 24
 
-function get_possible_decisions(state; allow_nothing = false)
+function get_possible_decisions(state::State; allow_nothing = false)
     decisions = zeros(possible_decisions)
     activeTeam = state.teams[state.agent]
     activeMon = activeTeam.mons[activeTeam.active]
@@ -55,7 +55,7 @@ function get_possible_decisions(state; allow_nothing = false)
     return decisions
 end
 
-function play_decision(state, decision)
+function play_decision(state::State, decision::Int64)
     next_state = state
     if iseven(decision)
         next_state = @set next_state.teams[next_state.agent].shielding = true
@@ -120,7 +120,7 @@ function play_battle(initial_state::State)
     end
 end
 
-function get_battle_scores(initial_state::State, N)
+function get_battle_scores(initial_state::State, N::Int64)
     scores = zeros(N)
     for i = 1:N
         scores[i] = play_battle(initial_state)

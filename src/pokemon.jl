@@ -38,7 +38,7 @@ struct Pokemon
     fastMoveCooldown::Int16   #Initially based on fast move
 end
 
-function Pokemon(i::Int64; league = "great")
+function Pokemon(i::Int64; league::String = "great")
     rankings = get_rankings(league)
     cp_limit = get_cp_limit(league)
     moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))

@@ -10,8 +10,8 @@ struct Team
     shielding::Bool          #Initially random
 end
 
-Team(mons::Array{Int64}; league = "great") =
+Team(mons::Array{Int64}; league::String = "great") =
     Team(Pokemon.(mons, league = league), StatBuffs(0, 0), 0, 2, 1, rand(Bool))
 
-Team(mons::Array{String}; league = "great") =
+Team(mons::Array{String}; league::String = "great") =
     Team(convert_indices.(mons, league = league), league = league)

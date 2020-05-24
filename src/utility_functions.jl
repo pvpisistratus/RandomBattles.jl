@@ -1,6 +1,6 @@
 using Setfield
 
-get_other_agent(agent) = agent == 1 ? agent = 2 : agent = 1
+get_other_agent(agent::Int64) = agent == 1 ? agent = 2 : agent = 1
 
 function get_gamemaster_mon_id(name::String)
     for i = 1:length(gamemaster["pokemon"])
@@ -60,7 +60,7 @@ function get_type_id(typeName::String)
     return type_id
 end
 
-function convert_indices(name; league = "great")
+function convert_indices(name::String; league::String = "great")
     rankings = get_rankings(league)
     ranking = 0
     for i = 1:length(rankings)
