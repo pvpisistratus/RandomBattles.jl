@@ -94,16 +94,24 @@ end
 function play_battle(initial_state::State)
     state = initial_state
     while true
-        for i = 1:2
-            weights = get_possible_decisions(state)
-            weights[9:14] /= 2
-            if sum(weights) == 0
-                return get_battle_score(state)
-            end
-            decision = rand(Categorical(weights / sum(weights)))
-            state = play_decision(state, decision)
-            state = @set state.agent = get_other_agent(state.agent)
+        weights = get_possible_decisions(state)
+        weights[9:14] /= 2
+        if sum(weights) == 0
+            return get_battle_score(state)
         end
+        decision = rand(Categorical(weights / sum(weights)))
+        state = play_decision(state, decision)
+        state = @set state.agent = get_other_agent(state.agent)
+
+        weights = get_possible_decisions(state)
+        weights[9:14] /= 2
+        if sum(weights) == 0
+            return get_battle_score(state)
+        end
+        decision = rand(Categorical(weights / sum(weights)))
+        state = play_decision(state, decision)
+        state = @set state.agent = get_other_agent(state.agent)
+
         state = evaluate_charged_moves(state)
         state = reset_charged_moves_pending(state)
         state = evaluate_switches(state)

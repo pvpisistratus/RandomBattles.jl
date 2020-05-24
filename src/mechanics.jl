@@ -126,12 +126,14 @@ function evaluate_charged_moves(state::State)
         defender = defendingTeam.mons[defendingTeam.active]
         move = state.chargedMovesPending[cmp].move
         state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= move.energy
-        for i = 1:2
-            state = @set state.teams[i].switchCooldown = max(
-                0,
-                state.teams[i].switchCooldown - 10000,
-            )
-        end
+        state = @set state.teams[1].switchCooldown = max(
+            0,
+            state.teams[1].switchCooldown - 10000,
+        )
+        state = @set state.teams[2].switchCooldown = max(
+            0,
+            state.teams[2].switchCooldown - 10000,
+        )
         if defendingTeam.shields > 0 && defendingTeam.shielding
             state = @set state.teams[get_other_agent(cmp)].shields -= 1
         else
