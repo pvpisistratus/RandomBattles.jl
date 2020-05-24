@@ -133,7 +133,9 @@ function step_timers(state::State)
             0,
             activeMon.fastMoveCooldown - 500,
         )
-        println(state.teams[i].mons[state.teams[i].active].fastMoveCooldown)
+
     end
+    println(state.teams[1].mons[state.teams[1].active].fastMoveCooldown)
+    println(state.teams[1].mons[state.teams[1].active].fastMoveCooldown)
     return state
 end
