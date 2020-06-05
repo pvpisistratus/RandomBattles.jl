@@ -94,6 +94,7 @@ end
 function play_battle(initial_state::State)
     state = initial_state
     while true
+        old_state = state
         weights = get_possible_decisions(state)
         weights[9:14] /= 2
         iszero(sum(weights)) && return get_battle_score(state)
@@ -113,6 +114,8 @@ function play_battle(initial_state::State)
         state = evaluate_switches(state)
         state = reset_switches_pending(state)
         state = step_timers(state)
+
+        diff(old_state, state)
     end
 end
 
