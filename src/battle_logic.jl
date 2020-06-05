@@ -115,7 +115,8 @@ function play_battle(initial_state::State)
         state = reset_switches_pending(state)
         state = step_timers(state)
 
-        diff(old_state, state)
+        diff(old_state, state
+        println()
     end
 end
 
