@@ -19,6 +19,7 @@ export State,
        ultraRankings,
        masterRankings,
        play_battle,
-       rank
+       rank,
+       diff
 
 end # module
