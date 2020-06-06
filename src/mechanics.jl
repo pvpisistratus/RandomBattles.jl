@@ -96,7 +96,7 @@ function apply_buffs(state::State, cmp::Int64)
     return next_state
 end
 
-function evaluate_fast_move(state::State)
+function evaluate_fast_moves(state::State)
     next_state = state
     if state.fastMovesPending[1]
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = next_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown
