@@ -55,7 +55,6 @@ end
 mutable struct Strategy
     decisions::Array{Tuple{Int64,Int64}}
     minimaxes::Array{Tuple{Float64,Float64}}
-    history::Array{State}
 end
 
 Strategy() = Strategy([], [], [])
@@ -64,17 +63,14 @@ function Strategy(state; battles_per_turn = 1000)
     strategy = Strategy()
     current_state = state
     while true
-        print(" ")
         d_matrix = get_decision_matrix(current_state, battles_per_turn = battles_per_turn)
         is_empty(d_matrix) && return strategy
         decision = minimax(d_matrix)
         push!(strategy.decisions, decision)
-        print(decision)
         push!(
             strategy.minimaxes,
             d_matrix.decision_matrix[decision[1], decision[2]],
         )
         current_state = play_turn(current_state, decision)
-        push!(strategy.history, current_state)
     end
 end
