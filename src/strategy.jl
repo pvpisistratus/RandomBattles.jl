@@ -24,12 +24,10 @@ function get_decision_matrix(state)
     if iszero(sum(weights1)) || iszero(sum(weights2))
         finished = true
     else
-        for decision1 in findall(isone(), weights1)
-            for decision2 in findall(isone(), weights2)
-                next_state = play_turn(state, decision1, decision2)
-                scores = get_battle_scores(next_state, 1000)
-                d_matrix.decision_matrix[decision1, decision2] = (minimum(scores), maximum(scores))
-            end
+        for decision1 in findall(isone, weights1), decision2 in findall(isone, weights2)
+            next_state = play_turn(state, decision1, decision2)
+            scores = get_battle_scores(next_state, 1000)
+            d_matrix.decision_matrix[decision1, decision2] = (minimum(scores), maximum(scores))
         end
     end
     return d_matrix, finished
