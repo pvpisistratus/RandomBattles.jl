@@ -71,7 +71,7 @@ function Strategy(state)
     while true
         print(" ")
         d_matrix = get_decision_matrix(current_state)
-        is_empty(d_matrix) && break
+        is_empty(d_matrix) && return strategy
             decision = minimax(d_matrix)
             push!(strategy.decisions, decision)
             print(decision)
@@ -83,5 +83,4 @@ function Strategy(state)
         end
         push!(strategy.history, current_state)
     end
-    return strategy
 end
