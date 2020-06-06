@@ -97,6 +97,7 @@ function play_battle(initial_state::State)
         old_state = state
         weights = get_possible_decisions(state)
         weights[9:14] /= 2
+        println(weights)
         iszero(sum(weights)) && return get_battle_score(state)
         decision = rand(Categorical(weights / sum(weights)))
         state = play_decision(state, decision)
@@ -104,6 +105,7 @@ function play_battle(initial_state::State)
 
         weights = get_possible_decisions(state)
         weights[9:14] /= 2
+        println(weights)
         iszero(sum(weights)) && return get_battle_score(state)
         decision = rand(Categorical(weights / sum(weights)))
         state = play_decision(state, decision)
