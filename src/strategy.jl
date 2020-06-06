@@ -57,9 +57,9 @@ mutable struct Strategy
     minimaxes::Array{Tuple{Float64,Float64}}
 end
 
-Strategy() = Strategy([], [], [])
+Strategy() = Strategy([], [])
 
-function Strategy(state; battles_per_turn = 1000)
+function Strategy(state::State; battles_per_turn::Int64 = 1000)
     strategy = Strategy()
     current_state = state
     while true
