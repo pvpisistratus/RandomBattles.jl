@@ -35,7 +35,7 @@ function minimax(dmat::DecisionMatrix)
             mins[i] = first(dmat.decision_matrix[i, j])
         end
     end
-    replace!(maxes, 1.0 => 0.0)
+    replace!(mins, 1.0 => 0.0)
     minimax = argmax(mins)
     maxes = zeros(possible_decisions)
     for i = 1:possible_decisions, j = 1:possible_decisions
