@@ -21,6 +21,8 @@ function get_decision_matrix(state)
     weights1 = get_possible_decisions(state)
     other_state = @set state.agent = get_other_agent(state.agent)
     weights2 = get_possible_decisions(other_state)
+    println(weights1)
+    println(weights2)
     if iszero(sum(weights1)) || iszero(sum(weights2))
         finished = true
     else
