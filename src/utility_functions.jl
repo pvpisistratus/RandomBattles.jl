@@ -2,6 +2,8 @@ using Setfield
 
 get_other_agent(agent::Int64) = agent == 1 ? agent = 2 : agent = 1
 
+switch_agent(state::State) = @set state.agent = get_other_agent(state.agent)
+
 function get_gamemaster_mon_id(name::String)
     for i = 1:length(gamemaster["pokemon"])
         if gamemaster["pokemon"][i]["speciesId"] == name

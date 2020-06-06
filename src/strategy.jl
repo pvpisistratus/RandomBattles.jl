@@ -15,20 +15,14 @@ function DecisionMatrix()
 end
 
 function get_decision_matrix(state)
-    finished = false
     d_matrix = DecisionMatrix()
-    decisions1 = get_possible_decisions(state)
     weights1 = get_possible_decisions(state)
-    other_state = @set state.agent = get_other_agent(state.agent)
-    weights2 = get_possible_decisions(other_state)
-    println(weights1)
-    println(weights2)
+    weights2 = get_possible_decisions(switch_agent(state))
     if !iszero(sum(weights1)) && !iszero(sum(weights2))
-        for decision1 in findall(isone, weights1), decision2 in findall(isone, weights2)
-            println((decision1, decision2))
-            next_state = play_turn(state, (decision1, decision2))
+        for d1 in findall(isone, weights1), d2 in findall(isone, weights2)
+            next_state = play_turn(state, (d1, d2))
             scores = get_battle_scores(next_state, 1000)
-            d_matrix.decision_matrix[decision1, decision2] = (minimum(scores), maximum(scores))
+            d_matrix.decision_matrix[d1, d2] = (minimum(scores), maximum(scores))
         end
     end
     return d_matrix
