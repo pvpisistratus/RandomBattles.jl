@@ -23,16 +23,14 @@ function get_decision_matrix(state)
     weights2 = get_possible_decisions(other_state)
     println(weights1)
     println(weights2)
-    if iszero(sum(weights1)) || iszero(sum(weights2))
-        finished = true
-    else
+    if !iszero(sum(weights1)) && !iszero(sum(weights2))
         for decision1 in findall(isone, weights1), decision2 in findall(isone, weights2)
             next_state = play_turn(state, decision1, decision2)
             scores = get_battle_scores(next_state, 1000)
             d_matrix.decision_matrix[decision1, decision2] = (minimum(scores), maximum(scores))
         end
     end
-    return d_matrix, finished
+    return d_matrix
 end
 
 function minimax(dmat::DecisionMatrix)
@@ -72,8 +70,8 @@ function Strategy(state)
     current_state = state
     while !finished
         print(" ")
-        d_matrix, finished = get_decision_matrix(current_state)
-        if !is_empty(d_matrix)
+        d_matrix = get_decision_matrix(current_state)
+        is_empty(d_matrix) && break
             decision = minimax(d_matrix)
             push!(strategy.decisions, decision)
             print(decision)
