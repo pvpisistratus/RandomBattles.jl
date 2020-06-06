@@ -31,6 +31,7 @@ end
 function fast_move(state::State)
     next_state = @set state.teams[state.agent].mons[state.teams[state.agent].active].fastMoveCooldown = state.teams[state.agent].mons[state.teams[state.agent].active].fastMove.cooldown
     next_state = @set next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].energy += next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].fastMove.energy
+    next_state = @set next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].energy = min(next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].energy, 100)
     next_state = @set next_state.teams[get_other_agent(next_state.agent)].mons[next_state.teams[get_other_agent(next_state.agent)].active].hp = max(
         0,
         next_state.teams[get_other_agent(next_state.agent)].mons[next_state.teams[get_other_agent(next_state.agent)].active].hp -
