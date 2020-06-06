@@ -28,22 +28,8 @@ function calculate_damage(
                  0.5 * 1.3) + 1
 end
 
-function fast_move(state::State)
-    next_state = @set state.teams[state.agent].mons[state.teams[state.agent].active].fastMoveCooldown = state.teams[state.agent].mons[state.teams[state.agent].active].fastMove.cooldown
-    next_state = @set next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].energy += next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].fastMove.energy
-    next_state = @set next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].energy = min(next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].energy, 100)
-    next_state = @set next_state.teams[get_other_agent(next_state.agent)].mons[next_state.teams[get_other_agent(next_state.agent)].active].hp = max(
-        0,
-        next_state.teams[get_other_agent(next_state.agent)].mons[next_state.teams[get_other_agent(next_state.agent)].active].hp -
-        calculate_damage(
-            next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active],
-            next_state.teams[next_state.agent].buffs.atk,
-            next_state.teams[get_other_agent(next_state.agent)].mons[next_state.teams[get_other_agent(next_state.agent)].active],
-            next_state.teams[get_other_agent(next_state.agent)].buffs.def,
-            next_state.teams[next_state.agent].mons[next_state.teams[next_state.agent].active].fastMove,
-            1.0,
-        ),
-    )
+function queue_fast_move(state::State)
+    next_state = @set state.fastMovesPending[state.agent] = true
     return next_state
 end
 
@@ -105,6 +91,45 @@ function apply_buffs(state::State, cmp::Int64)
             next_state.teams[cmp].buffs.def + next_state.chargedMovesPending[cmp].move.selfDefModifier,
             -gamemaster["settings"]["maxBuffStages"],
             gamemaster["settings"]["maxBuffStages"],
+        )
+    end
+    return next_state
+end
+
+function evaluate_fast_move(state::State)
+    next_state = state
+    if state.fastMovesPending[1]
+        next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = next_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown
+        next_state = @set next_state.teams[1].mons[next_state.teams[1].active].energy += next_state.teams[1].mons[next_state.teams[1].active].fastMove.energy
+        next_state = @set next_state.teams[1].mons[next_state.teams[1].active].energy = min(next_state.teams[1].mons[next_state.teams[1].active].energy, 100)
+        next_state = @set next_state.teams[2].mons[next_state.teams[2].active].hp = max(
+            0,
+            next_state.teams[2].mons[next_state.teams[2].active].hp -
+            calculate_damage(
+                next_state.teams[1].mons[next_state.teams[1].active],
+                next_state.teams[1].buffs.atk,
+                next_state.teams[2].mons[next_state.teams[2].active],
+                next_state.teams[2].buffs.def,
+                next_state.teams[1].mons[next_state.teams[1].active].fastMove,
+                1.0,
+            ),
+        )
+    end
+    if state.fastMovesPending[2]
+        next_state = @set state.teams[2].mons[state.teams[2].active].fastMoveCooldown = state.teams[2].mons[state.teams[2].active].fastMove.cooldown
+        next_state = @set next_state.teams[2].mons[next_state.teams[2].active].energy += next_state.teams[2].mons[next_state.teams[2].active].fastMove.energy
+        next_state = @set next_state.teams[2].mons[next_state.teams[2].active].energy = min(next_state.teams[2].mons[next_state.teams[2].active].energy, 100)
+        next_state = @set next_state.teams[1].mons[next_state.teams[1].active].hp = max(
+            0,
+            next_state.teams[1].mons[next_state.teams[1].active].hp -
+            calculate_damage(
+                next_state.teams[2].mons[next_state.teams[2].active],
+                next_state.teams[2].buffs.atk,
+                next_state.teams[1].mons[next_state.teams[1].active],
+                next_state.teams[1].buffs.def,
+                next_state.teams[2].mons[next_state.teams[2].active].fastMove,
+                1.0,
+            ),
         )
     end
     return next_state
