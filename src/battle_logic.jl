@@ -97,6 +97,7 @@ end
 function play_battle(initial_state::State)
     state = initial_state
     while true
+        old_state = state
         weights1 = get_possible_decisions(state)
         weights1[9:14] /= 2
         state = @set state.agent = get_other_agent(state.agent)
@@ -109,6 +110,7 @@ function play_battle(initial_state::State)
         decision2 = rand(Categorical(weights2 / sum(weights2)))
 
         state = play_turn(state, decision1, decision2)
+        diff(old_state, state)
     end
 end
 
