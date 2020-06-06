@@ -80,10 +80,10 @@ function play_decision(state::State, decision::Int64)
     return next_state
 end
 
-function play_turn(state::State, decision1::Int64, decision2::Int64)
-    next_state = play_decision(state, decision1)
+function play_turn(state::State, decision::Tuple{Int64,Int64})
+    next_state = play_decision(state, decision[1])
     next_state = @set next_state.agent = get_other_agent(next_state.agent)
-    next_state = play_decision(next_state, decision2)
+    next_state = play_decision(next_state, decision[2])
     next_state = @set next_state.agent = get_other_agent(next_state.agent)
 
     next_state = evaluate_switches(next_state)
@@ -110,7 +110,7 @@ function play_battle(initial_state::State)
         decision1 = rand(Categorical(weights1 / sum(weights1)))
         decision2 = rand(Categorical(weights2 / sum(weights2)))
 
-        state = play_turn(state, decision1, decision2)
+        state = play_turn(state, (decision1, decision2))
     end
 end
 

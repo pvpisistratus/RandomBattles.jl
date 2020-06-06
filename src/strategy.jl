@@ -72,15 +72,14 @@ function Strategy(state)
         print(" ")
         d_matrix = get_decision_matrix(current_state)
         is_empty(d_matrix) && return strategy
-            decision = minimax(d_matrix)
-            push!(strategy.decisions, decision)
-            print(decision)
-            push!(
-                strategy.minimaxes,
-                d_matrix.decision_matrix[first(decision), last(decision)],
-            )
-            current_state = play_turn(current_state, first(decision), last(decision))
-        end
+        decision = minimax(d_matrix)
+        push!(strategy.decisions, decision)
+        print(decision)
+        push!(
+            strategy.minimaxes,
+            d_matrix.decision_matrix[decision[1], decision[2]],
+        )
+        current_state = play_turn(current_state, decision)
         push!(strategy.history, current_state)
     end
 end
