@@ -83,10 +83,8 @@ end
 function play_battle(initial_state::State)
     state = initial_state
     while true
-        old_state = state
         weights = get_possible_decisions(state)
         weights[9:14] /= 2
-        println(weights)
         iszero(sum(weights)) && return get_battle_score(state)
         decision = rand(Categorical(weights / sum(weights)))
         println(decision)
@@ -95,10 +93,8 @@ function play_battle(initial_state::State)
 
         weights = get_possible_decisions(state)
         weights[9:14] /= 2
-        println(weights)
         iszero(sum(weights)) && return get_battle_score(state)
         decision = rand(Categorical(weights / sum(weights)))
-        println(decision)
         state = play_decision(state, decision)
         state = @set state.agent = get_other_agent(state.agent)
 
@@ -107,9 +103,6 @@ function play_battle(initial_state::State)
         state = evaluate_switches(state)
         state = reset_switches_pending(state)
         state = step_timers(state)
-
-        diff(old_state, state)
-        println()
     end
 end
 
