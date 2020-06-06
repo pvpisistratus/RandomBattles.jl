@@ -1,4 +1,4 @@
-using Distributions, Setfield
+using Distributions, Setfield, Match
 
 const possible_decisions = 24
 
@@ -62,30 +62,19 @@ function play_decision(state::State, decision::Int64)
     else
         next_state = @set next_state.teams[next_state.agent].shielding = false
     end
-    if 3 <= decision <= 4
-        next_state = fast_move(next_state)
-    elseif decision <= 6
-        next_state = queue_charged_move(next_state, 1)
-    elseif decision <= 8
-        next_state = queue_charged_move(next_state, 2)
-    elseif decision <= 10
-        next_state = queue_switch(next_state, 1)
-    elseif decision <= 12
-        next_state = queue_switch(next_state, 2)
-    elseif decision <= 14
-        next_state = queue_switch(next_state, 3)
-    elseif decision <= 16
-        next_state = queue_switch(next_state, 1, time = 12_000)
-    elseif decision <= 18
-        next_state = queue_switch(next_state, 2, time = 12_000)
-    elseif decision <= 20
-        next_state = queue_switch(next_state, 3, time = 12_000)
-    elseif decision <= 22
-        next_state = fast_move(next_state)
-        next_state = queue_charged_move(next_state, 1)
-    elseif decision <= 24
-        next_state = fast_move(next_state)
-        next_state = queue_charged_move(next_state, 2)
+    next_state = @match decision begin
+        3  || 4  => fast_move(next_state)
+        5  || 6  => queue_charged_move(next_state, 1)
+        7  || 8  => queue_charged_move(next_state, 2)
+        9  || 10 => queue_switch(next_state, 1)
+        11 || 12 => queue_switch(next_state, 2)
+        13 || 14 => queue_switch(next_state, 3)
+        15 || 16 => queue_switch(next_state, 1, time = 12_000)
+        17 || 18 => queue_switch(next_state, 2, time = 12_000)
+        19 || 20 => queue_switch(next_state, 3, time = 12_000)
+        21 || 22 => queue_charged_move(fast_move(next_state), 1)
+        23 || 24 => queue_charged_move(fast_move(next_state), 2)
+        _        => next_state
     end
 
     return next_state
