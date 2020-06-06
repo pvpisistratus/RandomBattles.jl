@@ -88,9 +88,8 @@ function play_turn(state::State, decision1::Int64, decision2::Int64)
 
     next_state = evaluate_fast_move(next_state)
     next_state = evaluate_charged_moves(next_state)
-    next_state = reset_charged_moves_pending(next_state)
     next_state = evaluate_switches(next_state)
-    next_state = reset_switches_pending(next_state)
+    next_state = reset_queues(next_state)
     next_state = step_timers(next_state)
     return next_state
 end
@@ -106,7 +105,7 @@ function play_battle(initial_state::State)
         state = @set state.agent = get_other_agent(state.agent)
         (iszero(sum(weights1)) || iszero(sum(weights2))) &&
             return get_battle_score(state)
-        
+
         decision1 = rand(Categorical(weights1 / sum(weights1)))
         decision2 = rand(Categorical(weights2 / sum(weights2)))
 

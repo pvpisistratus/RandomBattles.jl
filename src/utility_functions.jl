@@ -104,18 +104,15 @@ function get_battle_score(state::State)
              state.teams[2].mons[3].stats.hitpoints))
 end
 
-function reset_switches_pending(state::State)
-    next_state = @set state.switchesPending = [
-        SwitchAction(0, 0),
-        SwitchAction(0, 0),
-    ]
-    return next_state
-end
-
-function reset_charged_moves_pending(state::State)
+function reset_queues(state::State)
+    next_state = @set state.fastMovesPending = [false, false]
     next_state = @set state.chargedMovesPending = [
         ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
         ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
+    ]
+    next_state = @set state.switchesPending = [
+        SwitchAction(0, 0),
+        SwitchAction(0, 0),
     ]
     return next_state
 end
