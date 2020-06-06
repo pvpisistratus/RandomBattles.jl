@@ -23,6 +23,7 @@ function get_decision_matrix(state)
     else
         for decision1 in findall(isone, decisions1)
             next_state = play_decision(state, decision1)
+            next_state = @set next_state.agent = get_other_agent(next_state.agent)
             decisions2 = get_possible_decisions(next_state)
             if sum(decisions2) == 0
                 finished = true
@@ -34,7 +35,13 @@ function get_decision_matrix(state)
                 d_matrix.decision_matrix[decision1, :] = d_row
             else
                 for decision2 in findall(isone, decisions2)
-                    next_next_state = play_decision(next_state, decision2)
+                    next_next_state = play_decision(next_state, decision1)
+                    next_next_state = @set next_next_state.agent = get_other_agent(next_next_state.agent)
+                    next_next_state = evaluate_charged_moves(next_next_state)
+                    next_next_state = reset_charged_moves_pending(next_next_state)
+                    next_next_state = evaluate_switches(next_next_state)
+                    next_next_state = reset_switches_pending(next_next_state)
+                    next_next_state = step_timers(next_next_state)
                     scores = get_battle_scores(next_next_state, 1000)
                     d_matrix.decision_matrix[decision1, decision2] = (
                         minimum(scores),
