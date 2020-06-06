@@ -86,9 +86,9 @@ function play_turn(state::State, decision1::Int64, decision2::Int64)
     next_state = play_decision(next_state, decision2)
     next_state = @set next_state.agent = get_other_agent(next_state.agent)
 
+    next_state = evaluate_switches(next_state)
     next_state = evaluate_fast_moves(next_state)
     next_state = evaluate_charged_moves(next_state)
-    next_state = evaluate_switches(next_state)
     next_state = reset_queues(next_state)
     next_state = step_timers(next_state)
     return next_state
