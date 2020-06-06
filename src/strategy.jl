@@ -18,36 +18,17 @@ function get_decision_matrix(state)
     finished = false
     d_matrix = DecisionMatrix()
     decisions1 = get_possible_decisions(state)
-    if sum(decisions1) == 0
+    weights1 = get_possible_decisions(state)
+    other_state = @set state.agent = get_other_agent(state.agent)
+    weights2 = get_possible_decisions(other_state)
+    if iszero(sum(weights1)) || iszero(sum(weights2))
         finished = true
     else
-        for decision1 in findall(isone, decisions1)
-            next_state = play_decision(state, decision1)
-            next_state = @set next_state.agent = get_other_agent(next_state.agent)
-            decisions2 = get_possible_decisions(next_state)
-            if sum(decisions2) == 0
-                finished = true
-                score = get_battle_score(next_state)
-                d_row = Array{Tuple{Float64,Float64}}(undef, possible_decisions)
-                for i = 1:possible_decisions
-                    d_row[i] = (score, score)
-                end
-                d_matrix.decision_matrix[decision1, :] = d_row
-            else
-                for decision2 in findall(isone, decisions2)
-                    next_next_state = play_decision(next_state, decision1)
-                    next_next_state = @set next_next_state.agent = get_other_agent(next_next_state.agent)
-                    next_next_state = evaluate_charged_moves(next_next_state)
-                    next_next_state = reset_charged_moves_pending(next_next_state)
-                    next_next_state = evaluate_switches(next_next_state)
-                    next_next_state = reset_switches_pending(next_next_state)
-                    next_next_state = step_timers(next_next_state)
-                    scores = get_battle_scores(next_next_state, 1000)
-                    d_matrix.decision_matrix[decision1, decision2] = (
-                        minimum(scores),
-                        maximum(scores),
-                    )
-                end
+        for decision1 in findall(isone(), weights1)
+            for decision2 in findall(isone(), weights2)
+                next_state = play_turn(state, decision1, decision2)
+                scores = get_battle_scores(next_state, 1000)
+                d_matrix.decision_matrix[decision1, decision2] = (minimum(scores), maximum(scores))
             end
         end
     end
