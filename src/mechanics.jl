@@ -98,7 +98,7 @@ end
 
 function evaluate_fast_moves(state::State)
     next_state = state
-    if state.fastMovesPending[1]
+    if next_state.fastMovesPending[1]
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = next_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].energy += next_state.teams[1].mons[next_state.teams[1].active].fastMove.energy
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].energy = min(next_state.teams[1].mons[next_state.teams[1].active].energy, 100)
@@ -115,8 +115,8 @@ function evaluate_fast_moves(state::State)
             ),
         )
     end
-    if state.fastMovesPending[2]
-        next_state = @set state.teams[2].mons[state.teams[2].active].fastMoveCooldown = state.teams[2].mons[state.teams[2].active].fastMove.cooldown
+    if next_state.fastMovesPending[2]
+        next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = next_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown
         next_state = @set next_state.teams[2].mons[next_state.teams[2].active].energy += next_state.teams[2].mons[next_state.teams[2].active].fastMove.energy
         next_state = @set next_state.teams[2].mons[next_state.teams[2].active].energy = min(next_state.teams[2].mons[next_state.teams[2].active].energy, 100)
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].hp = max(

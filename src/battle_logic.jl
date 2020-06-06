@@ -86,8 +86,6 @@ function play_turn(state::State, decision1::Int64, decision2::Int64)
     next_state = play_decision(next_state, decision2)
     next_state = @set next_state.agent = get_other_agent(next_state.agent)
 
-    println(next_state.fastMovesPending)
-
     next_state = evaluate_fast_moves(next_state)
     next_state = evaluate_charged_moves(next_state)
     next_state = evaluate_switches(next_state)
@@ -113,10 +111,6 @@ function play_battle(initial_state::State)
         decision2 = rand(Categorical(weights2 / sum(weights2)))
 
         state = play_turn(state, decision1, decision2)
-
-        println((decision1, decision2))
-        diff(old_state, state)
-        println()
     end
 end
 
