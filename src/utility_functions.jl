@@ -106,11 +106,11 @@ end
 
 function reset_queues(state::State)
     next_state = @set state.fastMovesPending = [false, false]
-    next_state = @set state.chargedMovesPending = [
+    next_state = @set next_state.chargedMovesPending = [
         ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
         ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
     ]
-    next_state = @set state.switchesPending = [
+    next_state = @set next_state.switchesPending = [
         SwitchAction(0, 0),
         SwitchAction(0, 0),
     ]
