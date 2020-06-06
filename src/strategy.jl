@@ -25,6 +25,7 @@ function get_decision_matrix(state)
     println(weights2)
     if !iszero(sum(weights1)) && !iszero(sum(weights2))
         for decision1 in findall(isone, weights1), decision2 in findall(isone, weights2)
+            println((decision1, decision2))
             next_state = play_turn(state, decision1, decision2)
             scores = get_battle_scores(next_state, 1000)
             d_matrix.decision_matrix[decision1, decision2] = (minimum(scores), maximum(scores))
@@ -66,9 +67,8 @@ Strategy() = Strategy([], [], [])
 
 function Strategy(state)
     strategy = Strategy()
-    finished = false
     current_state = state
-    while !finished
+    while true
         print(" ")
         d_matrix = get_decision_matrix(current_state)
         is_empty(d_matrix) && break
