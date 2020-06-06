@@ -26,7 +26,7 @@ function get_decision_matrix(state)
     if !iszero(sum(weights1)) && !iszero(sum(weights2))
         for decision1 in findall(isone, weights1), decision2 in findall(isone, weights2)
             println((decision1, decision2))
-            next_state = play_turn(state, decision1, decision2)
+            next_state = play_turn(state, (decision1, decision2))
             scores = get_battle_scores(next_state, 1000)
             d_matrix.decision_matrix[decision1, decision2] = (minimum(scores), maximum(scores))
         end
