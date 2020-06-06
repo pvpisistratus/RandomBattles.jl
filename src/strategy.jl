@@ -79,8 +79,7 @@ function Strategy(state)
                 strategy.minimaxes,
                 d_matrix.decision_matrix[first(decision), last(decision)],
             )
-            current_state = play_decision(current_state, first(decision))
-            current_state = play_decision(current_state, last(decision))
+            current_state = play_turn(current_state, first(decision), last(decision))
         end
         push!(strategy.history, current_state)
     end
