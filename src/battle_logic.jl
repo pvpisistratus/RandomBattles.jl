@@ -110,7 +110,9 @@ function play_battle(initial_state::State)
         decision2 = rand(Categorical(weights2 / sum(weights2)))
 
         state = play_turn(state, decision1, decision2)
+        println((decision1, decision2))
         diff(old_state, state)
+        println()
     end
 end
 
