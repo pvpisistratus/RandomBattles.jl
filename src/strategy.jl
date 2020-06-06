@@ -14,14 +14,14 @@ function DecisionMatrix()
     return DecisionMatrix(dmat)
 end
 
-function get_decision_matrix(state)
+function get_decision_matrix(state; battles_per_turn = 1000)
     d_matrix = DecisionMatrix()
     weights1 = get_possible_decisions(state)
     weights2 = get_possible_decisions(switch_agent(state))
     if !iszero(sum(weights1)) && !iszero(sum(weights2))
         for d1 in findall(isone, weights1), d2 in findall(isone, weights2)
             next_state = play_turn(state, (d1, d2))
-            scores = get_battle_scores(next_state, 1000)
+            scores = get_battle_scores(next_state, battles_per_turn)
             d_matrix.decision_matrix[d1, d2] = (minimum(scores), maximum(scores))
         end
     end
@@ -60,12 +60,12 @@ end
 
 Strategy() = Strategy([], [], [])
 
-function Strategy(state)
+function Strategy(state; battles_per_turn = 1000)
     strategy = Strategy()
     current_state = state
     while true
         print(" ")
-        d_matrix = get_decision_matrix(current_state)
+        d_matrix = get_decision_matrix(current_state, battles_per_turn = battles_per_turn)
         is_empty(d_matrix) && return strategy
         decision = minimax(d_matrix)
         push!(strategy.decisions, decision)
