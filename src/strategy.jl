@@ -1,3 +1,5 @@
+using Distributions
+
 mutable struct DecisionMatrix
     decision_matrix::Array{Tuple{Float64,Float64},2}
 end
@@ -22,7 +24,7 @@ function get_decision_matrix(state; battles_per_turn = 1000)
         for d1 in findall(isone, weights1), d2 in findall(isone, weights2)
             next_state = play_turn(state, (d1, d2))
             scores = get_battle_scores(next_state, battles_per_turn)
-            d_matrix.decision_matrix[d1, d2] = (minimum(scores), maximum(scores))
+            d_matrix.decision_matrix[d1, d2] = (mean(scores) - 3 * std(scores), mean(scores) + 3 * std(scores))
         end
     end
     return d_matrix
