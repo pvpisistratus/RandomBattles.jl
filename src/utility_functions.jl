@@ -1,4 +1,4 @@
-using Setfield
+using Setfield, Match
 
 get_other_agent(agent::Int64) = agent == 1 ? agent = 2 : agent = 1
 
@@ -21,43 +21,26 @@ function get_gamemaster_move_id(name::String)
 end
 
 function get_type_id(typeName::String)
-    type_id = 19
-    if typeName == "normal"
-        type_id = 1
-    elseif typeName == "fighting"
-        type_id = 2
-    elseif typeName == "flying"
-        type_id = 3
-    elseif typeName == "poison"
-        type_id = 4
-    elseif typeName == "ground"
-        type_id = 5
-    elseif typeName == "rock"
-        type_id = 6
-    elseif typeName == "bug"
-        type_id = 7
-    elseif typeName == "ghost"
-        type_id = 8
-    elseif typeName == "steel"
-        type_id = 9
-    elseif typeName == "fire"
-        type_id = 10
-    elseif typeName == "water"
-        type_id = 11
-    elseif typeName == "grass"
-        type_id = 12
-    elseif typeName == "electric"
-        type_id = 12
-    elseif typeName == "psychic"
-        type_id = 14
-    elseif typeName == "ice"
-        type_id = 15
-    elseif typeName == "dragon"
-        type_id = 16
-    elseif typeName == "dark"
-        type_id = 17
-    elseif typeName == "fairy"
-        type_id = 18
+    type_id = @match decision begin
+        "normal"   => 1
+        "fighting" => 2
+        "flying"   => 3
+        "poison"   => 4
+        "ground"   => 5
+        "rock"     => 6
+        "bug"      => 7
+        "ghost"    => 8
+        "steel"    => 9
+        "fire"     => 10
+        "water"    => 11
+        "grass"    => 12
+        "electric" => 13
+        "psychic"  => 14
+        "ice"      => 15
+        "dragon"   => 16
+        "dark"     => 17
+        "fairy"    => 18
+        _          => 19
     end
     return type_id
 end
