@@ -83,7 +83,7 @@ function Strategy(state::State; battles_per_turn::Int64 = 1000)
         )
         push!(
             strategy.activeMons,
-            (current_state.teams[1], current_state.teams[2].active)
+            (current_state.teams[1].active, current_state.teams[2].active)
         )
     end
 end
