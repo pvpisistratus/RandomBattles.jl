@@ -21,7 +21,7 @@ function get_gamemaster_move_id(name::String)
 end
 
 function get_type_id(typeName::String)
-    type_id = @match decision begin
+    type_id = @match typeName begin
         "normal"   => 1
         "fighting" => 2
         "flying"   => 3
