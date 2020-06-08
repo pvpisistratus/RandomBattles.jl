@@ -57,9 +57,11 @@ end
 mutable struct Strategy
     decisions::Array{Tuple{Int64,Int64}}
     minimaxes::Array{Tuple{Float64,Float64}}
+    energies::Array{Tuple{Int8, Int8}}
+    activeMons::Array{Tuple{Int64, Int64}}
 end
 
-Strategy() = Strategy([], [])
+Strategy() = Strategy([], [], [], [])
 
 function Strategy(state::State; battles_per_turn::Int64 = 1000)
     strategy = Strategy()
@@ -74,5 +76,14 @@ function Strategy(state::State; battles_per_turn::Int64 = 1000)
             d_matrix.decision_matrix[decision[1], decision[2]],
         )
         current_state = play_turn(current_state, decision)
+        push!(
+            strategy.energies,
+            (current_state.teams[1].mons[current_state.teams[1].active].energy,
+            current_state.teams[2].mons[current_state.teams[2].active].energy)
+        )
+        push!(
+            strategy.activeMons,
+            (current_state.teams[1], current_state.teams[2].active)
+        )
     end
 end
