@@ -53,9 +53,9 @@ function get_cmp(state::State)
     cmp = 0
     if state.chargedMovesPending[1].charge == 0 && state.chargedMovesPending[2].charge == 0
         cmp = 0
-    elseif state.chargedMovesPending[1].charge != 0 && state.chargedMovesPending[2].charge == 0
+    elseif state.chargedMovesPending[1].charge != 0 && state.chargedMovesPending[2].charge == 0 && state.teams[2].mons[state.teams[2].active].hp > 0
         cmp = 1
-    elseif state.chargedMovesPending[1].charge == 0 && state.chargedMovesPending[2].charge != 0
+    elseif state.chargedMovesPending[1].charge == 0 && state.chargedMovesPending[2].charge != 0 && state.teams[1].mons[state.teams[1].active].hp > 0
         cmp = 2
     else
         if state.teams[1].mons[state.teams[1].active].stats.attack > state.teams[2].mons[state.teams[2].active].stats.attack
@@ -164,6 +164,7 @@ function evaluate_charged_moves(state::State)
             )
         end
         next_state = apply_buffs(next_state, cmp)
+        next_state = @set next_state.chargedMovesPending[cmp] = ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0)
     end
     return next_state
 end
