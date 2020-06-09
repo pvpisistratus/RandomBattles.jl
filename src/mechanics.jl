@@ -165,9 +165,6 @@ function evaluate_charged_moves(state::State)
         end
         next_state = apply_buffs(next_state, cmp)
         next_state = @set next_state.chargedMovesPending[cmp] = ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0)
-        if next_state.chargedMovesPending[get_other_agent(cmp)].move.moveType != 0
-            next_state = evaluate_charged_moves(next_state)
-        end
     end
     return next_state
 end
