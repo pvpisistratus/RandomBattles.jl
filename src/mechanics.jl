@@ -59,11 +59,11 @@ function get_cmp(state::State)
         cmp = 2
     else
         if state.teams[1].mons[state.teams[1].active].stats.attack > state.teams[2].mons[state.teams[2].active].stats.attack
-            cmp = 1
+            cmp = 3
         elseif state.teams[2].mons[state.teams[2].active].stats.attack < state.teams[1].mons[state.teams[1].active].stats.attack
-            cmp = 2
+            cmp = 4
         else
-            cmp = rand(1:2)
+            cmp = rand(3:4)
         end
     end
     return cmp
@@ -138,7 +138,7 @@ end
 function evaluate_charged_moves(state::State)
     cmp = get_cmp(state)
     next_state = state
-    if cmp != 0
+    if 1 <= cmp <= 2
         next_state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= state.chargedMovesPending[cmp].move.energy
         next_state = @set next_state.teams[1].switchCooldown = max(
             0,
@@ -164,7 +164,59 @@ function evaluate_charged_moves(state::State)
             )
         end
         next_state = apply_buffs(next_state, cmp)
-        next_state = @set next_state.chargedMovesPending[cmp] = ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0)
+    elseif 3 <= cmp <= 4
+        cmp -= 2
+        next_state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= state.chargedMovesPending[cmp].move.energy
+        next_state = @set next_state.teams[1].switchCooldown = max(
+            0,
+            next_state.teams[1].switchCooldown - 10000,
+        )
+        next_state = @set next_state.teams[2].switchCooldown = max(
+            0,
+            next_state.teams[2].switchCooldown - 10000,
+        )
+        if next_state.teams[get_other_agent(cmp)].shields > 0 && next_state.teams[get_other_agent(cmp)].shielding
+            next_state = @set next_state.teams[get_other_agent(cmp)].shields -= 1
+        else
+            next_state = @set next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp = max(
+                0,
+                next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp - calculate_damage(
+                    next_state.teams[cmp].mons[next_state.teams[cmp].active],
+                    next_state.teams[cmp].buffs.atk,
+                    next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active],
+                    next_state.teams[get_other_agent(cmp)].buffs.def,
+                    next_state.chargedMovesPending[cmp].move,
+                    next_state.chargedMovesPending[cmp].charge,
+                ),
+            )
+        end
+        next_state = apply_buffs(next_state, cmp)
+        cmp = get_other_agent(cmp)
+        next_state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= state.chargedMovesPending[cmp].move.energy
+        next_state = @set next_state.teams[1].switchCooldown = max(
+            0,
+            next_state.teams[1].switchCooldown - 10000,
+        )
+        next_state = @set next_state.teams[2].switchCooldown = max(
+            0,
+            next_state.teams[2].switchCooldown - 10000,
+        )
+        if next_state.teams[get_other_agent(cmp)].shields > 0 && next_state.teams[get_other_agent(cmp)].shielding
+            next_state = @set next_state.teams[get_other_agent(cmp)].shields -= 1
+        else
+            next_state = @set next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp = max(
+                0,
+                next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp - calculate_damage(
+                    next_state.teams[cmp].mons[next_state.teams[cmp].active],
+                    next_state.teams[cmp].buffs.atk,
+                    next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active],
+                    next_state.teams[get_other_agent(cmp)].buffs.def,
+                    next_state.chargedMovesPending[cmp].move,
+                    next_state.chargedMovesPending[cmp].charge,
+                ),
+            )
+        end
+        next_state = apply_buffs(next_state, cmp)
     end
     return next_state
 end
