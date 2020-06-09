@@ -217,6 +217,7 @@ function evaluate_charged_moves(state::State)
             )
         end
         next_state = apply_buffs(next_state, cmp)
+        next_state = @set next_state.chargedMovesPending[cmp] = ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0)
     end
     return next_state
 end
