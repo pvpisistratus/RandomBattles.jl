@@ -192,7 +192,7 @@ function evaluate_charged_moves(state::State)
         end
         next_state = apply_buffs(next_state, cmp)
         cmp = get_other_agent(cmp)
-        next_state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= state.chargedMovesPending[cmp].move.energy
+        next_state = @set next_state.teams[cmp].mons[state.teams[cmp].active].energy -= next_state.chargedMovesPending[cmp].move.energy
         next_state = @set next_state.teams[1].switchCooldown = max(
             0,
             next_state.teams[1].switchCooldown - 10000,
