@@ -21,8 +21,8 @@ function get_decision_matrix(
     battles_per_turn = 1000,
     perfect_information = true,
     active_mons::Array{Tuple{Int64, Int64}} = [],
-    meta::Array{Pokemon} = [],
-    weights::Array{Real} = []
+    meta::Array{Pokemon, 1} = [],
+    weights::Array{Int64, 1} = []
 )
     d_matrix = DecisionMatrix()
     weights1 = get_possible_decisions(state)
@@ -105,8 +105,8 @@ function Strategy(
     state::State;
     battles_per_turn::Int64 = 1000,
     perfect_information::Bool = true,
-    meta::Array{Pokemon} = [],
-    weights::Array{Real} = [],
+    meta::Array{Pokemon, 1} = [],
+    weights::Array{Int64, 1} = [],
 )
     strategy = Strategy()
     current_state = state
