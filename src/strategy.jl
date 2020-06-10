@@ -118,6 +118,7 @@ function Strategy(
         end
         is_empty(d_matrix) && return strategy
         decision = minimax(d_matrix)
+        println(decision)
         push!(strategy.decisions, decision)
         push!(
             strategy.minimaxes,
