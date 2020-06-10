@@ -139,7 +139,7 @@ function evaluate_charged_moves(state::State)
     cmp = get_cmp(state)
     next_state = state
     if 1 <= cmp <= 2
-        next_state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= state.chargedMovesPending[cmp].move.energy
+        next_state = @set next_state.teams[cmp].mons[state.teams[cmp].active].energy -= next_state.chargedMovesPending[cmp].move.energy
         next_state = @set next_state.teams[1].switchCooldown = max(
             0,
             next_state.teams[1].switchCooldown - 10000,
@@ -166,7 +166,7 @@ function evaluate_charged_moves(state::State)
         next_state = apply_buffs(next_state, cmp)
     elseif 3 <= cmp <= 4
         cmp -= 2
-        next_state = @set state.teams[cmp].mons[state.teams[cmp].active].energy -= state.chargedMovesPending[cmp].move.energy
+        next_state = @set next_state.teams[cmp].mons[state.teams[cmp].active].energy -= next_state.chargedMovesPending[cmp].move.energy
         next_state = @set next_state.teams[1].switchCooldown = max(
             0,
             next_state.teams[1].switchCooldown - 10000,
