@@ -114,7 +114,7 @@ function Strategy(
         if perfect_information
             d_matrix = get_decision_matrix(current_state, battles_per_turn = battles_per_turn)
         else
-            d_matrix = get_decision_matrix(current_state, battles_per_turn = battles_per_turn, active_mons = strat.activeMons, meta = meta, weights = weights)
+            d_matrix = get_decision_matrix(current_state, battles_per_turn = battles_per_turn, active_mons = strategy.activeMons, meta = meta, weights = weights)
         end
         is_empty(d_matrix) && return strategy
         decision = minimax(d_matrix)
