@@ -56,7 +56,7 @@ function get_cmp(state::State)
         cmp = 1
     elseif state.chargedMovesPending[1].charge == 0 && state.chargedMovesPending[2].charge != 0 && state.teams[1].mons[state.teams[1].active].hp > 0
         cmp = 2
-    else
+    elseif state.chargedMovesPending[1].charge != 0 && state.chargedMovesPending[2].charge != 0
         if state.teams[1].mons[state.teams[1].active].stats.attack > state.teams[2].mons[state.teams[2].active].stats.attack
             cmp = 1
         elseif state.teams[2].mons[state.teams[2].active].stats.attack < state.teams[1].mons[state.teams[1].active].stats.attack
