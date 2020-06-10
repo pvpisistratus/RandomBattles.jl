@@ -113,6 +113,7 @@ function evaluate_fast_moves(state::State)
                 1.0,
             ),
         )
+        next_state = @set state.fastMovesPending[1] = false
     end
     if next_state.fastMovesPending[2]
         next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = next_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown
@@ -130,6 +131,7 @@ function evaluate_fast_moves(state::State)
                 1.0,
             ),
         )
+        next_state = @set state.fastMovesPending[2] = false
     end
     return next_state
 end
@@ -182,6 +184,7 @@ function evaluate_switches(state::State)
         else
             next_state = @set next_state.teams[1].switchCooldown = 60000
         end
+        next_state = @set next_state.switchesPending[1] = SwitchAction(0, 0)
     end
 
     if next_state.switchesPending[2].pokemon != 0
@@ -195,6 +198,7 @@ function evaluate_switches(state::State)
         else
             next_state = @set next_state.teams[2].switchCooldown = 60000
         end
+        next_state = @set next_state.switchesPending[2] = SwitchAction(0, 0)
     end
     return next_state
 end

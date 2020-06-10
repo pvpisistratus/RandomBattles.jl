@@ -89,19 +89,6 @@ function get_battle_score(state::State)
              state.teams[2].mons[3].stats.hitpoints))
 end
 
-function reset_queues(state::State)
-    next_state = @set state.fastMovesPending = [false, false]
-    next_state = @set next_state.chargedMovesPending = [
-        ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-        ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-    ]
-    next_state = @set next_state.switchesPending = [
-        SwitchAction(0, 0),
-        SwitchAction(0, 0),
-    ]
-    return next_state
-end
-
 function step_timers(state::State)
     next_state = @set state.teams[1].switchCooldown = max(
         0,

@@ -90,7 +90,6 @@ function play_turn(state::State, decision::Tuple{Int64,Int64})
     next_state = evaluate_fast_moves(next_state)
     next_state = evaluate_charged_moves(next_state)
     next_state = evaluate_charged_moves(next_state)
-    next_state = reset_queues(next_state)
     next_state = step_timers(next_state)
     return next_state
 end
