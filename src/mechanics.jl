@@ -136,7 +136,6 @@ end
 
 function evaluate_charged_moves(state::State)
     cmp = get_cmp(state)
-    println(cmp)
     next_state = state
     if cmp > 0
         next_state = @set next_state.teams[cmp].mons[state.teams[cmp].active].energy -= next_state.chargedMovesPending[cmp].move.energy
