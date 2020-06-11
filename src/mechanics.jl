@@ -113,7 +113,7 @@ function evaluate_fast_moves(state::State)
                 1.0,
             ),
         )
-        next_state = @set state.fastMovesPending[1] = false
+        next_state = @set next_state.fastMovesPending[1] = false
     end
     if next_state.fastMovesPending[2]
         next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = next_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown
@@ -131,7 +131,7 @@ function evaluate_fast_moves(state::State)
                 1.0,
             ),
         )
-        next_state = @set state.fastMovesPending[2] = false
+        next_state = @set next_state.fastMovesPending[2] = false
     end
     return next_state
 end
