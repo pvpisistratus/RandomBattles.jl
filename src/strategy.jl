@@ -99,8 +99,6 @@ mutable struct Strategy
     activeMons::Array{Tuple{Int64, Int64}}
 end
 
-Strategy() = Strategy([], [], [], [])
-
 function Strategy(
     state::State;
     battles_per_turn::Int64 = 1000,
@@ -108,7 +106,7 @@ function Strategy(
     meta::Array{Pokemon, 1} = [],
     weights::Array{Int64, 1} = [],
 )
-    strategy = Strategy()
+    strategy = Strategy([], [], [], [])
     current_state = state
     while true
         if perfect_information
