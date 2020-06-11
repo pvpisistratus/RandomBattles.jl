@@ -106,7 +106,12 @@ function Strategy(
     meta::Array{Pokemon, 1} = [],
     weights::Array{Int64, 1} = [],
 )
-    strategy = Strategy([], [], [], [])
+    strategy = Strategy(
+        Array{Tuple{Int64,Int64}}(undef, 0),
+        Array{Tuple{Float64,Float64}}(undef, 0),
+        Array{Tuple{Int8, Int8}}(undef, 0),
+        Array{Tuple{Int64, Int64}}(undef, 0))
+    )
     current_state = state
     while true
         if perfect_information
