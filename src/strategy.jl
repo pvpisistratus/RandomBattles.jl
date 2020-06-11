@@ -110,7 +110,7 @@ function Strategy(
         Array{Tuple{Int64,Int64}}(undef, 0),
         Array{Tuple{Float64,Float64}}(undef, 0),
         Array{Tuple{Int8, Int8}}(undef, 0),
-        Array{Tuple{Int64, Int64}}(undef, 0))
+        Array{Tuple{Int64, Int64}}(undef, 0)
     )
     current_state = state
     while true
