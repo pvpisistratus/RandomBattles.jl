@@ -99,7 +99,7 @@ mutable struct Strategy
     activeMons::Array{Tuple{Int64, Int64}}
 end
 
-function Strategy(
+function get_strategy(
     state::State;
     battles_per_turn::Int64 = 1000,
     perfect_information::Bool = true,
