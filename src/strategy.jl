@@ -103,8 +103,8 @@ function get_strategy(
     state::State;
     battles_per_turn::Int64 = 1000,
     perfect_information::Bool = true,
-    meta::Array{Pokemon, 1} = [],
-    weights::Array{Int64, 1} = [],
+    meta::Array{Pokemon, 1} = Array{Pokemon}(undef, 0),
+    weights::Array{Int64, 1} = Array{Int64}(undef, 0),
 )
     strategy = Strategy(
         Array{Tuple{Int64,Int64}}(undef, 0),
