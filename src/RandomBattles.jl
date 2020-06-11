@@ -21,7 +21,6 @@ export State,
        masterRankings,
        play_battle,
        rank,
-       diff,
-       get_strategy
+       diff
 
 end # module

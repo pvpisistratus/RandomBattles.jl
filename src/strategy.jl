@@ -20,9 +20,9 @@ function get_decision_matrix(
     state;
     battles_per_turn = 1000,
     perfect_information = true,
-    active_mons::Array{Tuple{Int64, Int64}} = [],
-    meta::Array{Pokemon, 1} = [],
-    weights::Array{Int64, 1} = []
+    active_mons::Array{Tuple{Int64, Int64}} = Array{Tuple{Int64, Int64}}(undef, 0),
+    meta::Array{Pokemon, 1} = Array{Pokemon}(undef, 0),
+    weights::Array{Int64, 1} = Array{Int64}(undef, 0)
 )
     d_matrix = DecisionMatrix()
     weights1 = get_possible_decisions(state)
@@ -99,7 +99,7 @@ mutable struct Strategy
     activeMons::Array{Tuple{Int64, Int64}}
 end
 
-function get_strategy(
+function Strategy(
     state::State;
     battles_per_turn::Int64 = 1000,
     perfect_information::Bool = true,
