@@ -47,7 +47,7 @@ State(teams::Array{Int64}; league = "great", cup = "open") = State(
          Pokemon.(
              teams[(length(teams)÷2+1):length(teams)],
              league = league,
-             rankings = rankings,
+             cup = cup,
          ),
          StatBuffs(0, 0),
          0,
