@@ -29,10 +29,14 @@ State(team1::Team, team2::Team) = State(
     [SwitchAction(0, 0), SwitchAction(0, 0)],
 )
 
-State(teams::Array{Int64}; league = "great") = State(
+State(teams::Array{Int64}; league = "great", cup = "open") = State(
     [
      Team(
-         Pokemon.(teams[1:(length(teams)÷2)], league = league),
+         Pokemon.(
+            teams[1:(length(teams)÷2)],
+            league = league,
+            cup = cup,
+         ),
          StatBuffs(0, 0),
          0,
          2,
@@ -43,6 +47,7 @@ State(teams::Array{Int64}; league = "great") = State(
          Pokemon.(
              teams[(length(teams)÷2+1):length(teams)],
              league = league,
+             rankings = rankings,
          ),
          StatBuffs(0, 0),
          0,
@@ -60,5 +65,5 @@ State(teams::Array{Int64}; league = "great") = State(
     [SwitchAction(0, 0), SwitchAction(0, 0)],
 )
 
-State(teams::Array{String}; league = "great") =
-    State(convert_indices.(teams, league = league), league = league)
+State(teams::Array{String}; league = "great", cup = "open") =
+    State(convert_indices.(teams, league = league, cup = cup), league = league, cup = cup)

@@ -1,4 +1,4 @@
-using JSON, StaticArrays, Colors
+using JSON, StaticArrays, Colors, Memoize
 
 const gamemaster = JSON.parsefile(joinpath(@__DIR__, "../data/gamemaster.json"))
 const greatRankings = JSON.parsefile(joinpath(
@@ -14,13 +14,18 @@ const masterRankings = JSON.parsefile(joinpath(
     "../data/rankings-10000.json",
 ))
 
-function get_rankings(league::String)
-    if league == "master"
+@memoize function get_rankings(rankings::String)
+    if rankings == "master"
         return masterRankings
-    elseif league == "ultra"
+    elseif rankings == "ultra"
         return ultraRankings
-    else
+    elseif rankings == "great"
         return greatRankings
+    else
+        return JSON.parsefile(joinpath(
+            @__DIR__,
+            "../data/$(rankings).json",
+        ))
     end
 end
 

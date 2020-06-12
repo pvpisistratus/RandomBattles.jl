@@ -38,8 +38,8 @@ struct Pokemon
     fastMoveCooldown::Int16   #Initially based on fast move
 end
 
-function Pokemon(i::Int64; league::String = "great")
-    rankings = get_rankings(league)
+function Pokemon(i::Int64; league::String = "great", cup = "open")
+    rankings = get_rankings(cup == "open" ? league : cup)
     cp_limit = get_cp_limit(league)
     moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])

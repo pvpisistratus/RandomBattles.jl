@@ -45,8 +45,12 @@ function get_type_id(typeName::String)
     return type_id
 end
 
-function convert_indices(name::String; league::String = "great")
-    rankings = get_rankings(league)
+function convert_indices(
+    name::String;
+    league::String = "great",
+    cup = "open"
+)
+    rankings = get_rankings(cup == "open" ? league : cup)
     ranking = 0
     for i = 1:length(rankings)
         if rankings[i]["speciesId"] == name
