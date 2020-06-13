@@ -92,12 +92,14 @@ struct Pokemon
     fastMoveCooldown::Int16   #Initially based on fast move
 end
 
-function Pokemon(i::Int64; league::String = "great", cup = "open", custom_moveset = ["none"])
+function Pokemon(i::Int64; league::String = "great", cup = "open", custom_moveset = ["none"], custom_stats = ())
     rankings = get_rankings(cup == "open" ? league : cup)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
     types = get_type_id.(convert(Array{String}, gm["types"]))
     cp_limit = get_cp_limit(league)
+    if custom_stats != ()
+        level, atk, def, hp = custom_stats
     if league == "master"
         level, atk, def, hp = 40, 15, 15, 15
     else
@@ -154,8 +156,13 @@ end
 function Pokemon(mon::String; league = "great", cup = "open")
     if occursin(",", mon)
         mon_arr = split(mon, ",")
-        return Pokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
-            league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]))
+        if length(mon_arr) == 4
+            return Pokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
+                league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]))
+        else
+            return Pokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
+                league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
+                custom_stats = (mon_arr[5], mon_arr[6], mon_arr[7], mon_arr[8]))
     else
         return Pokemon(convert_indices(mon, league = league, cup = cup),
             league = league, cup = cup)
