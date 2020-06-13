@@ -24,6 +24,60 @@ struct Move
     selfDefModifier::Int8
 end
 
+function Move(move_name::String)
+    move_index = findfirst(isequal(move_name), map(x ->
+        gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))
+    gm_move = gamemaster["moves"][move_index]
+    return Move(gm_move)
+end
+
+function Move(gm_move::Dict{String,Any})
+    if gm_move["energyGain"] == 0
+        return Move(
+            get_type_id(gm_move["type"]),
+            (get_type_id(gm_move["type"]) in types) ? 1.2 : 1.0,
+            gm_move["power"],
+            gm_move["energy"],
+            0,
+            haskey(gm_move, "buffs") ?
+            parse(Float64, gm_move["buffApplyChance"]) : 0.0,
+            haskey(
+                gm_move,
+                "buffs",
+            ) && gm_move["buffTarget"] == "opponent" ?
+            Int(gm_move["buffs"][1]) : 0,
+            haskey(
+                gm_move,
+                "buffs",
+            ) && gm_move["buffTarget"] == "opponent" ?
+            Int(gm_move["buffs"][2]) : 0,
+            haskey(
+                gm_move,
+                "buffs",
+            ) && gm_move["buffTarget"] == "self" ?
+            Int(gm_move["buffs"][1]) : 0,
+            haskey(
+                gm_move,
+                "buffs",
+            ) && gm_move["buffTarget"] == "self" ?
+            Int(chargedMove1Gm["buffs"][2]) : 0,
+        )
+    else
+        return Move(
+                get_type_id(gm_move["type"]),
+                (get_type_id(gm_move["type"]) in types) ? 1.3 : 1,
+                gm_move["power"],
+                gm_move["energyGain"],
+                gm_move["cooldown"],
+                0.0,
+                0,
+                0,
+                0,
+                0,
+            )
+    end
+end
+
 struct Pokemon
     #These values are determined on initialization, and do not change in battle
     types::SVector{2,Int8}
@@ -38,13 +92,12 @@ struct Pokemon
     fastMoveCooldown::Int16   #Initially based on fast move
 end
 
-function Pokemon(i::Int64; league::String = "great", cup = "open")
+function Pokemon(i::Int64; league::String = "great", cup = "open", custom_moveset = ["none"])
     rankings = get_rankings(cup == "open" ? league : cup)
-    cp_limit = get_cp_limit(league)
-    moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
     types = get_type_id.(convert(Array{String}, gm["types"]))
+    cp_limit = get_cp_limit(league)
     if league == "master"
         level, atk, def, hp = 40, 15, 15, 15
     else
@@ -57,95 +110,35 @@ function Pokemon(i::Int64; league::String = "great", cup = "open")
     defense = (def + gm["baseStats"]["def"]) * cpm[level]
     hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
-    fastMovesAvailable = gm["fastMoves"]
-    sort!(fastMovesAvailable)
-    fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(fastMovesAvailable[moves[1]+1],)]
-    fastMove = Move(
-        get_type_id(fastMoveGm["type"]),
-        (get_type_id(fastMoveGm["type"]) in types) ? 1.3 : 1,
-        fastMoveGm["power"],
-        fastMoveGm["energyGain"],
-        fastMoveGm["cooldown"],
-        0.0,
-        0,
-        0,
-        0,
-        0,
-    )
-    chargedMovesAvailable = gm["chargedMoves"]
-    if haskey(gm, "tags") &&
-       "shadoweligible" in gm["tags"] && gm["level25CP"] < cp_limit
-        push!(chargedMovesAvailable, "RETURN")
-    elseif haskey(gm, "tags") && "shadow" in gm["tags"]
-        push!(chargedMovesAvailable, "FRUSTRATION")
-        attack *= gamemaster["settings"]["shadowAtkMult"]
-        defense *= gamemaster["settings"]["shadowDefMult"]
+    if haskey(rankings, "moveStr")
+        moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
+        fastMovesAvailable = gm["fastMoves"]
+        sort!(fastMovesAvailable)
+        fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(fastMovesAvailable[moves[1]+1],)]
+        fastMove = Move(fastMoveGm)
+        chargedMovesAvailable = gm["chargedMoves"]
+        if haskey(gm, "tags") &&
+           "shadoweligible" in gm["tags"] && gm["level25CP"] < cp_limit
+            push!(chargedMovesAvailable, "RETURN")
+        elseif haskey(gm, "tags") && "shadow" in gm["tags"]
+            push!(chargedMovesAvailable, "FRUSTRATION")
+            attack *= gamemaster["settings"]["shadowAtkMult"]
+            defense *= gamemaster["settings"]["shadowDefMult"]
+        end
+        sort!(chargedMovesAvailable)
+        chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
+        chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[3]],)]
+        chargedMoves = [Move(chargedMove1Gm), Move(chargedMove2Gm)]
+        toString = rankings[i]["speciesId"] * "," * fastMovesAvailable[moves[1]+1] *
+                   "," * chargedMovesAvailable[moves[2]] * "," *
+                   chargedMovesAvailable[moves[3]]
+    else
+        moveset = custom_moveset == ["none"] ? rankings[i]["moveset"] : custom_moveset
+        fastMove = Move(moveset[1]::String)
+        chargedMoves = [Move(moveset[2]::String), Move(moveset[3]::String)]
+        toString = rankings[i]["speciesId"] * "," * moveset[1] *
+                   "," * moveset[2] * "," * moveset[3]
     end
-    sort!(chargedMovesAvailable)
-    chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
-    chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[3]],)]
-    chargedMove1 = Move(
-        get_type_id(chargedMove1Gm["type"]),
-        (get_type_id(chargedMove1Gm["type"]) in types) ? 1.2 : 1.0,
-        chargedMove1Gm["power"],
-        chargedMove1Gm["energy"],
-        0,
-        haskey(chargedMove1Gm, "buffs") ?
-        parse(Float64, chargedMove1Gm["buffApplyChance"]) : 0.0,
-        haskey(
-            chargedMove1Gm,
-            "buffs",
-        ) && chargedMove1Gm["buffTarget"] == "opponent" ?
-        Int(chargedMove1Gm["buffs"][1]) : 0,
-        haskey(
-            chargedMove1Gm,
-            "buffs",
-        ) && chargedMove1Gm["buffTarget"] == "opponent" ?
-        Int(chargedMove1Gm["buffs"][2]) : 0,
-        haskey(
-            chargedMove1Gm,
-            "buffs",
-        ) && chargedMove1Gm["buffTarget"] == "self" ?
-        Int(chargedMove1Gm["buffs"][1]) : 0,
-        haskey(
-            chargedMove1Gm,
-            "buffs",
-        ) && chargedMove1Gm["buffTarget"] == "self" ?
-        Int(chargedMove1Gm["buffs"][2]) : 0,
-    )
-    chargedMove2 = Move(
-        get_type_id(chargedMove2Gm["type"]),
-        (get_type_id(chargedMove2Gm["type"]) in types) ? 1.3 : 1,
-        chargedMove2Gm["power"],
-        chargedMove2Gm["energy"],
-        0,
-        haskey(chargedMove2Gm, "buffs") ?
-        parse(Float64, chargedMove2Gm["buffApplyChance"]) : 0.0,
-        haskey(
-            chargedMove2Gm,
-            "buffs",
-        ) && chargedMove2Gm["buffTarget"] == "opponent" ?
-        Int(chargedMove2Gm["buffs"][1]) : 0,
-        haskey(
-            chargedMove2Gm,
-            "buffs",
-        ) && chargedMove2Gm["buffTarget"] == "opponent" ?
-        Int(chargedMove2Gm["buffs"][2]) : 0,
-        haskey(
-            chargedMove2Gm,
-            "buffs",
-        ) && chargedMove2Gm["buffTarget"] == "self" ?
-        Int(chargedMove2Gm["buffs"][1]) : 0,
-        haskey(
-            chargedMove2Gm,
-            "buffs",
-        ) && chargedMove2Gm["buffTarget"] == "self" ?
-        Int(chargedMove2Gm["buffs"][2]) : 0,
-    )
-    chargedMoves = [chargedMove1, chargedMove2]
-    toString = rankings[i]["speciesId"] * "," * fastMovesAvailable[moves[1]+1] *
-               "," * chargedMovesAvailable[moves[2]] * "," *
-               chargedMovesAvailable[moves[3]]
     return Pokemon(
         types,
         stats,
