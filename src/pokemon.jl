@@ -24,14 +24,14 @@ struct Move
     selfDefModifier::Int8
 end
 
-function Move(move_name::String)
+function Move(move_name::String, types)
     move_index = findfirst(isequal(move_name), map(x ->
         gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))
     gm_move = gamemaster["moves"][move_index]
-    return Move(gm_move)
+    return Move(gm_move, types)
 end
 
-function Move(gm_move::Dict{String,Any})
+function Move(gm_move::Dict{String,Any}, types)
     if gm_move["energyGain"] == 0
         return Move(
             get_type_id(gm_move["type"]),
@@ -115,7 +115,7 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
         fastMovesAvailable = gm["fastMoves"]
         sort!(fastMovesAvailable)
         fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(fastMovesAvailable[moves[1]+1],)]
-        fastMove = Move(fastMoveGm)
+        fastMove = Move(fastMoveGm, types)
         chargedMovesAvailable = gm["chargedMoves"]
         if haskey(gm, "tags") &&
            "shadoweligible" in gm["tags"] && gm["level25CP"] < cp_limit
@@ -128,14 +128,14 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
         sort!(chargedMovesAvailable)
         chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
         chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[3]],)]
-        chargedMoves = [Move(chargedMove1Gm), Move(chargedMove2Gm)]
+        chargedMoves = [Move(chargedMove1Gm, types), Move(chargedMove2Gm, types)]
         toString = rankings[i]["speciesId"] * "," * fastMovesAvailable[moves[1]+1] *
                    "," * chargedMovesAvailable[moves[2]] * "," *
                    chargedMovesAvailable[moves[3]]
     else
         moveset = custom_moveset == ["none"] ? rankings[i]["moveset"] : custom_moveset
-        fastMove = Move(moveset[1]::String)
-        chargedMoves = [Move(moveset[2]::String), Move(moveset[3]::String)]
+        fastMove = Move(moveset[1]::String, types)
+        chargedMoves = [Move(moveset[2]::String, types), Move(moveset[3]::String, types)]
         toString = rankings[i]["speciesId"] * "," * moveset[1] *
                    "," * moveset[2] * "," * moveset[3]
     end
