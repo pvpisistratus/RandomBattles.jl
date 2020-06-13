@@ -137,7 +137,7 @@ function Strategy(
     end
 end
 
-function plot(strat::Strategy)
+function plot_strategy(strat::Strategy)
     gr()
     plt1 = plot(1:length(strat.minimaxes), mean.(strat.minimaxes), width = 2, label = "possible battle scores", fillalpha = 0.2, ribbon = (mean.(strat.minimaxes) .- first.(strat.minimaxes), last.(strat.minimaxes) .- mean.(strat.minimaxes)), ylims = [0, 1], ylabel = "Battle Score", xlabel = "Decisions", size = (950, 400))
     hline!(plt1, [mean1], label = "random battles mean")
