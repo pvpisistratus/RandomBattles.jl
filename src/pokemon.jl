@@ -163,6 +163,7 @@ function Pokemon(mon::String; league = "great", cup = "open")
             return Pokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
                 custom_stats = (mon_arr[5], mon_arr[6], mon_arr[7], mon_arr[8]))
+        end
     else
         return Pokemon(convert_indices(mon, league = league, cup = cup),
             league = league, cup = cup)
