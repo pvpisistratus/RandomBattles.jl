@@ -99,7 +99,7 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
     types = get_type_id.(convert(Array{String}, gm["types"]))
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
-        level, atk, def, hp = custom_stats
+        level, atk, def, hp = parse.(Int, custom_stats)
     elseif league == "master"
         level, atk, def, hp = 40, 15, 15, 15
     else
