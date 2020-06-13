@@ -21,8 +21,7 @@ function get_decision_matrix(
     battles_per_turn = 1000,
     perfect_information = true,
     active_mons::Array{Tuple{Int64, Int64}} = Array{Tuple{Int64, Int64}}(undef, 0),
-    meta::Array{Pokemon, 1} = Array{Pokemon}(undef, 0),
-    weights::Array{Int64, 1} = Array{Int64}(undef, 0)
+    meta::PokemonMeta = PokemonMeta()
 )
     d_matrix = DecisionMatrix()
     weights1 = get_possible_decisions(state)
@@ -46,18 +45,18 @@ function get_decision_matrix(
                     modified_state2 = next_state
 
                     if !(2 in first.(active_mons))
-                        modified_state2 = @set modified_state2.teams[1].mons[2] = meta[rand(Categorical(weights ./ sum(weights)))]
+                        modified_state2 = @set modified_state2.teams[1].mons[2] = meta.pokemon[rand(meta.weights)]
                     end
                     if !(3 in first.(active_mons))
-                        modified_state2 = @set modified_state2.teams[1].mons[3] = meta[rand(Categorical(weights ./ sum(weights)))]
+                        modified_state2 = @set modified_state2.teams[1].mons[3] = meta.pokemon[rand(meta.weights)]
                     end
                     push!(scores2, play_battle(modified_state2))
 
                     if !(2 in last.(active_mons))
-                        modified_state1 = @set modified_state1.teams[2].mons[2] = meta[rand(Categorical(weights ./ sum(weights)))]
+                        modified_state1 = @set modified_state1.teams[2].mons[2] = meta.pokemon[rand(meta.weights)]
                     end
                     if !(3 in last.(active_mons))
-                        modified_state1 = @set modified_state1.teams[2].mons[3] = meta[rand(Categorical(weights ./ sum(weights)))]
+                        modified_state1 = @set modified_state1.teams[2].mons[3] = meta.pokemon[rand(meta.weights)]
                     end
                     push!(scores1, play_battle(modified_state1))
                 end
@@ -103,8 +102,7 @@ function Strategy(
     state::State;
     battles_per_turn::Int64 = 1000,
     perfect_information::Bool = true,
-    meta::Array{Pokemon, 1} = Array{Pokemon}(undef, 0),
-    weights::Array{Int64, 1} = Array{Int64}(undef, 0),
+    meta::PokemonMeta = PokemonMeta(),
 )
     strategy = Strategy(
         Array{Tuple{Int64,Int64}}(undef, 0),
@@ -117,7 +115,7 @@ function Strategy(
         if perfect_information
             d_matrix = get_decision_matrix(current_state, battles_per_turn = battles_per_turn)
         else
-            d_matrix = get_decision_matrix(current_state, perfect_information = perfect_information, battles_per_turn = battles_per_turn, active_mons = strategy.activeMons, meta = meta, weights = weights)
+            d_matrix = get_decision_matrix(current_state, perfect_information = perfect_information, battles_per_turn = battles_per_turn, active_mons = strategy.activeMons, meta = meta)
         end
         is_empty(d_matrix) && return strategy
         decision = minimax(d_matrix)
