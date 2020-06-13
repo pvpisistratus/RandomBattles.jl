@@ -60,7 +60,7 @@ function convert_indices(
     return ranking
 end;
 
-function team_count_to_pvpoke(name::String)
+function silph_to_pvpoke(name::String)
     name = lowercase(name)
     name = replace(name, "_normal" => "")
     name = replace(name, "mr. " => "mr_")

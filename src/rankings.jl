@@ -3,7 +3,7 @@ using OnlineStats, CSV, ProgressMeter, IterTools, DataFrames
 function get_empirical_teams(filename::String; league = "great")
     data = CSV.read(filename)
     numEmpiricalTeams = nrow(data)
-    data = hcat(team_count_to_pvpoke.(data[:, 1:3]), data[:, 4])
+    data = hcat(silph_to_pvpoke.(data[:, 1:3]), data[:, 4])
     rankings = get_rankings(league)
     empiricalTeams = Array{Team}(undef, numEmpiricalTeams)
     for i = 1:numEmpiricalTeams
