@@ -60,7 +60,7 @@ function Move(gm_move::Dict{String,Any}, types)
                 gm_move,
                 "buffs",
             ) && gm_move["buffTarget"] == "self" ?
-            Int(chargedMove1Gm["buffs"][2]) : 0,
+            Int(gm_move["buffs"][2]) : 0,
         )
     else
         return Move(
