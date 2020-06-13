@@ -17,5 +17,5 @@ Team(
 ) = Team(Pokemon.(mons, league = league, cup = cup), StatBuffs(0, 0), 0, 2, 1, rand(Bool))
 
 Team(mons::Array{String}; league::String = "great", cup::String = "open") =
-    Team(convert_indices.(mons, league = league, cup = cup),
+    Team(Pokemon.(mons, league = league, cup = cup),
         league = league, cup = cup)
