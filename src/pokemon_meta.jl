@@ -11,5 +11,5 @@ function PokemonMeta(cup::String; data_key = "all")
     silph_keys = collect(keys(data[data_key]))
     mons = silph_to_pvpoke.(silph_keys)
     meta_weights = map(x -> data[data_key][x]["percent"], silph_keys)
-    return Meta(Pokemon.(silph_names), Categorical(meta_weights ./ sum(meta_weights)))
+    return Meta(Pokemon.(mons), Categorical(meta_weights ./ sum(meta_weights)))
 end
