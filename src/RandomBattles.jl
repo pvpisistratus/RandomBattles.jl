@@ -23,6 +23,7 @@ export State,
        play_battle,
        rank,
        diff,
-       PokemonMeta
+       PokemonMeta,
+       plot_strategy
 
 end # module

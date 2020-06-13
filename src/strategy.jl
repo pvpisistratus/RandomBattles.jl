@@ -140,7 +140,6 @@ end
 function plot_strategy(strat::Strategy)
     gr()
     plt1 = plot(1:length(strat.minimaxes), mean.(strat.minimaxes), width = 2, label = "possible battle scores", fillalpha = 0.2, ribbon = (mean.(strat.minimaxes) .- first.(strat.minimaxes), last.(strat.minimaxes) .- mean.(strat.minimaxes)), ylims = [0, 1], ylabel = "Battle Score", xlabel = "Decisions", size = (950, 400))
-    hline!(plt1, [mean1], label = "random battles mean")
     hline!(plt1, [0.5], label = "win/loss")
     plt2 = plot(xlims = [0, length(strat.decisions)], ylims = [-3, 0], legend = false, size = (950, 200), axis = nothing)
     shields = [2, 2]
