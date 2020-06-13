@@ -1,11 +1,11 @@
 using JSON, HTTP, Distributions
 
-struct Meta
+struct PokemonMeta
     pokemon::Array{Pokemon}
     weights::Distribution
 end
 
-function Meta(cup::String; data_key = "all")
+function PokemonMeta(cup::String; data_key = "all")
     resp = HTTP.get("https://silph.gg/api/cup/" * cup * "/stats/.json")
     data = JSON.parse(String(resp.body))
     silph_keys = collect(keys(data[data_key]))

@@ -22,6 +22,6 @@ export State,
        play_battle,
        rank,
        diff,
-       Meta
+       PokemonMeta
 
 end # module
