@@ -8,6 +8,7 @@ include("utility_functions.jl")
 include("diff.jl")
 include("mechanics.jl")
 include("battle_logic.jl")
+include("pokemon_meta.jl")
 include("strategy.jl")
 include("rankings.jl")
 
