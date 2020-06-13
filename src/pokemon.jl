@@ -100,7 +100,7 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
         level, atk, def, hp = custom_stats
-    if league == "master"
+    elseif league == "master"
         level, atk, def, hp = 40, 15, 15, 15
     else
         level = gm["defaultIVs"]["cp$(cp_limit)"][1]
