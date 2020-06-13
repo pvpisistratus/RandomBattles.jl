@@ -65,5 +65,13 @@ State(teams::Array{Int64}; league = "great", cup = "open") = State(
     [SwitchAction(0, 0), SwitchAction(0, 0)],
 )
 
-State(teams::Array{String}; league = "great", cup = "open") =
-    State(convert_indices.(teams, league = league, cup = cup), league = league, cup = cup)
+State(teams::Array{String}; league = "great", cup = "open") = State(
+    [Team(teams[1:3], league = league, cup = cup), Team(teams[4:6], league = league, cup = cup)],
+    1,
+    [false, false],
+    [
+     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
+     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
+    ],
+    [SwitchAction(0, 0), SwitchAction(0, 0)],
+)

@@ -150,3 +150,14 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
         fastMove.cooldown,
     )
 end
+
+function Pokemon(mon::String; league = "great", cup = "open")
+    if occursin(",", mon)
+        mon_arr = split(mon, ",")
+        return Pokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
+            league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]))
+    else
+        return Pokemon(convert_indices(mon, league = league, cup = cup),
+            league = league, cup = cup)
+    end
+end
