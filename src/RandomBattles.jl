@@ -22,6 +22,6 @@ export State,
        play_battle,
        rank,
        diff,
-       get_meta
+       Meta
 
 end # module
