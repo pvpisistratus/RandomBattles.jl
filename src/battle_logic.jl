@@ -86,10 +86,16 @@ function play_turn(state::State, decision::Tuple{Int64,Int64})
     next_state = play_decision(next_state, decision[2])
     next_state = @set next_state.agent = get_other_agent(next_state.agent)
 
-    next_state = evaluate_switches(next_state)
-    next_state = evaluate_fast_moves(next_state)
-    next_state = evaluate_charged_moves(next_state)
-    next_state = evaluate_charged_moves(next_state)
+    if !isnothing(findfirst(in(9:20), decision))
+        next_state = evaluate_switches(next_state)
+    end
+    if !isnothing(findfirst(in([3, 4, 21, 22, 23, 24]), decision))
+        next_state = evaluate_fast_moves(next_state)
+    end
+    if !isnothing(findfirst(in([5, 6, 7, 8, 21, 22, 23, 24]), decision))
+        next_state = evaluate_charged_moves(next_state)
+        next_state = evaluate_charged_moves(next_state)
+    end
     next_state = step_timers(next_state)
     return next_state
 end
