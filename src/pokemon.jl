@@ -110,7 +110,7 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
     defense = (def + gm["baseStats"]["def"]) * cpm[level]
     hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
-    if haskey(rankings, "moveStr")
+    if haskey(rankings[i], "moveStr")
         moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
         fastMovesAvailable = gm["fastMoves"]
         sort!(fastMovesAvailable)
