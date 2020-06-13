@@ -62,6 +62,7 @@ end;
 
 function silph_to_pvpoke(name::String)
     name = lowercase(name)
+    name = replace(name, "-" => "_")
     name = replace(name, "_normal" => "")
     name = replace(name, "mr. " => "mr_")
     name = replace(name, "ho-oh" => "ho_oh")
