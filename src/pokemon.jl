@@ -25,6 +25,9 @@ struct Move
 end
 
 function Move(move_name::String, types)
+    if move_name == "NONE"
+        return RandomBattles.Move(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+    end
     move_index = findfirst(isequal(move_name), map(x ->
         gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))
     gm_move = gamemaster["moves"][move_index]

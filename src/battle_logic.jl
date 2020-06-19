@@ -21,7 +21,7 @@ function get_possible_decisions(state::State; allow_nothing = false)
             decisions[5] = 1
             decisions[6] = 1
         end
-        if activeMon.energy >= activeMon.chargedMoves[2].energy
+        if activeMon.energy >= activeMon.chargedMoves[2].energy && activeMon.chargedMoves[2].moveType != 0
             decisions[7] = 1
             decisions[8] = 1
         end
@@ -40,7 +40,7 @@ function get_possible_decisions(state::State; allow_nothing = false)
         end
         if activeMon.fastMoveCooldown == 0 &&
            activeMon.energy +
-           activeMon.fastMove.energy >= activeMon.chargedMoves[2].energy
+           activeMon.fastMove.energy >= activeMon.chargedMoves[2].energy && activeMon.chargedMoves[2].moveType != 0
             decisions[23] = 1
             decisions[24] = 1
         end
