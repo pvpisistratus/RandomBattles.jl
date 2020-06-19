@@ -14,6 +14,7 @@ include("rankings.jl")
 
 export State,
        Team,
+       Pokemon,
        Strategy,
        get_battle_scores,
        gamemaster,
