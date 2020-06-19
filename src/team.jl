@@ -18,3 +18,6 @@ Team(
 
 Team(mons::Array{String}; league::String = "great", cup::String = "open") =
     Team(Pokemon.(mons, league = league, cup = cup), StatBuffs(0, 0), 0, 2, 1, rand(Bool))
+
+Team(mons::Array{Pokemon}) =
+    Team(mons, StatBuffs(0, 0), 0, 2, 1, rand(Bool))
