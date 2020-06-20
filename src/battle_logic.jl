@@ -25,11 +25,13 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
             decisions[7] = 1
             decisions[8] = 1
         end
-        for i = 1:3
-            if i != activeTeam.active &&
-               activeTeam.mons[i].hp != 0 && activeTeam.switchCooldown == 0
-                decisions[2*i+7] = 1
-                decisions[2*i+8] = 1
+        if typeof(state) != IndividualBattleState
+            for i = 1:3
+                if i != activeTeam.active &&
+                   activeTeam.mons[i].hp != 0 && activeTeam.switchCooldown == 0
+                    decisions[2*i+7] = 1
+                    decisions[2*i+8] = 1
+                end
             end
         end
         if activeMon.fastMoveCooldown == 0 &&
@@ -45,10 +47,12 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
             decisions[24] = 1
         end
     else
-        for i = 1:3
-            if i != activeTeam.active && activeTeam.mons[i].hp != 0
-                decisions[2*i+13] = 1
-                decisions[2*i+14] = 1
+        if typeof(state) != IndividualBattleState
+            for i = 1:3
+                if i != activeTeam.active && activeTeam.mons[i].hp != 0
+                    decisions[2*i+13] = 1
+                    decisions[2*i+14] = 1
+                end
             end
         end
     end
