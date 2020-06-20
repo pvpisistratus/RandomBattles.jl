@@ -2,7 +2,7 @@ using Distributions, Setfield, Match
 
 const possible_decisions = 24
 
-function get_possible_decisions(state::State; allow_nothing = false)
+function get_possible_decisions(state::BattleState; allow_nothing = false)
     decisions = zeros(possible_decisions)
     activeTeam = state.teams[state.agent]
     activeMon = activeTeam.mons[activeTeam.active]
@@ -55,7 +55,7 @@ function get_possible_decisions(state::State; allow_nothing = false)
     return decisions
 end
 
-function play_decision(state::State, decision::Int64)
+function play_decision(state::BattleState, decision::Int64)
     next_state = state
     if iseven(decision)
         next_state = @set next_state.teams[next_state.agent].shielding = true
@@ -80,7 +80,7 @@ function play_decision(state::State, decision::Int64)
     return next_state
 end
 
-function play_turn(state::State, decision::Tuple{Int64,Int64})
+function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
     next_state = play_decision(state, decision[1])
     next_state = @set next_state.agent = get_other_agent(next_state.agent)
     next_state = play_decision(next_state, decision[2])
@@ -100,7 +100,7 @@ function play_turn(state::State, decision::Tuple{Int64,Int64})
     return next_state
 end
 
-function play_battle(initial_state::State)
+function play_battle(initial_state::BattleState)
     state = initial_state
     while true
         weights1 = get_possible_decisions(state)
@@ -116,7 +116,7 @@ function play_battle(initial_state::State)
     end
 end
 
-function get_battle_scores(initial_state::State, N::Int64)
+function get_battle_scores(initial_state::BattleState, N::Int64)
     scores = zeros(N)
     for i = 1:N
         scores[i] = play_battle(initial_state)

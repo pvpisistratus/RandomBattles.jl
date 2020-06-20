@@ -1,26 +1,14 @@
 using StaticArrays
 
-abstract type BattleState end
-
-struct ChargedAction
-    move::Move
-    charge::Float64
-end
-
-struct SwitchAction
-    pokemon::Int8
-    time::Int16
-end
-
-struct State <: BattleState
-    teams::SVector{2,Team}
+struct IndividualBattleState <: BattleState
+    teams::SVector{2,Individual}
     agent::Int64
     fastMovesPending::SVector{2,Bool}
     chargedMovesPending::SVector{2,ChargedAction}
     switchesPending::SVector{2,SwitchAction}
 end
 
-State(team1::Team, team2::Team) = State(
+IndividualBattleState(team1::Individual, team2::Individual) = IndividualBattleState(
     [team1, team2],
     1,
     [false, false],
@@ -31,11 +19,11 @@ State(team1::Team, team2::Team) = State(
     [SwitchAction(0, 0), SwitchAction(0, 0)],
 )
 
-State(teams::Array{Int64}; league = "great", cup = "open") = State(
+IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open") = IndividualBattleState(
     [
-     Team(
-         Pokemon.(
-            teams[1:(length(teams)÷2)],
+     Individual(
+         Pokemon(
+            teams[1],
             league = league,
             cup = cup,
          ),
@@ -45,9 +33,9 @@ State(teams::Array{Int64}; league = "great", cup = "open") = State(
          1,
          rand(Bool),
      ),
-     Team(
-         Pokemon.(
-             teams[(length(teams)÷2+1):length(teams)],
+     Individual(
+         Pokemon(
+             teams[2],
              league = league,
              cup = cup,
          ),
@@ -67,8 +55,8 @@ State(teams::Array{Int64}; league = "great", cup = "open") = State(
     [SwitchAction(0, 0), SwitchAction(0, 0)],
 )
 
-State(teams::Array{String}; league = "great", cup = "open") = State(
-    [Team(teams[1:3], league = league, cup = cup), Team(teams[4:6], league = league, cup = cup)],
+IndividualBattleState(teams::Array{String}; league = "great", cup = "open") = State(
+    [Individual(teams[1], league = league, cup = cup), Individual(teams[2], league = league, cup = cup)],
     1,
     [false, false],
     [

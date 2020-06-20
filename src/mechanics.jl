@@ -28,12 +28,12 @@ function calculate_damage(
                  0.5 * 1.3) + 1
 end
 
-function queue_fast_move(state::State)
+function queue_fast_move(state::BattleState)
     next_state = @set state.fastMovesPending[state.agent] = true
     return next_state
 end
 
-function queue_charged_move(state::State, move::Int64)
+function queue_charged_move(state::BattleState, move::Int64)
     next_state = @set state.chargedMovesPending[state.agent] = ChargedAction(
         state.teams[state.agent].mons[state.teams[state.agent].active].chargedMoves[move],
         1,
@@ -41,7 +41,7 @@ function queue_charged_move(state::State, move::Int64)
     return next_state
 end
 
-function queue_switch(state::State, switchTo::Int64; time::Int64 = 0)
+function queue_switch(state::BattleState, switchTo::Int64; time::Int64 = 0)
     next_state = @set state.switchesPending[state.agent] = SwitchAction(
         switchTo,
         time,
@@ -49,7 +49,7 @@ function queue_switch(state::State, switchTo::Int64; time::Int64 = 0)
     return next_state
 end
 
-function get_cmp(state::State)
+function get_cmp(state::BattleState)
     cmp = 0
     if state.chargedMovesPending[1].charge == 0 && state.chargedMovesPending[2].charge == 0
     elseif state.chargedMovesPending[1].charge != 0 && state.chargedMovesPending[2].charge == 0 && state.teams[2].mons[state.teams[2].active].hp > 0
@@ -68,7 +68,7 @@ function get_cmp(state::State)
     return cmp
 end
 
-function apply_buffs(state::State, cmp::Int64)
+function apply_buffs(state::BattleState, cmp::Int64)
     next_state = state
     if rand(Uniform(0, 1)) < next_state.chargedMovesPending[cmp].move.buffChance
         next_state = @set next_state.teams[get_other_agent(cmp)].buffs.atk = clamp(
@@ -95,7 +95,7 @@ function apply_buffs(state::State, cmp::Int64)
     return next_state
 end
 
-function evaluate_fast_moves(state::State)
+function evaluate_fast_moves(state::BattleState)
     next_state = state
     if next_state.fastMovesPending[1]
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = next_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown
@@ -136,7 +136,7 @@ function evaluate_fast_moves(state::State)
     return next_state
 end
 
-function evaluate_charged_moves(state::State)
+function evaluate_charged_moves(state::BattleState)
     cmp = get_cmp(state)
     next_state = state
     if cmp > 0
@@ -171,7 +171,7 @@ function evaluate_charged_moves(state::State)
     return next_state
 end
 
-function evaluate_switches(state::State)
+function evaluate_switches(state::BattleState)
     next_state = state
     if next_state.switchesPending[1].pokemon != 0
         next_state = @set next_state.teams[1].active = next_state.switchesPending[1].pokemon
