@@ -17,7 +17,7 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
                 decisions[2] = 0
             end
         end
-        if activeMon.energy >= activeMon.chargedMoves[1].energy
+        if activeMon.energy >= activeMon.chargedMoves[1].energy && activeMon.chargedMoves[1].moveType != 0
             decisions[5] = 1
             decisions[6] = 1
         end
