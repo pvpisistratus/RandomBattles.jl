@@ -22,11 +22,11 @@ IndividualBattleState(team1::Individual, team2::Individual) = IndividualBattleSt
 IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open") = IndividualBattleState(
     [
      Individual(
-         Pokemon(
+         [Pokemon(
             teams[1],
             league = league,
             cup = cup,
-         ),
+         )],
          StatBuffs(0, 0),
          0,
          2,
@@ -34,11 +34,11 @@ IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open") = Ind
          rand(Bool),
      ),
      Individual(
-         Pokemon(
+         [Pokemon(
              teams[2],
              league = league,
              cup = cup,
-         ),
+         )],
          StatBuffs(0, 0),
          0,
          2,
@@ -56,7 +56,7 @@ IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open") = Ind
 )
 
 IndividualBattleState(teams::Array{String}; league = "great", cup = "open") = State(
-    [Individual(teams[1], league = league, cup = cup), Individual(teams[2], league = league, cup = cup)],
+    [Individual([teams[1]], league = league, cup = cup), Individual([teams[2]], league = league, cup = cup)],
     1,
     [false, false],
     [

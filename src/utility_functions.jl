@@ -78,20 +78,10 @@ function silph_to_pvpoke(name::String)
 end;
 
 function get_battle_score(state::BattleState)
-    return (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
-             state.teams[1].mons[3].hp) /
-            (state.teams[1].mons[1].stats.hitpoints +
-             state.teams[1].mons[2].stats.hitpoints +
-             state.teams[1].mons[3].stats.hitpoints)) +
-           (0.5 * (state.teams[2].mons[1].stats.hitpoints -
-             state.teams[2].mons[1].hp +
-             state.teams[2].mons[2].stats.hitpoints -
-             state.teams[2].mons[2].hp +
-             state.teams[2].mons[3].stats.hitpoints -
-             state.teams[2].mons[3].hp) /
-            (state.teams[2].mons[1].stats.hitpoints +
-             state.teams[2].mons[2].stats.hitpoints +
-             state.teams[2].mons[3].stats.hitpoints))
+    remaining_hp = map(i -> sum(map(x -> x.hp, i.mons)), state.teams)
+    starting_hp = map(i -> sum(map(x -> x.stats.hitpoints, i.mons)), state.teams)
+    return (0.5 * remaining_hp[1] / starting_hp[1]) +
+           (0.5 * (starting_hp[1] - remaining_hp[1]) / starting_hp[1])
 end
 
 function step_timers(state::BattleState)
