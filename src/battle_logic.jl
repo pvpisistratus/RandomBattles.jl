@@ -36,7 +36,7 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
         end
         if activeMon.fastMoveCooldown == 0 &&
            activeMon.energy +
-           activeMon.fastMove.energy >= activeMon.chargedMoves[1].energy
+           activeMon.fastMove.energy >= activeMon.chargedMoves[1].energy && activeMon.chargedMoves[1].moveType != 0
             decisions[21] = 1
             decisions[22] = 1
         end
