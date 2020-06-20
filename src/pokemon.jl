@@ -110,7 +110,7 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
                 hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[lvl])
                 return floor(max(10, (attack * sqrt(defense) * sqrt(hitpoints) * cpm[lvl]^2) / 10.0))
             end
-            level = (1:0.5:40)[findlast(x -> get_cp(x) <= cp_limit, 1:0.5:40)]
+            level = (1:0.5:40)[findfirst(x -> get_cp(x) > cp_limit, 1:0.5:40) - 1]
         end
     elseif league == "master"
         level, atk, def, hp = 40, 15, 15, 15
