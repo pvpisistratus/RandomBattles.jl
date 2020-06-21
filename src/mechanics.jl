@@ -21,11 +21,13 @@ function calculate_damage(
     move::Move,
     charge::Float64,
 )
-    return floor(move.power * move.stab *
+    damage = floor(move.power * move.stab *
                  ((attacker.stats.attack * get_buff_modifier(atkBuff)) /
                   (defender.stats.defense * get_buff_modifier(defBuff))) *
                  get_effectiveness(defender.types, move.moveType) * charge *
                  0.5 * 1.3) + 1
+    println(damage)
+    return damage
 end
 
 function queue_fast_move(state::BattleState)
