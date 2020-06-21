@@ -68,7 +68,7 @@ function Move(gm_move::Dict{String,Any}, types)
     else
         return Move(
                 get_type_id(gm_move["type"]),
-                (get_type_id(gm_move["type"]) in types) ? 1.3 : 1,
+                (get_type_id(gm_move["type"]) in types) ? 1.2 : 1,
                 gm_move["power"],
                 gm_move["energyGain"],
                 gm_move["cooldown"],
