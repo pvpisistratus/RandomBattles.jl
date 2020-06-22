@@ -2,7 +2,7 @@ using Setfield, Match
 
 get_other_agent(agent::Int64) = agent == 1 ? agent = 2 : agent = 1
 
-switch_agent(state::State) = @set state.agent = get_other_agent(state.agent)
+switch_agent(state::BattleState) = @set state.agent = get_other_agent(state.agent)
 
 function get_gamemaster_mon_id(name::String)
     for i = 1:length(gamemaster["pokemon"])
@@ -77,8 +77,15 @@ function silph_to_pvpoke(name::String)
     return name
 end;
 
-function get_battle_score(state::State)
-    return (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
+function get_battle_score(state::BattleState)
+    if typeof(state) == IndividualBattleState
+        return (0.5 * (state.teams[1].mons[1].hp) /
+            (state.teams[1].mons[1].stats.hitpoints)) +
+           (0.5 * (state.teams[2].mons[1].stats.hitpoints -
+             state.teams[2].mons[1].hp) /
+            (state.teams[2].mons[1].stats.hitpoints))
+    else
+        return (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
              state.teams[1].mons[3].hp) /
             (state.teams[1].mons[1].stats.hitpoints +
              state.teams[1].mons[2].stats.hitpoints +
@@ -92,9 +99,10 @@ function get_battle_score(state::State)
             (state.teams[2].mons[1].stats.hitpoints +
              state.teams[2].mons[2].stats.hitpoints +
              state.teams[2].mons[3].stats.hitpoints))
+    end
 end
 
-function step_timers(state::State)
+function step_timers(state::BattleState)
     next_state = @set state.teams[1].switchCooldown = max(
         0,
         state.teams[1].switchCooldown - 500,

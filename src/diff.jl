@@ -49,7 +49,7 @@ function diff(t1::Team, t2::Team)
     end
 end
 
-function diff(s1::State, s2::State)
+function diff(s1::BattleState, s2::BattleState)
     if s1.agent != s2.agent
         println("Agent changed from $(s1.agent) to $(s2.agent)")
     end

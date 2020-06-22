@@ -68,7 +68,7 @@ function Move(gm_move::Dict{String,Any}, types)
     else
         return Move(
                 get_type_id(gm_move["type"]),
-                (get_type_id(gm_move["type"]) in types) ? 1.3 : 1,
+                (get_type_id(gm_move["type"]) in types) ? 1.2 : 1,
                 gm_move["power"],
                 gm_move["energyGain"],
                 gm_move["cooldown"],
@@ -103,6 +103,16 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
         level, atk, def, hp = parse.(Int, custom_stats)
+        if level == 0
+            function get_cp(lvl)
+                attack = (atk + gm["baseStats"]["atk"]) * cpm[lvl]
+                defense = (def + gm["baseStats"]["def"]) * cpm[lvl]
+                hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[lvl])
+                cp = floor(max(10, (attack * sqrt(defense) * sqrt(hitpoints)) / 10.0))
+                return cp
+            end
+            level = (1:0.5:40)[findfirst(x -> get_cp(x) > cp_limit, 1:0.5:40) - 1]
+        end
     elseif league == "master"
         level, atk, def, hp = 40, 15, 15, 15
     else
@@ -162,7 +172,11 @@ function Pokemon(mon::String; league = "great", cup = "open")
         if length(mon_arr) == 4
             return Pokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]))
-        else
+        elseif length(mon_arr) == 7
+            return Pokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
+                league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
+                custom_stats = ("0", mon_arr[5], mon_arr[6], mon_arr[7]))
+        elseif length(mon_arr) == 8
             return Pokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
                 custom_stats = (mon_arr[5], mon_arr[6], mon_arr[7], mon_arr[8]))
