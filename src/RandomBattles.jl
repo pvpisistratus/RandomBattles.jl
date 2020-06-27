@@ -30,6 +30,6 @@ export State,
        diff,
        PokemonMeta,
        plot_strategy,
-       vectorize,
+       vectorize
 
 end # module
