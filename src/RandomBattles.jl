@@ -29,6 +29,7 @@ export State,
        rank,
        diff,
        PokemonMeta,
-       plot_strategy
+       plot_strategy,
+       vectorize,
 
 end # module

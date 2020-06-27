@@ -11,7 +11,7 @@ struct Individual
 end
 
 function vectorize(ind::Individual)
-    return append(vectorize(ind.mons[1]), [ind.buffs.atk, ind.buffs.def, ind.switchCooldown, ind.shields])
+    return vcat(vectorize(ind.mons[1]), [ind.buffs.atk, ind.buffs.def, ind.switchCooldown, ind.shields])
 end
 
 Individual(
