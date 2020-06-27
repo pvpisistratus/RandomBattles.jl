@@ -8,6 +8,11 @@ struct IndividualBattleState <: BattleState
     switchesPending::SVector{2,SwitchAction}
 end
 
+function vectorize(state::IndividualBattleState)
+    return append(append(vectorize(state.teams[1]), vectorize(state.teams[2])),
+        [state.agent])
+end
+
 IndividualBattleState(team1::Individual, team2::Individual) = IndividualBattleState(
     [team1, team2],
     1,

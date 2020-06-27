@@ -95,6 +95,24 @@ struct Pokemon
     fastMoveCooldown::Int16   #Initially based on fast move
 end
 
+function vectorize(mon::Pokemon)
+    return [mon.types[1], mon.types[2], mon.stats.attack, mon.stats.defense,
+        mon.stats.hitpoints, mon.fastMove.moveType, mon.fastMove.stab,
+        mon.fastMove.power, mon.fastMove.energy, mon.fastMove.cooldown,
+        mon.chargedMoves[1].moveType, mon.chargedMoves[1].stab,
+        mon.chargedMoves[1].power, mon.chargedMoves[1].energy,
+        mon.chargedMoves[1].buffChance, mon.chargedMoves[1].oppAtkModifier,
+        mon.chargedMoves[1].oppDefModifier, mon.chargedMoves[1].selfAtkModifier,
+        mon.chargedMoves[1].selfDefModifier, mon.chargedMoves[2].moveType,
+        mon.chargedMoves[2].stab, mon.chargedMoves[2].power,
+        mon.chargedMoves[2].energy, mon.chargedMoves[2].buffChance,
+        mon.chargedMoves[2].oppAtkModifier, mon.chargedMoves[2].oppDefModifier,
+        mon.chargedMoves[2].selfAtkModifier,
+        mon.chargedMoves[2].selfDefModifier, mon.hp, mon.energy,
+        mon.fastMoveCooldown]
+end
+
+
 function Pokemon(i::Int64; league::String = "great", cup = "open", custom_moveset = ["none"], custom_stats = ())
     rankings = get_rankings(cup == "open" ? league : cup)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])

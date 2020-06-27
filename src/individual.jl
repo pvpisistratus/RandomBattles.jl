@@ -10,6 +10,10 @@ struct Individual
     shielding::Bool          #Initially random
 end
 
+function vectorize(ind::Individual)
+    return append(vectorize(ind.mons[1]), [ind.buffs.atk, ind.buffs.def, ind.switchCooldown, ind.shields])
+end
+
 Individual(
     mons::Array{Int64};
     league::String = "great",
