@@ -10,6 +10,12 @@ struct Team
     shielding::Bool          #Initially random
 end
 
+function vectorize(team::Team)
+    return vcat(vectorize(team.mons[1]), vcat(vectorize(team.mons[2]),
+        vcat(vectorize(team.mons[3]), [team.buffs.atk, team.buffs.def,
+        team.switchCooldown, team.shields, team.active])))
+end
+
 Team(
     mons::Array{Int64};
     league::String = "great",

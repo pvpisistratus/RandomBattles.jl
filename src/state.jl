@@ -20,6 +20,11 @@ struct State <: BattleState
     switchesPending::SVector{2,SwitchAction}
 end
 
+function vectorize(state::State)
+    return vcat(vectorize(state.teams[1]), vcat(vectorize(state.teams[2]),
+        [state.agent]))
+end
+
 State(team1::Team, team2::Team) = State(
     [team1, team2],
     1,
