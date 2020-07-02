@@ -22,7 +22,7 @@ end
 
 function vectorize(state::State)
     return vcat(vectorize(state.teams[1]), vcat(vectorize(state.teams[2]),
-        [state.agent]))
+        [1 == state.agent, 2 == state.agent]))
 end
 
 State(team1::Team, team2::Team) = State(
