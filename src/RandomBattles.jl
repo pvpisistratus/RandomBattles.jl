@@ -13,6 +13,7 @@ include("battle_logic.jl")
 include("pokemon_meta.jl")
 include("strategy.jl")
 include("rankings.jl")
+include("learning.jl")
 
 export State,
        IndividualBattleState,
@@ -30,6 +31,10 @@ export State,
        diff,
        PokemonMeta,
        plot_strategy,
-       vectorize
+       vectorize,
+       crossover_and_mutate,
+       play_nn_battle,
+       play_nn_random_battle,
+       testing_best
 
 end # module
