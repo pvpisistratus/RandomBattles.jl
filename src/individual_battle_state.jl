@@ -61,7 +61,7 @@ IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open", shiel
 )
 
 IndividualBattleState(teams::Array{String}; league = "great", cup = "open", shields = 2) = IndividualBattleState(
-    [Individual([teams[1]], league = league, cup = cup, shields = shields), Individual([teams[2]], league = league, cup = cup, sheilds = shields)],
+    [Individual([teams[1]], league = league, cup = cup, shields = shields), Individual([teams[2]], league = league, cup = cup, shields = shields)],
     1,
     [false, false],
     [
