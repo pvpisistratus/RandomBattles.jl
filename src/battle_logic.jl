@@ -7,10 +7,10 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
     activeTeam = state.teams[state.agent]
     activeMon = activeTeam.mons[activeTeam.active]
     if activeMon.hp > 0
-        decisions[1] = 1
+        decisions[1] = 0
         decisions[2] = 1
         if activeMon.fastMoveCooldown == 0
-            decisions[3] = 1
+            decisions[3] = 0
             decisions[4] = 1
             if !allow_nothing
                 decisions[1] = 0
@@ -18,12 +18,16 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
             end
         end
         if activeMon.energy >= activeMon.chargedMoves[1].energy && activeMon.chargedMoves[1].moveType != 0
-            decisions[5] = 1
+            decisions[5] = 0
             decisions[6] = 1
+            decisions[3] = 0
+            decisions[4] = 0
         end
         if activeMon.energy >= activeMon.chargedMoves[2].energy && activeMon.chargedMoves[2].moveType != 0
-            decisions[7] = 1
+            decisions[7] = 0
             decisions[8] = 1
+            decisions[3] = 0
+            decisions[4] = 0
         end
         if typeof(state) != IndividualBattleState
             for i = 1:3
@@ -37,14 +41,26 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
         if activeMon.fastMoveCooldown == 0 &&
            activeMon.energy +
            activeMon.fastMove.energy >= activeMon.chargedMoves[1].energy && activeMon.chargedMoves[1].moveType != 0
-            decisions[21] = 1
+            decisions[21] = 0
             decisions[22] = 1
+            decisions[5] = 0
+            decisions[6] = 0
+            decisions[7] = 0
+            decisions[8] = 0
+            decisions[3] = 0
+            decisions[4] = 0
         end
         if activeMon.fastMoveCooldown == 0 &&
            activeMon.energy +
            activeMon.fastMove.energy >= activeMon.chargedMoves[2].energy && activeMon.chargedMoves[2].moveType != 0
-            decisions[23] = 1
-            decisions[24] = 1
+           decisions[23] = 0
+           decisions[24] = 1
+           decisions[5] = 0
+           decisions[6] = 0
+           decisions[7] = 0
+           decisions[8] = 0
+           decisions[3] = 0
+           decisions[4] = 0
         end
     else
         if typeof(state) != IndividualBattleState
