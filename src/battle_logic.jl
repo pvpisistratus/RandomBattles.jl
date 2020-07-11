@@ -115,6 +115,8 @@ end
 function play_battle(initial_state::BattleState)
     state = initial_state
     while true
+        println(next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown)
+
         weights1 = get_possible_decisions(state)
         weights2 = get_possible_decisions(switch_agent(state))
         weights1[9:14] /= 2
