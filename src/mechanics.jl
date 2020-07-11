@@ -21,7 +21,6 @@ function calculate_damage(
     move::Move,
     charge::Float64,
 )
-    println(move.power)
     return floor(move.power * move.stab *
          ((attacker.stats.attack * get_buff_modifier(atkBuff)) /
           (defender.stats.defense * get_buff_modifier(defBuff))) *
