@@ -9,7 +9,7 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
     if activeMon.hp > 0
         decisions[1] = 0
         decisions[2] = 1
-        if activeMon.fastMoveCooldown == 0
+        if activeMon.fastMoveCooldown <= 0
             decisions[3] = 0
             decisions[4] = 1
             if !allow_nothing
