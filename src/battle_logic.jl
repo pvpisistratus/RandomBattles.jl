@@ -42,25 +42,13 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
            activeMon.energy +
            activeMon.fastMove.energy >= activeMon.chargedMoves[1].energy && activeMon.chargedMoves[1].moveType != 0
             decisions[21] = 0
-            decisions[22] = 1
-            decisions[5] = 0
-            decisions[6] = 0
-            decisions[7] = 0
-            decisions[8] = 0
-            decisions[3] = 0
-            decisions[4] = 0
+            decisions[22] = 0
         end
         if activeMon.fastMoveCooldown == 0 &&
            activeMon.energy +
            activeMon.fastMove.energy >= activeMon.chargedMoves[2].energy && activeMon.chargedMoves[2].moveType != 0
            decisions[23] = 0
-           decisions[24] = 1
-           decisions[5] = 0
-           decisions[6] = 0
-           decisions[7] = 0
-           decisions[8] = 0
-           decisions[3] = 0
-           decisions[4] = 0
+           decisions[24] = 0
         end
     else
         if typeof(state) != IndividualBattleState
