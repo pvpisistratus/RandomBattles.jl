@@ -165,7 +165,8 @@ function evaluate_charged_moves(state::BattleState)
             )
         end
         next_state = apply_buffs(next_state, cmp)
-        next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMoveCooldown = 0
+        next_state = @set next_state.teams[1].mons[next_state.teams[cmp].active].fastMoveCooldown = 0
+        next_state = @set next_state.teams[2].mons[next_state.teams[cmp].active].fastMoveCooldown = 0
         next_state = @set next_state.chargedMovesPending[cmp] =
             ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0)
     end
