@@ -1,16 +1,16 @@
 using Distributions, Setfield, Match
 
-const possible_decisions = 24
+const possible_decisions = 20
 
 function get_possible_decisions(state::BattleState; allow_nothing = false)
     decisions = zeros(possible_decisions)
     activeTeam = state.teams[state.agent]
     activeMon = activeTeam.mons[activeTeam.active]
     if activeMon.hp > 0
-        decisions[1] = 0
+        decisions[1] = 1
         decisions[2] = 1
         if activeMon.fastMoveCooldown <= 0
-            decisions[3] = 0
+            decisions[3] = 1
             decisions[4] = 1
             if !allow_nothing
                 decisions[1] = 0
@@ -18,20 +18,12 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
             end
         end
         if activeMon.energy >= activeMon.chargedMoves[1].energy && activeMon.chargedMoves[1].moveType != 0
-            decisions[5] = 0
+            decisions[5] = 1
             decisions[6] = 1
-            decisions[3] = 0
-            decisions[4] = 0
-            decisions[1] = 0
-            decisions[2] = 0
         end
         if activeMon.energy >= activeMon.chargedMoves[2].energy && activeMon.chargedMoves[2].moveType != 0
-            decisions[7] = 0
+            decisions[7] = 1
             decisions[8] = 1
-            decisions[3] = 0
-            decisions[4] = 0
-            decisions[1] = 0
-            decisions[2] = 0
         end
         if typeof(state) != IndividualBattleState
             for i = 1:3
@@ -41,18 +33,6 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
                     decisions[2*i+8] = 1
                 end
             end
-        end
-        if activeMon.fastMoveCooldown == 0 &&
-           activeMon.energy +
-           activeMon.fastMove.energy >= activeMon.chargedMoves[1].energy && activeMon.chargedMoves[1].moveType != 0
-            decisions[21] = 0
-            decisions[22] = 0
-        end
-        if activeMon.fastMoveCooldown == 0 &&
-           activeMon.energy +
-           activeMon.fastMove.energy >= activeMon.chargedMoves[2].energy && activeMon.chargedMoves[2].moveType != 0
-           decisions[23] = 0
-           decisions[24] = 0
         end
     else
         if typeof(state) != IndividualBattleState
@@ -84,8 +64,6 @@ function play_decision(state::BattleState, decision::Int64)
         15 || 16 => queue_switch(next_state, 1, time = 12_000)
         17 || 18 => queue_switch(next_state, 2, time = 12_000)
         19 || 20 => queue_switch(next_state, 3, time = 12_000)
-        21 || 22 => queue_charged_move(queue_fast_move(next_state), 1)
-        23 || 24 => queue_charged_move(queue_fast_move(next_state), 2)
         _        => next_state
     end
 
@@ -101,10 +79,10 @@ function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
     if !isnothing(findfirst(in(9:20), decision))
         next_state = evaluate_switches(next_state)
     end
-    if !isnothing(findfirst(in([3, 4, 21, 22, 23, 24]), decision))
+    if !isnothing(findfirst(in([3, 4]), decision))
         next_state = evaluate_fast_moves(next_state)
     end
-    if !isnothing(findfirst(in([5, 6, 7, 8, 21, 22, 23, 24]), decision))
+    if !isnothing(findfirst(in([5, 6, 7, 8]), decision))
         next_state = evaluate_charged_moves(next_state)
         next_state = evaluate_charged_moves(next_state)
     end

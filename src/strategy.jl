@@ -182,32 +182,6 @@ function plot_strategy(strat::Strategy, s::BattleState)
                 end
                 scatter!(plt2, [i + .25], [-j - .25], markershape = :dtriangle, alpha = 0.5, color = color)
             end
-            21 || 22 => begin
-                color = RandomBattles.colors[s.teams[j].mons[strat.activeMons[i][j]].chargedMoves[1].moveType]
-                if strat.energies[i][j] < strat.energies[i - 1][j]
-                    scatter!(plt2, [i], [-j], markershape = :circle, markersize = 10, alpha = 0.5, color = color)
-                    other_agent = RandomBattles.get_other_agent(j)
-                    if shields[other_agent] > 0 && iseven(strat.decisions[i][other_agent])
-                        scatter!(plt2, [i], [-other_agent], markershape = :hexagon, markersize = 12, alpha = 0.5, color = RandomBattles.shieldColor)
-                        shields[other_agent] -= 1
-                    end
-                end
-                color = RandomBattles.colors[s.teams[j].mons[strat.activeMons[i][j]].fastMove.moveType]
-                scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5, color = color)
-            end
-            23 || 24 => begin
-                color = RandomBattles.colors[s.teams[j].mons[strat.activeMons[i][j]].chargedMoves[2].moveType]
-                if strat.energies[i][j] < strat.energies[i - 1][j]
-                    scatter!(plt2, [i], [-j], markershape = :circle, markersize = 10, alpha = 0.5, color = color)
-                    other_agent = RandomBattles.get_other_agent(j)
-                    if shields[other_agent] > 0 && iseven(strat.decisions[i][other_agent])
-                        scatter!(plt2, [i], [-other_agent], markershape = :hexagon, markersize = 12, alpha = 0.5, color = RandomBattles.shieldColor)
-                        shields[other_agent] -= 1
-                    end
-                end
-                color = RandomBattles.colors[s.teams[j].mons[strat.activeMons[i][j]].fastMove.moveType]
-                scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5, color = color)
-            end
         end
     end
     if mean(strat.minimaxes[length(strat.decisions)]) > 0.5
