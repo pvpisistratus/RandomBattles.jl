@@ -103,6 +103,7 @@ function get_battle_score(state::BattleState)
 end
 
 function step_timers(state::BattleState)
+    println(state.teams[2].mons[state.teams[2].active].fastMoveCooldown)
     next_state = @set state.teams[1].switchCooldown = max(
         0,
         state.teams[1].switchCooldown - 500,
