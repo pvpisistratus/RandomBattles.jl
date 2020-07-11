@@ -165,7 +165,7 @@ function evaluate_charged_moves(state::BattleState)
             )
         end
         next_state = apply_buffs(next_state, cmp)
-        if next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMoveCooldown < 0
+        if next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMoveCooldown < 0
             next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMoveCooldown = min(1000, next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMove.cooldown)
             next_state = @set next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].fastMoveCooldown = min(1000, next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].fastMove.cooldown)
         else
