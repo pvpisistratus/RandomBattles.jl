@@ -98,7 +98,7 @@ end
 function evaluate_fast_moves(state::BattleState)
     next_state = state
     if next_state.fastMovesPending[1]
-        next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = next_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown
+        next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown == 0 ? next_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : 0
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].energy += next_state.teams[1].mons[next_state.teams[1].active].fastMove.energy
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].energy = min(next_state.teams[1].mons[next_state.teams[1].active].energy, 100)
         next_state = @set next_state.teams[2].mons[next_state.teams[2].active].hp = max(
@@ -116,7 +116,7 @@ function evaluate_fast_moves(state::BattleState)
         next_state = @set next_state.fastMovesPending[1] = false
     end
     if next_state.fastMovesPending[2]
-        next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = next_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown
+        next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown == 0 ? next_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown : 0
         next_state = @set next_state.teams[2].mons[next_state.teams[2].active].energy += next_state.teams[2].mons[next_state.teams[2].active].fastMove.energy
         next_state = @set next_state.teams[2].mons[next_state.teams[2].active].energy = min(next_state.teams[2].mons[next_state.teams[2].active].energy, 100)
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].hp = max(
@@ -165,6 +165,13 @@ function evaluate_charged_moves(state::BattleState)
             )
         end
         next_state = apply_buffs(next_state, cmp)
+        if next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMoveCooldown < 0
+            next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMoveCooldown = min(1000, next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMove.cooldown)
+            next_state = @set next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].fastMoveCooldown = min(1000, next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].fastMove.cooldown)
+        else
+            next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMoveCooldown = min(1000, next_state.teams[cmp].mons[next_state.teams[cmp].active].fastMove.cooldown)
+            next_state = @set next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].fastMoveCooldown = next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].fastMoveCooldown != next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].fastMove.cooldown ? -500 : next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].fastMoveCooldown
+        end
         next_state = @set next_state.chargedMovesPending[cmp] =
             ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0)
     end

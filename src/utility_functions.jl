@@ -107,18 +107,23 @@ function step_timers(state::BattleState)
         0,
         state.teams[1].switchCooldown - 500,
     )
-    next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = max(
-        0,
-        state.teams[1].mons[state.teams[1].active].fastMoveCooldown - 500,
-    )
+    if next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown >= 0
+        next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = max(
+            0,
+            state.teams[1].mons[state.teams[1].active].fastMoveCooldown - 500,
+        )
+    end
     next_state = @set next_state.teams[2].switchCooldown = max(
         0,
         next_state.teams[2].switchCooldown - 500,
     )
-    next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = max(
-        0,
-        next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown - 500,
-    )
+
+    if next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown >= 0
+        next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = max(
+            0,
+            next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown - 500,
+        )
+    end
 
     return next_state
 end

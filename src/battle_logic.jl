@@ -1,6 +1,6 @@
 using Distributions, Setfield, Match
 
-const possible_decisions = 24
+const possible_decisions = 20
 
 function get_possible_decisions(state::BattleState; allow_nothing = false)
     decisions = zeros(possible_decisions)
@@ -9,7 +9,7 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
     if activeMon.hp > 0
         decisions[1] = 1
         decisions[2] = 1
-        if activeMon.fastMoveCooldown == 0
+        if activeMon.fastMoveCooldown <= 0
             decisions[3] = 1
             decisions[4] = 1
             if !allow_nothing
@@ -33,18 +33,6 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
                     decisions[2*i+8] = 1
                 end
             end
-        end
-        if activeMon.fastMoveCooldown == 0 &&
-           activeMon.energy +
-           activeMon.fastMove.energy >= activeMon.chargedMoves[1].energy && activeMon.chargedMoves[1].moveType != 0
-            decisions[21] = 1
-            decisions[22] = 1
-        end
-        if activeMon.fastMoveCooldown == 0 &&
-           activeMon.energy +
-           activeMon.fastMove.energy >= activeMon.chargedMoves[2].energy && activeMon.chargedMoves[2].moveType != 0
-            decisions[23] = 1
-            decisions[24] = 1
         end
     else
         if typeof(state) != IndividualBattleState
@@ -76,8 +64,6 @@ function play_decision(state::BattleState, decision::Int64)
         15 || 16 => queue_switch(next_state, 1, time = 12_000)
         17 || 18 => queue_switch(next_state, 2, time = 12_000)
         19 || 20 => queue_switch(next_state, 3, time = 12_000)
-        21 || 22 => queue_charged_move(queue_fast_move(next_state), 1)
-        23 || 24 => queue_charged_move(queue_fast_move(next_state), 2)
         _        => next_state
     end
 
@@ -93,10 +79,10 @@ function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
     if !isnothing(findfirst(in(9:20), decision))
         next_state = evaluate_switches(next_state)
     end
-    if !isnothing(findfirst(in([3, 4, 21, 22, 23, 24]), decision))
+    if !isnothing(findfirst(in([3, 4]), decision))
         next_state = evaluate_fast_moves(next_state)
     end
-    if !isnothing(findfirst(in([5, 6, 7, 8, 21, 22, 23, 24]), decision))
+    if !isnothing(findfirst(in([5, 6, 7, 8]), decision))
         next_state = evaluate_charged_moves(next_state)
         next_state = evaluate_charged_moves(next_state)
     end
