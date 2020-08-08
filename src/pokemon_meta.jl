@@ -14,7 +14,7 @@ function PokemonMeta(cup::String; data_key = "all", source = "silph")
         meta_weights = map(x -> data[data_key][x]["percent"], silph_keys)
         return PokemonMeta(Pokemon.(mons, cup = cup),
             Categorical(meta_weights ./ sum(meta_weights)))
-    else if source == "pvpoke"
+    elseif source == "pvpoke"
         overrides = get_rankings("rankingoverrides")
         cup_id = findfirst(x -> x["cup"] == cup, overrides)
         mons = Pokemon.(map(x -> x["speciesId"], get_rankings(cup)), cup = cup)
