@@ -142,7 +142,7 @@ function plot_strategy(strat::Strategy, s::BattleState)
     plt1 = plot(1:length(strat.minimaxes), mean.(strat.minimaxes), width = 2, label = "possible battle scores", fillalpha = 0.2, ribbon = (mean.(strat.minimaxes) .- first.(strat.minimaxes), last.(strat.minimaxes) .- mean.(strat.minimaxes)), ylims = [0, 1], ylabel = "Battle Score", xlabel = "Decisions", size = (950, 400))
     hline!(plt1, [0.5], label = "win/loss")
     plt2 = plot(xlims = [0, length(strat.decisions)], ylims = [-3, 0], legend = false, size = (950, 200), axis = nothing)
-    shields = [2, 2]
+    shields = [s.teams[1].shields, s.teams[2].shields]
     for i = 1:length(strat.decisions), j = 1:2
         @match strat.decisions[i][j] begin
             3  || 4  => begin
@@ -181,32 +181,6 @@ function plot_strategy(strat::Strategy, s::BattleState)
                     color = RandomBattles.colors[s.teams[j].mons[strat.activeMons[i][j]].types[2]]
                 end
                 scatter!(plt2, [i + .25], [-j - .25], markershape = :dtriangle, alpha = 0.5, color = color)
-            end
-            21 || 22 => begin
-                color = RandomBattles.colors[s.teams[j].mons[strat.activeMons[i][j]].chargedMoves[1].moveType]
-                if strat.energies[i][j] < strat.energies[i - 1][j]
-                    scatter!(plt2, [i], [-j], markershape = :circle, markersize = 10, alpha = 0.5, color = color)
-                    other_agent = RandomBattles.get_other_agent(j)
-                    if shields[other_agent] > 0 && iseven(strat.decisions[i][other_agent])
-                        scatter!(plt2, [i], [-other_agent], markershape = :hexagon, markersize = 12, alpha = 0.5, color = RandomBattles.shieldColor)
-                        shields[other_agent] -= 1
-                    end
-                end
-                color = RandomBattles.colors[s.teams[j].mons[strat.activeMons[i][j]].fastMove.moveType]
-                scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5, color = color)
-            end
-            23 || 24 => begin
-                color = RandomBattles.colors[s.teams[j].mons[strat.activeMons[i][j]].chargedMoves[2].moveType]
-                if strat.energies[i][j] < strat.energies[i - 1][j]
-                    scatter!(plt2, [i], [-j], markershape = :circle, markersize = 10, alpha = 0.5, color = color)
-                    other_agent = RandomBattles.get_other_agent(j)
-                    if shields[other_agent] > 0 && iseven(strat.decisions[i][other_agent])
-                        scatter!(plt2, [i], [-other_agent], markershape = :hexagon, markersize = 12, alpha = 0.5, color = RandomBattles.shieldColor)
-                        shields[other_agent] -= 1
-                    end
-                end
-                color = RandomBattles.colors[s.teams[j].mons[strat.activeMons[i][j]].fastMove.moveType]
-                scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5, color = color)
             end
         end
     end

@@ -10,14 +10,19 @@ struct Individual
     shielding::Bool          #Initially random
 end
 
+function vectorize(ind::Individual)
+    return vcat(vectorize(ind.mons[1]), [ind.buffs.atk, ind.buffs.def, ind.switchCooldown, ind.shields])
+end
+
 Individual(
     mons::Array{Int64};
     league::String = "great",
     cup::String = "open",
-) = Individual(Pokemon.(mons, league = league, cup = cup), StatBuffs(0, 0), 0, 2, 1, rand(Bool))
+    shields = 2,
+) = Individual(Pokemon.(mons, league = league, cup = cup), StatBuffs(0, 0), 0, shields, 1, rand(Bool))
 
-Individual(mons::Array{String}; league::String = "great", cup::String = "open") =
-    Individual(Pokemon.(mons, league = league, cup = cup), StatBuffs(0, 0), 0, 2, 1, rand(Bool))
+Individual(mons::Array{String}; league::String = "great", cup::String = "open", shields = 2) =
+    Individual(Pokemon.(mons, league = league, cup = cup), StatBuffs(0, 0), 0, shields, 1, rand(Bool))
 
-Individual(mons::Array{Pokemon}) =
-    Individual(mons, StatBuffs(0, 0), 0, 2, 1, rand(Bool))
+Individual(mons::Array{Pokemon}, shields = 2) =
+    Individual(mons, StatBuffs(0, 0), 0, shields, 1, rand(Bool))
