@@ -26,7 +26,7 @@ function PokemonMeta(
             overrides
         )
         mons = Pokemon.(map(x -> x["speciesId"],
-            get_rankings(cup, league = league)), cup = cup, league == league)
+            get_rankings(cup, league = league)), cup = cup, league = league)
         weights = ones(length(mons))
         for i = 1:length(overrides[cup_id]["pokemon"])
             if haskey(overrides[cup_id]["pokemon"][i], "weight")
