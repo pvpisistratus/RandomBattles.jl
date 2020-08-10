@@ -15,7 +15,6 @@ const masterRankings = JSON.parsefile(joinpath(
 ))
 
 @memoize function get_rankings(rankings::String; league = "great")
-    println(league)
     if rankings == "master"
         return masterRankings
     elseif rankings == "ultra"
@@ -29,7 +28,6 @@ const masterRankings = JSON.parsefile(joinpath(
                 "../data/$(rankings).json",
             ))
         catch
-            println(league)
             return JSON.parsefile(joinpath(
                 @__DIR__,
                 "../data/$(rankings)-$(league).json",

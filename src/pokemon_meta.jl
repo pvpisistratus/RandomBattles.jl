@@ -20,8 +20,6 @@ function PokemonMeta(
         return PokemonMeta(Pokemon.(mons, cup = cup),
             Categorical(meta_weights ./ sum(meta_weights)))
     elseif source == "pvpoke"
-        println()
-        println(league)
         overrides = get_rankings("rankingoverrides")
         cup_id = findfirst(
             x -> x["cup"] == cup && x["league"] == get_cp_limit(league),
@@ -35,7 +33,7 @@ function PokemonMeta(
                 weight = overrides[cup_id]["pokemon"][i]["weight"]
                 speciesId = overrides[cup_id]["pokemon"][i]["speciesId"]
                 species_index = findfirst(x -> speciesId == x,
-                    map(x -> x["speciesId"], get_rankings(cup)))
+                    map(x -> x["speciesId"], get_rankings(cup, league = league)))
                 if !isnothing(species_index)
                     weights[species_index] = weight
                 end
