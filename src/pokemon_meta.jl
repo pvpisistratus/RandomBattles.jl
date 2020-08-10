@@ -5,7 +5,12 @@ struct PokemonMeta
     weights::Distribution
 end
 
-function PokemonMeta(cup::String; data_key = "all", source = "silph")
+function PokemonMeta(
+    cup::String;
+    data_key::String = "all",
+    source::String = "silph",
+    league::String = "great",
+)
     if source == "silph"
         resp = HTTP.get("https://silph.gg/api/cup/" * cup * "/stats/.json")
         data = JSON.parse(String(resp.body))
@@ -16,8 +21,12 @@ function PokemonMeta(cup::String; data_key = "all", source = "silph")
             Categorical(meta_weights ./ sum(meta_weights)))
     elseif source == "pvpoke"
         overrides = get_rankings("rankingoverrides")
-        cup_id = findfirst(x -> x["cup"] == cup, overrides)
-        mons = Pokemon.(map(x -> x["speciesId"], get_rankings(cup)), cup = cup)
+        cup_id = findfirst(
+            x -> x["cup"] == cup && x["league"] == get_cp_limit(league),
+            overrides
+        )
+        mons = Pokemon.(map(x -> x["speciesId"],
+            get_rankings(cup, league = league)), cup = cup, league == league)
         weights = ones(length(mons))
         for i = 1:length(overrides[cup_id]["pokemon"])
             if haskey(overrides[cup_id]["pokemon"][i], "weight")
