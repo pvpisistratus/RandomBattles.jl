@@ -144,7 +144,7 @@ end
 
 
 function Pokemon(i::Int64; league::String = "great", cup = "open", custom_moveset = ["none"], custom_stats = ())
-    rankings = get_rankings(cup == "open" ? league : cup)
+    rankings = get_rankings(cup == "open" ? league : cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
     types = get_type_id.(convert(Array{String}, gm["types"]))

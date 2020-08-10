@@ -50,7 +50,7 @@ function convert_indices(
     league::String = "great",
     cup = "open"
 )
-    rankings = get_rankings(cup == "open" ? league : cup)
+    rankings = get_rankings(cup == "open" ? league : cup, league = league)
     ranking = 0
     for i = 1:length(rankings)
         if rankings[i]["speciesId"] == name
