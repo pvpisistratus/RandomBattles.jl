@@ -28,6 +28,7 @@ const masterRankings = JSON.parsefile(joinpath(
                 "../data/$(rankings).json",
             ))
         catch
+            println(league)
             return JSON.parsefile(joinpath(
                 @__DIR__,
                 "../data/$(rankings)-$(league).json",
