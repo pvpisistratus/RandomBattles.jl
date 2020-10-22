@@ -23,10 +23,6 @@ const masterRankings = JSON.parsefile(joinpath(
         return greatRankings
     else
         try
-            print("Oof: $(joinpath(
-                @__DIR__,
-                "../data/$(rankings).json",
-            ))")
             return JSON.parsefile(joinpath(
                 @__DIR__,
                 "../data/$(rankings).json",
