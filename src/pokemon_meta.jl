@@ -20,7 +20,7 @@ function PokemonMeta(
         return PokemonMeta(Pokemon.(mons, cup = cup),
             Categorical(meta_weights ./ sum(meta_weights)))
     elseif source == "pvpoke"
-        overrides = get_rankings("rankingoverrides")
+        overrides = get_rankings("$(cup)_rankingoverrides")
         rankings = get_rankings(cup, league = league)
         cup_id = findfirst(
             x -> x["cup"] == cup && x["league"] == get_cp_limit(league),
