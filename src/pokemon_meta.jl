@@ -43,7 +43,8 @@ function PokemonMeta(
         return PokemonMeta(mons, Categorical(weights ./ sum(weights)))
     else
         rankings = get_rankings(cup, league = league)
-        mons = map(x -> Pokemon(x["speciesId"], cup, league), rankings)
+        mons = map(x -> Pokemon(x["speciesId"], cup = cup, league = league),
+            rankings)
         PokemonMeta(mons, Categorical(ones(length(mons)) ./ length(mons)))
     end
 end
