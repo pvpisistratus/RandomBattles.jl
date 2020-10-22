@@ -215,6 +215,7 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
 end
 
 function Pokemon(mon::String; league = "great", cup = "open")
+    println(mon)
     if occursin(",", mon)
         mon_arr = split(mon, ",")
         if length(mon_arr) == 4
