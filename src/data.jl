@@ -27,6 +27,10 @@ const masterRankings = JSON.parsefile(joinpath(
                 @__DIR__,
                 "../data/$(rankings).json",
             ))
+            print("Oof: $(joinpath(
+                @__DIR__,
+                "../data/$(rankings).json",
+            ))")
         catch
             return JSON.parsefile(joinpath(
                 @__DIR__,
