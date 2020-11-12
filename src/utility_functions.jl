@@ -77,6 +77,26 @@ function silph_to_pvpoke(name::String)
     return name
 end;
 
+function get_min_score(state::BattleState)
+    return 0.5 * (state.teams[2].mons[1].stats.hitpoints -
+      state.teams[2].mons[1].hp +
+      state.teams[2].mons[2].stats.hitpoints -
+      state.teams[2].mons[2].hp +
+      state.teams[2].mons[3].stats.hitpoints -
+      state.teams[2].mons[3].hp) /
+     (state.teams[2].mons[1].stats.hitpoints +
+      state.teams[2].mons[2].stats.hitpoints +
+      state.teams[2].mons[3].stats.hitpoints)
+end
+
+function get_max_score(state::BattleState)
+    return 0.5 + (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
+         state.teams[1].mons[3].hp) /
+        (state.teams[1].mons[1].stats.hitpoints +
+         state.teams[1].mons[2].stats.hitpoints +
+         state.teams[1].mons[3].stats.hitpoints))
+end
+
 function get_battle_score(state::BattleState)
     if typeof(state) == IndividualBattleState
         return (0.5 * (state.teams[1].mons[1].hp) /
@@ -85,20 +105,7 @@ function get_battle_score(state::BattleState)
              state.teams[2].mons[1].hp) /
             (state.teams[2].mons[1].stats.hitpoints))
     else
-        return (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
-             state.teams[1].mons[3].hp) /
-            (state.teams[1].mons[1].stats.hitpoints +
-             state.teams[1].mons[2].stats.hitpoints +
-             state.teams[1].mons[3].stats.hitpoints)) +
-           (0.5 * (state.teams[2].mons[1].stats.hitpoints -
-             state.teams[2].mons[1].hp +
-             state.teams[2].mons[2].stats.hitpoints -
-             state.teams[2].mons[2].hp +
-             state.teams[2].mons[3].stats.hitpoints -
-             state.teams[2].mons[3].hp) /
-            (state.teams[2].mons[1].stats.hitpoints +
-             state.teams[2].mons[2].stats.hitpoints +
-             state.teams[2].mons[3].stats.hitpoints))
+        return min_score(state) + max_score(state) - 0.5
     end
 end
 
