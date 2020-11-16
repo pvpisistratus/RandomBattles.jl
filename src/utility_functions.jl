@@ -105,7 +105,7 @@ function get_battle_score(state::BattleState)
              state.teams[2].mons[1].hp) /
             (state.teams[2].mons[1].stats.hitpoints))
     else
-        return min_score(state) + max_score(state) - 0.5
+        return get_min_score(state) + get_max_score(state) - 0.5
     end
 end
 
