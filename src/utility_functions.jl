@@ -75,6 +75,7 @@ function silph_to_pvpoke(name::String)
     name = replace(name, "darmanitan" => "darmanitan_standard")
     name = replace(name, "gastrodon_blue" => "gastrodon_west_sea")
     name = replace(name, "gastrodon_pink" => "gastrodon_east_sea")
+    name = replace(name, "sirfetch'd" => "sirfetchd")
     return name
 end;
 
