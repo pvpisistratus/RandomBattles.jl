@@ -22,17 +22,13 @@ function PokemonMeta(
     elseif source == "pvpoke"
         overrides = get_rankings("$(cup)_rankingoverrides")
         rankings = get_rankings(cup, league = league)
-        cup_id = findfirst(
-            x -> x["cup"] == cup && x["league"] == get_cp_limit(league),
-            overrides
-        )
         mons = Pokemon.(map(x -> x["speciesId"],
             rankings), cup = cup, league = league)
         weights = ones(length(mons))
-        for i = 1:length(overrides[cup_id]["pokemon"])
-            if haskey(overrides[cup_id]["pokemon"][i], "weight")
-                weight = overrides[cup_id]["pokemon"][i]["weight"]
-                speciesId = overrides[cup_id]["pokemon"][i]["speciesId"]
+        for i = 1:length(overrides)
+            if haskey(overrides[i], "weight")
+                weight = overrides[i]["weight"]
+                speciesId = overrides[i]["speciesId"]
                 species_index = findfirst(x -> speciesId == x,
                     map(x -> x["speciesId"], rankings))
                 if !isnothing(species_index)
