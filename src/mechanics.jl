@@ -122,7 +122,7 @@ function evaluate_fast_moves(state::BattleState)
             next_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown
             next_state = @set next_state.teams[2].mons[next_state.teams[2].active].energy =
                 min(next_state.teams[2].mons[next_state.teams[2].active].energy +
-                    next_state.teams[2].mons[next_state.teams[2].active].fastMove.energy, 100))
+                    next_state.teams[2].mons[next_state.teams[2].active].fastMove.energy, 100)
         next_state = @set next_state.teams[1].mons[next_state.teams[1].active].hp = max(
             0,
             next_state.teams[1].mons[next_state.teams[1].active].hp -
