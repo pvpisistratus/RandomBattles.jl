@@ -17,11 +17,13 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
                 decisions[2] = 0
             end
         end
-        if activeMon.energy >= activeMon.chargedMoves[1].energy && activeMon.chargedMoves[1].moveType != 0
+        if activeMon.energy >= activeMon.chargedMoves[1].energy &&
+          activeMon.chargedMoves[1].moveType != 0
             decisions[5] = 1
             decisions[6] = 1
         end
-        if activeMon.energy >= activeMon.chargedMoves[2].energy && activeMon.chargedMoves[2].moveType != 0
+        if activeMon.energy >= activeMon.chargedMoves[2].energy &&
+          activeMon.chargedMoves[2].moveType != 0
             decisions[7] = 1
             decisions[8] = 1
         end
@@ -79,12 +81,12 @@ function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
     if !isnothing(findfirst(in(9:20), decision))
         next_state = evaluate_switches(next_state)
     end
-    if !isnothing(findfirst(in([3, 4]), decision))
-        next_state = evaluate_fast_moves(next_state)
-    end
     if !isnothing(findfirst(in([5, 6, 7, 8]), decision))
         next_state = evaluate_charged_moves(next_state)
         next_state = evaluate_charged_moves(next_state)
+    end
+    if !isnothing(findfirst(in([3, 4]), decision))
+        next_state = evaluate_fast_moves(next_state)
     end
     next_state = step_timers(next_state)
     return next_state
@@ -97,7 +99,8 @@ function play_battle(initial_state::BattleState)
         weights2 = get_possible_decisions(switch_agent(state))
         weights1[9:14] /= 2
         weights2[9:14] /= 2
-        (iszero(sum(weights1)) || iszero(sum(weights2))) && return get_battle_score(state)
+        (iszero(sum(weights1)) || iszero(sum(weights2))) &&
+            return get_battle_score(state)
 
         decision1 = rand(Categorical(weights1 / sum(weights1)))
         decision2 = rand(Categorical(weights2 / sum(weights2)))
