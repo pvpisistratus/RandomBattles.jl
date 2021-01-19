@@ -50,30 +50,18 @@ function queue_switch(state::BattleState, switchTo::Int64; time::Int64 = 0)
 end
 
 function get_cmp(state::BattleState)
-    cmp = 0
-    if state.chargedMovesPending[1].charge == 0 &&
-        state.chargedMovesPending[2].charge == 0
-    elseif state.chargedMovesPending[1].charge != 0 &&
-        state.chargedMovesPending[2].charge == 0 &&
-        state.teams[2].mons[state.teams[2].active].hp > 0
-        cmp = 1
-    elseif state.chargedMovesPending[1].charge == 0 &&
-        state.chargedMovesPending[2].charge != 0 &&
-        state.teams[1].mons[state.teams[1].active].hp > 0
-        cmp = 2
-    elseif state.chargedMovesPending[1].charge != 0 &&
-        state.chargedMovesPending[2].charge != 0
-        if state.teams[1].mons[state.teams[1].active].stats.attack >
-            state.teams[2].mons[state.teams[2].active].stats.attack
-            cmp = 1
-        elseif state.teams[2].mons[state.teams[2].active].stats.attack <
-            state.teams[1].mons[state.teams[1].active].stats.attack
-            cmp = 2
-        else
-            cmp = rand(1:2)
-        end
-    end
-    return cmp
+    charges = state.chargedMovesPending[1].charge,
+        state.chargedMovesPending[2].charge
+    charges[1] == 0 && charges[2] == 0 && return 0
+    hps = state.teams[1].mons[state.teams[1].active].hp,
+        state.teams[2].mons[state.teams[2].active].hp
+    charges[1] != 0 && charges[2] == 0 && hps[2] > 0 && return 1
+    charges[1] == 0 && charges[2] != 0 && hps[1] > 0 && return 2
+    attacks = state.teams[1].mons[state.teams[1].active].stats.attack,
+        state.teams[2].mons[state.teams[2].active].stats.attack
+    attacks[1] > attacks[2] && return 1
+    attacks[1] < attacks[2] && return 2
+    return rand(1:2)
 end
 
 function apply_buffs(state::BattleState, cmp::Int64)
