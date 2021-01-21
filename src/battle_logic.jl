@@ -4,35 +4,35 @@ const possible_decisions = 20
 
 function get_possible_decisions(state::BattleState; allow_nothing = false)
     decisions = zeros(possible_decisions)
-    activeTeam = state.teams[state.agent]
-    activeMon = activeTeam.mons[activeTeam.active]
+    @inbounds activeTeam = state.teams[state.agent]
+    @inbounds activeMon = activeTeam.mons[activeTeam.active]
     if activeMon.hp > 0
-        decisions[1] = 1
-        decisions[2] = 1
+        @inbounds decisions[1] = 1
+        @inbounds decisions[2] = 1
         if activeMon.fastMoveCooldown <= 0
-            decisions[3] = 1
-            decisions[4] = 1
+            @inbounds decisions[3] = 1
+            @inbounds decisions[4] = 1
             if !allow_nothing
-                decisions[1] = 0
-                decisions[2] = 0
+                @inbounds decisions[1] = 0
+                @inbounds decisions[2] = 0
             end
         end
-        if activeMon.energy >= activeMon.chargedMoves[1].energy &&
+        @inbounds if activeMon.energy >= activeMon.chargedMoves[1].energy &&
           activeMon.chargedMoves[1].moveType != 0
-            decisions[5] = 1
-            decisions[6] = 1
+            @inbounds decisions[5] = 1
+            @inbounds decisions[6] = 1
         end
-        if activeMon.energy >= activeMon.chargedMoves[2].energy &&
+        @inbounds if activeMon.energy >= activeMon.chargedMoves[2].energy &&
           activeMon.chargedMoves[2].moveType != 0
-            decisions[7] = 1
-            decisions[8] = 1
+            @inbounds decisions[7] = 1
+            @inbounds decisions[8] = 1
         end
         if typeof(state) != IndividualBattleState
             for i = 1:3
                 if i != activeTeam.active &&
                    activeTeam.mons[i].hp != 0 && activeTeam.switchCooldown == 0
-                    decisions[2*i+7] = 1
-                    decisions[2*i+8] = 1
+                    @inbounds decisions[2*i+7] = 1
+                    @inbounds decisions[2*i+8] = 1
                 end
             end
         end
@@ -40,9 +40,80 @@ function get_possible_decisions(state::BattleState; allow_nothing = false)
         if typeof(state) != IndividualBattleState
             for i = 1:3
                 if i != activeTeam.active && activeTeam.mons[i].hp != 0
-                    decisions[2*i+13] = 1
-                    decisions[2*i+14] = 1
+                    @inbounds decisions[2*i+13] = 1
+                    @inbounds decisions[2*i+14] = 1
                 end
+            end
+        end
+    end
+    return decisions
+end
+
+function get_possible_decisions(state::IndividualBattleState; allow_nothing = false)
+    decisions = zeros(possible_decisions)
+    @inbounds activeTeam = state.teams[state.agent]
+    @inbounds activeMon = activeTeam.mons[activeTeam.active]
+    activeMon.hp <= 0 && return decisions
+    @inbounds decisions[1] = 1
+    @inbounds decisions[2] = 1
+    if activeMon.fastMoveCooldown <= 0
+        @inbounds decisions[3] = 1
+        @inbounds decisions[4] = 1
+        if !allow_nothing
+            @inbounds decisions[1] = 0
+            @inbounds decisions[2] = 0
+        end
+    end
+    @inbounds if activeMon.energy >= activeMon.chargedMoves[1].energy &&
+      activeMon.chargedMoves[1].moveType != 0
+        @inbounds decisions[5] = 1
+        @inbounds decisions[6] = 1
+    end
+    @inbounds if activeMon.energy >= activeMon.chargedMoves[2].energy &&
+      activeMon.chargedMoves[2].moveType != 0
+        @inbounds decisions[7] = 1
+        @inbounds decisions[8] = 1
+    end
+    return decisions
+end
+
+function get_possible_decisions(state::State; allow_nothing = false)
+    decisions = zeros(possible_decisions)
+    @inbounds activeTeam = state.teams[state.agent]
+    @inbounds activeMon = activeTeam.mons[activeTeam.active]
+    if activeMon.hp > 0
+        @inbounds decisions[1] = 1
+        @inbounds decisions[2] = 1
+        if activeMon.fastMoveCooldown <= 0
+            @inbounds decisions[3] = 1
+            @inbounds decisions[4] = 1
+            if !allow_nothing
+                @inbounds decisions[1] = 0
+                @inbounds decisions[2] = 0
+            end
+        end
+        @inbounds if activeMon.energy >= activeMon.chargedMoves[1].energy &&
+          activeMon.chargedMoves[1].moveType != 0
+            @inbounds decisions[5] = 1
+            @inbounds decisions[6] = 1
+        end
+        @inbounds if activeMon.energy >= activeMon.chargedMoves[2].energy &&
+          activeMon.chargedMoves[2].moveType != 0
+            @inbounds decisions[7] = 1
+            @inbounds decisions[8] = 1
+        end
+        for i = 1:3
+            if i != activeTeam.active &&
+               activeTeam.mons[i].hp != 0 && activeTeam.switchCooldown == 0
+                @inbounds decisions[2*i+7] = 1
+                @inbounds decisions[2*i+8] = 1
+            end
+        end
+    else
+        for i = 1:3
+            if i != activeTeam.active && activeTeam.mons[i].hp != 0
+                @inbounds decisions[2*i+13] = 1
+                @inbounds decisions[2*i+14] = 1
             end
         end
     end
@@ -52,9 +123,9 @@ end
 function play_decision(state::BattleState, decision::Int64)
     next_state = state
     if iseven(decision)
-        next_state = @set next_state.teams[next_state.agent].shielding = true
+        @inbounds next_state = @set next_state.teams[next_state.agent].shielding = true
     else
-        next_state = @set next_state.teams[next_state.agent].shielding = false
+        @inbounds next_state = @set next_state.teams[next_state.agent].shielding = false
     end
     next_state = @match decision begin
         3  || 4  => queue_fast_move(next_state)
@@ -73,10 +144,9 @@ function play_decision(state::BattleState, decision::Int64)
 end
 
 function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
-    next_state = play_decision(state, decision[1])
-    next_state = @set next_state.agent = get_other_agent(next_state.agent)
-    next_state = play_decision(next_state, decision[2])
-    next_state = @set next_state.agent = get_other_agent(next_state.agent)
+    @inbounds next_state = play_decision(state, decision[1])
+    @inbounds next_state = play_decision(@set next_state.agent = 2, decision[2])
+    next_state = @set next_state.agent = 1
 
     if !isnothing(findfirst(in(9:20), decision))
         next_state = evaluate_switches(next_state)
@@ -88,17 +158,16 @@ function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
     if !isnothing(findfirst(in([3, 4]), decision))
         next_state = evaluate_fast_moves(next_state)
     end
-    next_state = step_timers(next_state)
-    return next_state
+    return step_timers(next_state)
 end
 
 function play_battle(initial_state::BattleState)
     state = initial_state
     while true
         weights1 = get_possible_decisions(state)
-        weights2 = get_possible_decisions(switch_agent(state))
-        weights1[9:14] /= 2
-        weights2[9:14] /= 2
+        weights2 = get_possible_decisions(@set state.agent = 2)
+        @inbounds weights1[9:14] /= 2
+        @inbounds weights2[9:14] /= 2
         (iszero(sum(weights1)) || iszero(sum(weights2))) &&
             return get_battle_score(state)
 
@@ -110,9 +179,5 @@ function play_battle(initial_state::BattleState)
 end
 
 function get_battle_scores(initial_state::BattleState, N::Int64)
-    scores = zeros(N)
-    for i = 1:N
-        scores[i] = play_battle(initial_state)
-    end
-    return scores
+    return map(x -> play_battle(initial_state), 1:N)
 end;
