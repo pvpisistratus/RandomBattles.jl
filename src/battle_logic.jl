@@ -145,7 +145,7 @@ end
 
 function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
     @inbounds next_state = play_decision(state, decision[1])
-    @inbounds next_state = play_decision(@set next_state.agent = 2, decision[2])
+    @inbounds next_state = play_decision((@set next_state.agent = 2), decision[2])
     next_state = @set next_state.agent = 1
 
     if !isnothing(findfirst(in(9:20), decision))
