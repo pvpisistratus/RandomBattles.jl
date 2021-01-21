@@ -1,4 +1,4 @@
-using Distributions, Setfield, Match
+using Distributions, Setfield, Match, StaticArrays
 
 const possible_decisions = 20
 
@@ -78,7 +78,7 @@ function get_possible_decisions(state::IndividualBattleState; allow_nothing = fa
 end
 
 function get_possible_decisions(state::State; allow_nothing = false)
-    decisions = zeros(possible_decisions)
+    decisions = @SVector zeros(Int64, possible_decisions)
     @inbounds activeTeam = state.teams[state.agent]
     @inbounds activeMon = activeTeam.mons[activeTeam.active]
     if activeMon.hp > 0
@@ -158,7 +158,8 @@ function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
     if !isnothing(findfirst(in([3, 4]), decision))
         next_state = evaluate_fast_moves(next_state)
     end
-    return step_timers(next_state)
+    next_state = step_timers(next_state)
+    return next_state
 end
 
 function play_battle(initial_state::BattleState)
