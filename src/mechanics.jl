@@ -1,12 +1,12 @@
 using Setfield
 
 function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
-    @inbounds  return type_effectiveness[defenderTypes[1], moveType] *
+    @inbounds @fastmath return type_effectiveness[defenderTypes[1], moveType] *
            type_effectiveness[defenderTypes[2], moveType]
 end
 
 function get_buff_modifier(buff::Int8)
-    @inbounds  return buff > 0 ?
+    @inbounds @fastmath return buff > 0 ?
            (gamemaster["settings"]["buffDivisor"] + buff) /
            gamemaster["settings"]["buffDivisor"] :
            gamemaster["settings"]["buffDivisor"] /
@@ -21,7 +21,7 @@ function calculate_damage(
     move::Move,
     charge::Float64,
 )
-     return floor(move.power * move.stab *
+    @fastmath return floor(move.power * move.stab *
          ((attacker.stats.attack * get_buff_modifier(atkBuff)) /
           (defender.stats.defense * get_buff_modifier(defBuff))) *
          get_effectiveness(defender.types, move.moveType) * charge *
