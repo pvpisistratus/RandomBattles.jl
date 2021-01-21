@@ -78,7 +78,7 @@ function get_possible_decisions(state::IndividualBattleState; allow_nothing = fa
 end
 
 function get_possible_decisions(state::State; allow_nothing = false)
-    decisions = @SVector zeros(Int64, possible_decisions)
+    decisions = @MVector zeros(Int64, possible_decisions)
     @inbounds activeTeam = state.teams[state.agent]
     @inbounds activeMon = activeTeam.mons[activeTeam.active]
     if activeMon.hp > 0
