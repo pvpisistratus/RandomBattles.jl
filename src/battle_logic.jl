@@ -1,80 +1,17 @@
 using Distributions, Setfield, Match, StaticArrays
 
-const possible_decisions = 20
-
-function get_possible_decisions(state::BattleState; allow_nothing = false)
-    decisions = zeros(possible_decisions)
-    @inbounds activeTeam = state.teams[state.agent]
-    @inbounds activeMon = activeTeam.mons[activeTeam.active]
-    if activeMon.hp > 0
-        @inbounds decisions[1] = 1
-        @inbounds decisions[2] = 1
-        if activeMon.fastMoveCooldown <= 0
-            @inbounds decisions[3] = 1
-            @inbounds decisions[4] = 1
-            if !allow_nothing
-                @inbounds decisions[1] = 0
-                @inbounds decisions[2] = 0
-            end
-        end
-        @inbounds if activeMon.energy >= activeMon.chargedMoves[1].energy &&
-          activeMon.chargedMoves[1].moveType != 0
-            @inbounds decisions[5] = 1
-            @inbounds decisions[6] = 1
-        end
-        @inbounds if activeMon.energy >= activeMon.chargedMoves[2].energy &&
-          activeMon.chargedMoves[2].moveType != 0
-            @inbounds decisions[7] = 1
-            @inbounds decisions[8] = 1
-        end
-        if typeof(state) != IndividualBattleState
-            for i = 1:3
-                if i != activeTeam.active &&
-                   activeTeam.mons[i].hp != 0 && activeTeam.switchCooldown == 0
-                    @inbounds decisions[2*i+7] = 1
-                    @inbounds decisions[2*i+8] = 1
-                end
-            end
-        end
-    else
-        if typeof(state) != IndividualBattleState
-            for i = 1:3
-                if i != activeTeam.active && activeTeam.mons[i].hp != 0
-                    @inbounds decisions[2*i+13] = 1
-                    @inbounds decisions[2*i+14] = 1
-                end
-            end
-        end
-    end
-    return decisions
-end
-
 function get_possible_decisions(state::IndividualBattleState; allow_nothing = false)
-    decisions = zeros(possible_decisions)
     @inbounds activeTeam = state.teams[state.agent]
     @inbounds activeMon = activeTeam.mons[activeTeam.active]
-    activeMon.hp <= 0 && return decisions
-    @inbounds decisions[1] = 1
-    @inbounds decisions[2] = 1
-    if activeMon.fastMoveCooldown <= 0
-        @inbounds decisions[3] = 1
-        @inbounds decisions[4] = 1
-        if !allow_nothing
-            @inbounds decisions[1] = 0
-            @inbounds decisions[2] = 0
-        end
-    end
-    @inbounds if activeMon.energy >= activeMon.chargedMoves[1].energy &&
-      activeMon.chargedMoves[1].moveType != 0
-        @inbounds decisions[5] = 1
-        @inbounds decisions[6] = 1
-    end
-    @inbounds if activeMon.energy >= activeMon.chargedMoves[2].energy &&
-      activeMon.chargedMoves[2].moveType != 0
-        @inbounds decisions[7] = 1
-        @inbounds decisions[8] = 1
-    end
-    return decisions
+    @inbounds return @SVector [((allow_nothing || activeMon.fastMoveCooldown > 0) && activeMon.hp > 0) ? 1.0 : 0.0,
+                                ((allow_nothing || activeMon.fastMoveCooldown > 0) && activeMon.hp > 0) ? 1.0 : 0.0,
+                                (activeMon.fastMoveCooldown <= 0 && activeMon.hp > 0) ? 1.0 : 0.0,
+                                (activeMon.fastMoveCooldown <= 0 && activeMon.hp > 0) ? 1.0 : 0.0,
+                                (activeMon.energy >= activeMon.chargedMoves[1].energy && activeMon.hp > 0) ? 1.0 : 0.0,
+                                (activeMon.energy >= activeMon.chargedMoves[1].energy && activeMon.hp > 0) ? 1.0 : 0.0,
+                                (activeMon.energy >= activeMon.chargedMoves[2].energy && activeMon.hp > 0) ? 1.0 : 0.0,
+                                (activeMon.energy >= activeMon.chargedMoves[2].energy && activeMon.hp > 0) ? 1.0 : 0.0,
+                                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 end
 
 function get_possible_decisions(state::State; allow_nothing = false)
