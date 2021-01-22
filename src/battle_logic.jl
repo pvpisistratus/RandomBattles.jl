@@ -66,7 +66,7 @@ function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
         17 in decision || 18 in decision || 19 in decision || 20 in decision
         next_state = evaluate_switches(next_state)
     end
-    if 5 in decision || 6 in decision || 7 in decisions || 8 in decision
+    if 5 in decision || 6 in decision || 7 in decision || 8 in decision
         next_state = evaluate_charged_moves(next_state)
         next_state = evaluate_charged_moves(next_state)
     end
