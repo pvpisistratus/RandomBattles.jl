@@ -103,12 +103,7 @@ function get_possible_decisions(state::State; allow_nothing = false)
 end
 
 function play_decision(state::BattleState, decision::Int64)
-    next_state = state
-    if iseven(decision)
-        @inbounds next_state = @set next_state.teams[next_state.agent].shielding = true
-    else
-        @inbounds next_state = @set next_state.teams[next_state.agent].shielding = false
-    end
+    @inbounds next_state = @set state.teams[state.agent].shielding = iseven(decision)
     next_state = @match decision begin
         3  || 4  => queue_fast_move(next_state)
         5  || 6  => queue_charged_move(next_state, 1)
