@@ -11,6 +11,8 @@ struct StatBuffs
     def::Int8
 end
 
+const defaultBuff = StatBuffs(Int8(0), Int8(0))
+
 struct Move
     moveType::Int8
     stab::Float32
@@ -24,9 +26,11 @@ struct Move
     selfDefModifier::Int8
 end
 
+const defaultMove = Move(Int8(0), Float32(0.0), Int16(0), Int8(0), Int16(0), Float32(0.0), Int8(0), Int8(0), Int8(0), Int8(0))
+
 function Move(move_name::String, types)
     if move_name == "NONE"
-        return RandomBattles.Move(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        return defaultMove
     end
     move_index = findfirst(isequal(move_name), map(x ->
         gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))
@@ -72,11 +76,11 @@ function Move(gm_move::Dict{String,Any}, types)
                 gm_move["power"],
                 gm_move["energyGain"],
                 gm_move["cooldown"],
-                0.0,
-                0,
-                0,
-                0,
-                0,
+                Float32(0.0),
+                Int8(0),
+                Int8(0),
+                Int8(0),
+                Int8(0),
             )
     end
 end
@@ -209,7 +213,7 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
         chargedMoves,
         toString,
         hitpoints,
-        0,
+        Int8(0),
         fastMove.cooldown,
     )
 end

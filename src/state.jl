@@ -7,10 +7,14 @@ struct ChargedAction
     charge::Float64
 end
 
+const defaultCharge = ChargedAction(defaultMove, Float64(0.0))
+
 struct SwitchAction
     pokemon::Int8
     time::Int16
 end
+
+const defaultSwitch = SwitchAction(0, 0)
 
 struct State <: BattleState
     teams::SVector{2,Team}
@@ -26,27 +30,24 @@ function vectorize(state::State)
 end
 
 State(team1::Team, team2::Team) = State(
-    [team1, team2],
+    @SVector [team1, team2],
     1,
-    [false, false],
-    [
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-    ],
-    [SwitchAction(0, 0), SwitchAction(0, 0)],
+    @SVector [false, false],
+    @SVector [defaultCharge, defaultCharge],
+    @SVector [defaultSwitch, defaultSwitch],
 )
 
 State(teams::Array{Int64}; league = "great", cup = "open") = State(
-    [
+    @SVector [
      Team(
          Pokemon.(
             teams[1:(length(teams)÷2)],
             league = league,
             cup = cup,
          ),
-         StatBuffs(0, 0),
+         defaultBuffs,
          0,
-         2,
+         Int8(2),
          1,
          rand(Bool),
      ),
@@ -56,29 +57,23 @@ State(teams::Array{Int64}; league = "great", cup = "open") = State(
              league = league,
              cup = cup,
          ),
-         StatBuffs(0, 0),
+         defaultBuffs,
          0,
-         2,
+         Int8(2),
          1,
          rand(Bool),
      ),
     ],
     1,
-    [false, false],
-    [
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-    ],
-    [SwitchAction(0, 0), SwitchAction(0, 0)],
+    @SVector [false, false],
+    @SVector [defaultCharge, defaultCharge],
+    @SVector [defaultSwitch, defaultSwitch],
 )
 
 State(teams::Array{String}; league = "great", cup = "open") = State(
-    [Team(teams[1:3], league = league, cup = cup), Team(teams[4:6], league = league, cup = cup)],
+    @SVector [Team(teams[1:3], league = league, cup = cup), Team(teams[4:6], league = league, cup = cup)],
     1,
-    [false, false],
-    [
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-    ],
-    [SwitchAction(0, 0), SwitchAction(0, 0)],
+    @SVector [false, false],
+    @SVector [defaultCharge, defaultCharge],
+    @SVector [defaultSwitch, defaultSwitch],
 )

@@ -1,9 +1,5 @@
 using Setfield
 
-const defaultMove = ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0)
-const defaultSwitch = SwitchAction(0, 0)
-const defaultBuff StatBuffs(0, 0)
-
 function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
     @inbounds return type_effectiveness[defenderTypes[1], moveType] *
             type_effectiveness[defenderTypes[2], moveType]
@@ -151,9 +147,9 @@ function evaluate_charged_moves(state::BattleState)
             0,
             next_state.teams[2].switchCooldown - 10000,
         )
-        @inbounds if next_state.teams[get_other_agent(cmp)].shields > 0 &&
+        @inbounds if next_state.teams[get_other_agent(cmp)].shields > Int8(0) &&
             next_state.teams[get_other_agent(cmp)].shielding
-            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].shields -= 1
+            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].shields -= Int8(1)
         else
             @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp = max(
                 Int16(0),
@@ -169,7 +165,7 @@ function evaluate_charged_moves(state::BattleState)
         end
         next_state = apply_buffs(next_state, cmp)
         next_state = queue_fast_move(next_state, agent = get_other_agent(cmp))
-        @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultMove
+        @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
     end
     return next_state
 end
