@@ -21,10 +21,10 @@ Team(
     mons::Array{Int64};
     league::String = "great",
     cup::String = "open",
-) = Team(Pokemon.(mons, league = league, cup = cup), defaultBuffs, 0, Int8(2), 1, rand(Bool))
+) = Team(Pokemon.(mons, league = league, cup = cup), defaultBuff, 0, Int8(2), 1, rand(Bool))
 
 Team(mons::Array{String}; league::String = "great", cup::String = "open") =
-    Team(Pokemon.(mons, league = league, cup = cup), defaultBuffs, 0, Int8(2), 1, rand(Bool))
+    Team(Pokemon.(mons, league = league, cup = cup), defaultBuff, 0, Int8(2), 1, rand(Bool))
 
 Team(mons::Array{Pokemon}) =
     Team(mons, StatBuffs(0, 0), 0, 2, 1, rand(Bool))

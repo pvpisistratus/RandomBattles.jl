@@ -174,7 +174,7 @@ function evaluate_switches(state::BattleState)
     next_state = state
     @inbounds if next_state.switchesPending[1].pokemon != Int8(0)
         @inbounds next_state = @set next_state.teams[1].active = next_state.switchesPending[1].pokemon
-        @inbounds next_state = @set next_state.teams[1].buffs = defaultBuffs
+        @inbounds next_state = @set next_state.teams[1].buffs = defaultBuff
         @inbounds if next_state.switchesPending[1].time != Int16(0)
             @inbounds next_state = @set next_state.teams[2].switchCooldown = max(
                 0,
@@ -188,7 +188,7 @@ function evaluate_switches(state::BattleState)
 
     @inbounds if next_state.switchesPending[2].pokemon != 0
         @inbounds next_state = @set next_state.teams[2].active = next_state.switchesPending[2].pokemon
-        @inbounds next_state = @set next_state.teams[2].buffs = defaultBuffs
+        @inbounds next_state = @set next_state.teams[2].buffs = defaultBuff
         @inbounds if next_state.switchesPending[2].time != 0
             @inbounds next_state = @set next_state.teams[1].switchCooldown = max(
                 0,
