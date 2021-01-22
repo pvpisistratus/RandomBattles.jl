@@ -61,7 +61,7 @@ function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
     @inbounds next_state = play_decision((@set next_state.agent = 2), decision[2])
     next_state = @set next_state.agent = 1
 
-    if 9 in decision || 10 in decision || 11 in decisions || 12 in decision ||
+    if 9 in decision || 10 in decision || 11 in decision || 12 in decision ||
         13 in decision || 14 in decision || 15 in decision || 16 in decision ||
         17 in decision || 18 in decision || 19 in decision || 20 in decision
         next_state = evaluate_switches(next_state)
