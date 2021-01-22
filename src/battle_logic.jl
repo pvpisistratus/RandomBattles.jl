@@ -78,42 +78,42 @@ function get_possible_decisions(state::IndividualBattleState; allow_nothing = fa
 end
 
 function get_possible_decisions(state::State; allow_nothing = false)
-    decisions = @MVector zeros(Int64, possible_decisions)
+    decisions = @MVector zeros(Float64, possible_decisions)
     @inbounds activeTeam = state.teams[state.agent]
     @inbounds activeMon = activeTeam.mons[activeTeam.active]
     if activeMon.hp > 0
-        @inbounds decisions[1] = 1
-        @inbounds decisions[2] = 1
+        @inbounds decisions[1] = 1.0
+        @inbounds decisions[2] = 1.0
         if activeMon.fastMoveCooldown <= 0
-            @inbounds decisions[3] = 1
-            @inbounds decisions[4] = 1
+            @inbounds decisions[3] = 1.0
+            @inbounds decisions[4] = 1.0
             if !allow_nothing
-                @inbounds decisions[1] = 0
-                @inbounds decisions[2] = 0
+                @inbounds decisions[1] = 0.0
+                @inbounds decisions[2] = 0.0
             end
         end
         @inbounds if activeMon.energy >= activeMon.chargedMoves[1].energy &&
           activeMon.chargedMoves[1].moveType != 0
-            @inbounds decisions[5] = 1
-            @inbounds decisions[6] = 1
+            @inbounds decisions[5] = 1.0
+            @inbounds decisions[6] = 1.0
         end
         @inbounds if activeMon.energy >= activeMon.chargedMoves[2].energy &&
           activeMon.chargedMoves[2].moveType != 0
-            @inbounds decisions[7] = 1
-            @inbounds decisions[8] = 1
+            @inbounds decisions[7] = 1.0
+            @inbounds decisions[8] = 1.0
         end
         for i = 1:3
             if i != activeTeam.active &&
                activeTeam.mons[i].hp != 0 && activeTeam.switchCooldown == 0
-                @inbounds decisions[2*i+7] = 1
-                @inbounds decisions[2*i+8] = 1
+                @inbounds decisions[2*i+7] = 1.0
+                @inbounds decisions[2*i+8] = 1.0
             end
         end
     else
         for i = 1:3
             if i != activeTeam.active && activeTeam.mons[i].hp != 0
-                @inbounds decisions[2*i+13] = 1
-                @inbounds decisions[2*i+14] = 1
+                @inbounds decisions[2*i+13] = 1.0
+                @inbounds decisions[2*i+14] = 1.0
             end
         end
     end
