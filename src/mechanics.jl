@@ -6,11 +6,7 @@ function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
 end
 
 function get_buff_modifier(buff::Int8)
-    @inbounds return buff > 0 ?
-            (gamemaster["settings"]["buffDivisor"] + buff) /
-            gamemaster["settings"]["buffDivisor"] :
-            gamemaster["settings"]["buffDivisor"] /
-            (gamemaster["settings"]["buffDivisor"] - buff)
+    @inbounds return buff > 0 ? (4 + buff) / 4 : 4 / (4 - buff)
 end
 
 function calculate_damage(
@@ -104,7 +100,7 @@ function evaluate_fast_moves(state::BattleState)
             min(next_state.teams[1].mons[next_state.teams[1].active].energy +
                 next_state.teams[1].mons[next_state.teams[1].active].fastMove.energy, 100)
         @inbounds next_state = @set next_state.teams[2].mons[next_state.teams[2].active].hp = max(
-            0,
+            Int16(0),
             next_state.teams[2].mons[next_state.teams[2].active].hp -
             calculate_damage(
                 next_state.teams[1].mons[next_state.teams[1].active],
@@ -124,7 +120,7 @@ function evaluate_fast_moves(state::BattleState)
             min(next_state.teams[2].mons[next_state.teams[2].active].energy +
                 next_state.teams[2].mons[next_state.teams[2].active].fastMove.energy, 100)
         @inbounds next_state = @set next_state.teams[1].mons[next_state.teams[1].active].hp = max(
-            0,
+            Int16(0),
             next_state.teams[1].mons[next_state.teams[1].active].hp -
             calculate_damage(
                 next_state.teams[2].mons[next_state.teams[2].active],
@@ -159,7 +155,7 @@ function evaluate_charged_moves(state::BattleState)
             @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].shields -= 1
         else
             @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp = max(
-                0,
+                Int16(0),
                 next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp - calculate_damage(
                     next_state.teams[cmp].mons[next_state.teams[cmp].active],
                     next_state.teams[cmp].buffs.atk,
