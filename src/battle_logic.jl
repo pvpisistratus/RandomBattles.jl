@@ -78,15 +78,8 @@ function get_possible_decisions(state::IndividualBattleState; allow_nothing = fa
 end
 
 function get_possible_decisions(state::State; allow_nothing = false)
-    decisions = @MVector zeros(Float64, possible_decisions)
     @inbounds activeTeam = state.teams[state.agent]
     @inbounds activeMon = activeTeam.mons[activeTeam.active]
-    conditions = @SVector [activeMon.fastMoveCooldown > 0,
-        activeMon.energy < activeMon.chargedMoves[1].energy,
-        activeMon.energy < activeMon.chargedMoves[2].energy,
-        activeTeam.switchCooldown > 0,
-        activeTeam.active == 1, activeTeam.active == 2, activeTeam.active == 3,
-        activeTeam.mons[1].hp, activeTeam.mons[2].hp, activeTeam.mons[3].hp]
     @inbounds return @SVector [((allow_nothing || activeMon.fastMoveCooldown > 0) && activeMon.hp > 0) ? 1.0 : 0.0,
                                 ((allow_nothing || activeMon.fastMoveCooldown > 0) && activeMon.hp > 0) ? 1.0 : 0.0,
                                 (activeMon.fastMoveCooldown <= 0 && activeMon.hp > 0) ? 1.0 : 0.0,
