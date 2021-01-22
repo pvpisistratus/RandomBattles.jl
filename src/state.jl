@@ -30,15 +30,15 @@ function vectorize(state::State)
 end
 
 State(team1::Team, team2::Team) = State(
-    @SVector [team1, team2],
+    [team1, team2],
     1,
-    @SVector [false, false],
-    @SVector [defaultCharge, defaultCharge],
-    @SVector [defaultSwitch, defaultSwitch]
+    [false, false],
+    [defaultCharge, defaultCharge],
+    [defaultSwitch, defaultSwitch]
 )
 
 State(teams::Array{Int64}; league = "great", cup = "open") = State(
-    @SVector [
+    [
      Team(
          Pokemon.(
             teams[1:(length(teams)÷2)],
@@ -65,15 +65,15 @@ State(teams::Array{Int64}; league = "great", cup = "open") = State(
      ),
     ],
     1,
-    @SVector [false, false],
-    @SVector [defaultCharge, defaultCharge],
-    @SVector [defaultSwitch, defaultSwitch]
+    [false, false],
+    [defaultCharge, defaultCharge],
+    [defaultSwitch, defaultSwitch]
 )
 
 State(teams::Array{String}; league = "great", cup = "open") = State(
-    @SVector [Team(teams[1:3], league = league, cup = cup), Team(teams[4:6], league = league, cup = cup)],
+    [Team(teams[1:3], league = league, cup = cup), Team(teams[4:6], league = league, cup = cup)],
     1,
-    @SVector [false, false],
-    @SVector [defaultCharge, defaultCharge],
-    @SVector [defaultSwitch, defaultSwitch]
+    [false, false],
+    [defaultCharge, defaultCharge],
+    [defaultSwitch, defaultSwitch]
 )
