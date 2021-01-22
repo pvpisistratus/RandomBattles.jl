@@ -35,7 +35,7 @@ function queue_charged_move(state::BattleState, move::Int64)
     )
 end
 
-function queue_switch(state::BattleState, switchTo::Int64; time::Int64 = 0)
+function queue_switch(state::BattleState, switchTo::Int64; time::Int16 = Int16(0))
     @inbounds return @set state.switchesPending[state.agent] = SwitchAction(
         switchTo,
         time,
@@ -172,10 +172,10 @@ end
 
 function evaluate_switches(state::BattleState)
     next_state = state
-    @inbounds if next_state.switchesPending[1].pokemon != 0
+    @inbounds if next_state.switchesPending[1].pokemon != Int8(0)
         @inbounds next_state = @set next_state.teams[1].active = next_state.switchesPending[1].pokemon
         @inbounds next_state = @set next_state.teams[1].buffs = defaultBuffs
-        @inbounds if next_state.switchesPending[1].time != 0
+        @inbounds if next_state.switchesPending[1].time != Int16(0)
             @inbounds next_state = @set next_state.teams[2].switchCooldown = max(
                 0,
                 next_state.teams[2].switchCooldown - next_state.switchesPending[1].time - 500,

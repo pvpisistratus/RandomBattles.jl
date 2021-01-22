@@ -14,7 +14,7 @@ struct SwitchAction
     time::Int16
 end
 
-const defaultSwitch = SwitchAction(0, 0)
+const defaultSwitch = SwitchAction(Int8(0), Int16(0))
 
 struct State <: BattleState
     teams::SVector{2,Team}
@@ -34,7 +34,7 @@ State(team1::Team, team2::Team) = State(
     1,
     @SVector [false, false],
     @SVector [defaultCharge, defaultCharge],
-    @SVector [defaultSwitch, defaultSwitch],
+    @SVector [defaultSwitch, defaultSwitch]
 )
 
 State(teams::Array{Int64}; league = "great", cup = "open") = State(
@@ -67,7 +67,7 @@ State(teams::Array{Int64}; league = "great", cup = "open") = State(
     1,
     @SVector [false, false],
     @SVector [defaultCharge, defaultCharge],
-    @SVector [defaultSwitch, defaultSwitch],
+    @SVector [defaultSwitch, defaultSwitch]
 )
 
 State(teams::Array{String}; league = "great", cup = "open") = State(
@@ -75,5 +75,5 @@ State(teams::Array{String}; league = "great", cup = "open") = State(
     1,
     @SVector [false, false],
     @SVector [defaultCharge, defaultCharge],
-    @SVector [defaultSwitch, defaultSwitch],
+    @SVector [defaultSwitch, defaultSwitch]
 )
