@@ -61,14 +61,16 @@ function play_turn(state::BattleState, decision::Tuple{Int64,Int64})
     @inbounds next_state = play_decision((@set next_state.agent = 2), decision[2])
     next_state = @set next_state.agent = 1
 
-    if !isnothing(findfirst(in(9:20), decision))
+    if 9 in decision || 10 in decision || 11 in decisions || 12 in decision ||
+        13 in decision || 14 in decision || 15 in decision || 16 in decision ||
+        17 in decision || 18 in decision || 19 in decision || 20 in decision
         next_state = evaluate_switches(next_state)
     end
-    if !isnothing(findfirst(in([5, 6, 7, 8]), decision))
+    if 5 in decision || 6 in decision || 7 in decisions || 8 in decision
         next_state = evaluate_charged_moves(next_state)
         next_state = evaluate_charged_moves(next_state)
     end
-    if !isnothing(findfirst(in([3, 4]), decision))
+    if 3 in decision || 4 in decision
         next_state = evaluate_fast_moves(next_state)
     end
     next_state = step_timers(next_state)
