@@ -1,15 +1,15 @@
-using Setfield
+using Setfield, Memoize
 
-function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
+@memoize function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
     @inbounds return type_effectiveness[defenderTypes[1], moveType] *
             type_effectiveness[defenderTypes[2], moveType]
 end
 
-function get_buff_modifier(buff::Int8)
+@memoize function get_buff_modifier(buff::Int8)
     @inbounds return buff >= Int8(0) ? (buff == Int8(0) ? 12 : (4 + buff) * 3) : 48 ÷ (4 - buff)
 end
 
-function calculate_damage(
+@memoize function calculate_damage(
     attacker::Pokemon,
     atkBuff::Int8,
     defender::Pokemon,
@@ -158,7 +158,7 @@ function evaluate_charged_moves(state::BattleState)
     return next_state
 end
 
-function evaluate_switches(state::BattleState)
+function evaluate_switches(state::State)
     next_state = state
     @inbounds if next_state.switchesPending[1].pokemon != Int8(0)
         @inbounds next_state = @set next_state.teams[1].active = next_state.switchesPending[1].pokemon
