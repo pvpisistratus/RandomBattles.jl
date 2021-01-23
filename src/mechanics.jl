@@ -53,28 +53,29 @@ end
 
 function apply_buffs(state::BattleState, cmp::Int8)
     next_state = state
-    @inbounds if rand(Int8(1):Int8(100)) < next_state.chargedMovesPending[cmp].move.buffChance
+    move = next_state.teams[cmp].mons[state.teams[cmp].active].chargedMoves[next_state.chargedMovesPending[cmp].move]
+    @inbounds if rand(Int8(0):Int8(99)) < move.buffChance
         @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs.atk = clamp(
             next_state.teams[get_other_agent(cmp)].buffs.atk +
-            next_state.chargedMovesPending[cmp].move.oppAtkModifier,
+            move.oppAtkModifier,
             Int8(-4),
             Int8(4),
         )
         @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs.def = clamp(
             next_state.teams[get_other_agent(cmp)].buffs.def +
-            next_state.chargedMovesPending[cmp].move.oppDefModifier,
+            move.oppDefModifier,
             Int8(-4),
             Int8(4),
         )
         @inbounds next_state = @set next_state.teams[cmp].buffs.atk = clamp(
             next_state.teams[cmp].buffs.atk +
-            next_state.chargedMovesPending[cmp].move.selfAtkModifier,
+            move.selfAtkModifier,
             Int8(-4),
             Int8(4),
         )
         @inbounds next_state = @set next_state.teams[cmp].buffs.def = clamp(
             next_state.teams[cmp].buffs.def +
-            next_state.chargedMovesPending[cmp].move.selfDefModifier,
+            move.selfDefModifier,
             Int8(-4),
             Int8(4),
         )
