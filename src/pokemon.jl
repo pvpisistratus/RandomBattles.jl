@@ -215,3 +215,5 @@ function Pokemon(mon::String; league = "great", cup = "open")
             league = league, cup = cup)
     end
 end
+
+setindex(arr::StaticArrays.SVector{3, Pokemon}, p::Pokemon, i::Int8) = i == Int8(1) ? setindex(arr, p, 1) : i == Int8(2) ? setindex(arr, t, 2) : setindex(arr, t, 3)
