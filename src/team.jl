@@ -30,5 +30,5 @@ Team(mons::Array{Pokemon}) =
     Team(mons, defaultBuff, Int8(0), Int8(2), Int8(1), rand(Bool))
 
 function Setfield.:setindex(arr::StaticArrays.SVector{2, Team}, t::Team, i::Int8)
-    return i == Int8(1) ? setindex(arr, t, 1) : setindex(arr, t, 2)
+    return setindex(arr, t, Int64(i))
 end
