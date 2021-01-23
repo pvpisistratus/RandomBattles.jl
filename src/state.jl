@@ -24,6 +24,10 @@ end
 
 const defaultSwitch = SwitchAction(Int8(0), Int8(0))
 
+function Setfield.:setindex(arr::StaticArrays.SVector{2, Bool}, b::Bool, i::Int8)
+    return i == Int8(1) ? setindex(arr, b, 1) : setindex(arr, b, 2)
+end
+
 struct State <: BattleState
     teams::SVector{2,Team}
     agent::Int8
