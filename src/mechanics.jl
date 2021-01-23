@@ -24,7 +24,7 @@ function calculate_damage(
         Int64(get_buff_modifier(defBuff)) * 1_280_000_000) + 1)
 end
 
-function queue_fast_move(state::BattleState; agent::Int64 = state.agent)
+function queue_fast_move(state::BattleState; agent::Int8 = state.agent)
     @inbounds return @set state.fastMovesPending[agent] = true
 end
 
