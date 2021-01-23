@@ -99,7 +99,7 @@ function evaluate_fast_moves(state::BattleState)
                 next_state.teams[2].mons[next_state.teams[2].active],
                 next_state.teams[2].buffs.def,
                 next_state.teams[1].mons[next_state.teams[1].active].fastMove,
-                1.0,
+                100,
             ),
         )
         @inbounds next_state = @set next_state.fastMovesPending[1] = false
@@ -119,7 +119,7 @@ function evaluate_fast_moves(state::BattleState)
                 next_state.teams[1].mons[next_state.teams[1].active],
                 next_state.teams[1].buffs.def,
                 next_state.teams[2].mons[next_state.teams[2].active].fastMove,
-                1.0,
+                100,
             ),
         )
         @inbounds next_state = @set next_state.fastMovesPending[2] = false
