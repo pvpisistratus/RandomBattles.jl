@@ -7,11 +7,19 @@ struct ChargedAction
     charge::Int8
 end
 
+function Setfield.:setindex(arr::StaticArrays.SVector{2, ChargedAction}, c::ChargedAction, i::Int8)
+    return i == Int8(1) ? setindex(arr, c, 1) : setindex(arr, c, 2)
+end
+
 const defaultCharge = ChargedAction(Int8(0), Int8(0))
 
 struct SwitchAction
     pokemon::Int8
     time::Int8
+end
+
+function Setfield.:setindex(arr::StaticArrays.SVector{2, SwitchAction}, s::SwitchAction, i::Int8)
+    return i == Int8(1) ? setindex(arr, s, 1) : setindex(arr, s, 2)
 end
 
 const defaultSwitch = SwitchAction(Int8(0), Int8(0))
