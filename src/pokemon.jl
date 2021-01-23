@@ -217,5 +217,5 @@ function Pokemon(mon::String; league = "great", cup = "open")
 end
 
 function Setfield.:setindex(arr::StaticArrays.SVector{3, Pokemon}, p::Pokemon, i::Int8)
-    return i == Int8(1) ? setindex(arr, p, 1) : i == Int8(2) ? setindex(arr, t, 2) : setindex(arr, t, 3)
+    return i == Int8(1) ? setindex(arr, p, 1) : i == Int8(2) ? setindex(arr, p, 2) : setindex(arr, p, 3)
 end
