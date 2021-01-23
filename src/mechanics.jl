@@ -1,15 +1,15 @@
-using Setfield, Memoize
+using Setfield
 
-@memoize function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
+function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
     @inbounds return type_effectiveness[defenderTypes[1], moveType] *
             type_effectiveness[defenderTypes[2], moveType]
 end
 
-@memoize function get_buff_modifier(buff::Int8)
+function get_buff_modifier(buff::Int8)
     @inbounds return buff >= Int8(0) ? (buff == Int8(0) ? 12 : (4 + buff) * 3) : 48 ÷ (4 - buff)
 end
 
-@memoize function calculate_damage(
+function calculate_damage(
     attacker::Pokemon,
     atkBuff::Int8,
     defender::Pokemon,
