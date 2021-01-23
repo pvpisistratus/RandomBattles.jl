@@ -131,14 +131,15 @@ function get_summary_stats(
     expected_battle_score,
     theoreticalTeams,
 )
-    summaryStats = Array{Any}(undef, length(theoreticalTeams), 5)
-    for i = 1:length(theoreticalTeams)
-        @inbounds summaryStats[
-            i,
-            :,
-        ] = [expected_wins[i] expected_battle_score[i] theoreticalTeams[i].mons[1].toString theoreticalTeams[i].mons[2].toString theoreticalTeams[i].mons[3].toString]
-    end
-    return summaryStats
+    println("Sorry, this is broken")
+    #summaryStats = Array{Any}(undef, length(theoreticalTeams), 5)
+    #for i = 1:length(theoreticalTeams)
+    #    @inbounds summaryStats[
+    #        i,
+    #        :,
+    #    ] = [expected_wins[i] expected_battle_score[i] theoreticalTeams[i].mons[1].toString theoreticalTeams[i].mons[2].toString theoreticalTeams[i].mons[3].toString]
+    #end
+    #return summaryStats
 end;
 
 function rank(numMons, indigo_file, outfile; league = "great")

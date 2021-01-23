@@ -1,6 +1,6 @@
 using Setfield, Match
 
-get_other_agent(agent::Int64) = agent == 1 ? agent = 2 : agent = 1
+get_other_agent(agent::Int8) = agent == Int8(1) ? Int8(2) : Int8(1)
 
 switch_agent(state::BattleState) = @set state.agent = get_other_agent(state.agent)
 
@@ -22,25 +22,25 @@ end
 
 function get_type_id(typeName::String)
     type_id = @match typeName begin
-        "normal"   => 1
-        "fighting" => 2
-        "flying"   => 3
-        "poison"   => 4
-        "ground"   => 5
-        "rock"     => 6
-        "bug"      => 7
-        "ghost"    => 8
-        "steel"    => 9
-        "fire"     => 10
-        "water"    => 11
-        "grass"    => 12
-        "electric" => 13
-        "psychic"  => 14
-        "ice"      => 15
-        "dragon"   => 16
-        "dark"     => 17
-        "fairy"    => 18
-        _          => 19
+        "normal"   => Int8(1)
+        "fighting" => Int8(2)
+        "flying"   => Int8(3)
+        "poison"   => Int8(4)
+        "ground"   => Int8(5)
+        "rock"     => Int8(6)
+        "bug"      => Int8(7)
+        "ghost"    => Int8(8)
+        "steel"    => Int8(9)
+        "fire"     => Int8(10)
+        "water"    => Int8(11)
+        "grass"    => Int8(12)
+        "electric" => Int8(13)
+        "psychic"  => Int8(14)
+        "ice"      => Int8(15)
+        "dragon"   => Int8(16)
+        "dark"     => Int8(17)
+        "fairy"    => Int8(18)
+        _          => Int8(19)
     end
     return type_id
 end
@@ -112,27 +112,11 @@ function get_battle_score(state::BattleState)
 end
 
 function step_timers(state::BattleState)
-    next_state = @set state.teams[1].switchCooldown = max(
-        0,
-        state.teams[1].switchCooldown - 500,
-    )
-    if next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown >= 0
-        next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = max(
-            0,
-            state.teams[1].mons[state.teams[1].active].fastMoveCooldown - 500,
-        )
-    end
-    next_state = @set next_state.teams[2].switchCooldown = max(
-        0,
-        next_state.teams[2].switchCooldown - 500,
-    )
-
-    if next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown >= 0
-        next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = max(
-            0,
-            next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown - 500,
-        )
-    end
-
+    next_state = @set state.teams[1].switchCooldown = max(Int8(0), state.teams[1].switchCooldown - Int8(1))
+    next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = max(Int8(0),
+        state.teams[1].mons[state.teams[1].active].fastMoveCooldown - Int8(1))
+    next_state = @set next_state.teams[2].switchCooldown = max(Int8(0), next_state.teams[2].switchCooldown - Int8(1))
+    next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = max(Int8(0),
+        state.teams[2].mons[state.teams[2].active].fastMoveCooldown - Int8(1))
     return next_state
 end

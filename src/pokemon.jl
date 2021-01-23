@@ -1,8 +1,8 @@
 using StaticArrays
 
 struct Stats
-    attack::Float32
-    defense::Float32
+    attack::UInt16
+    defense::UInt16
     hitpoints::Int16
 end
 
@@ -15,18 +15,18 @@ const defaultBuff = StatBuffs(Int8(0), Int8(0))
 
 struct Move
     moveType::Int8
-    stab::Float32
-    power::Int16
+    stab::Int8
+    power::UInt8
     energy::Int8
-    cooldown::Int16
-    buffChance::Float32
+    cooldown::Int8
+    buffChance::Int8
     oppAtkModifier::Int8
     oppDefModifier::Int8
     selfAtkModifier::Int8
     selfDefModifier::Int8
 end
 
-const defaultMove = Move(Int8(0), Float32(0.0), Int16(0), Int8(0), Int16(0), Float32(0.0), Int8(0), Int8(0), Int8(0), Int8(0))
+const defaultMove = Move(Int8(0), Int8(0), UInt8(0), Int8(0), Int8(0), Int8(0), Int8(0), Int8(0), Int8(0), Int8(0))
 
 function Move(move_name::String, types)
     if move_name == "NONE"
@@ -42,41 +42,25 @@ function Move(gm_move::Dict{String,Any}, types)
     if gm_move["energyGain"] == 0
         return Move(
             get_type_id(gm_move["type"]),
-            (get_type_id(gm_move["type"]) in types) ? 1.2 : 1.0,
-            gm_move["power"],
-            gm_move["energy"],
-            0,
+            (get_type_id(gm_move["type"]) in types) ? Int8(12) : Int8(10),
+            UInt8(gm_move["power"]),
+            Int8(gm_move["energy"]),
+            Int8(0),
             haskey(gm_move, "buffs") ?
-            parse(Float64, gm_move["buffApplyChance"]) : 0.0,
-            haskey(
-                gm_move,
-                "buffs",
-            ) && gm_move["buffTarget"] == "opponent" ?
-            Int(gm_move["buffs"][1]) : 0,
-            haskey(
-                gm_move,
-                "buffs",
-            ) && gm_move["buffTarget"] == "opponent" ?
-            Int(gm_move["buffs"][2]) : 0,
-            haskey(
-                gm_move,
-                "buffs",
-            ) && gm_move["buffTarget"] == "self" ?
-            Int(gm_move["buffs"][1]) : 0,
-            haskey(
-                gm_move,
-                "buffs",
-            ) && gm_move["buffTarget"] == "self" ?
-            Int(gm_move["buffs"][2]) : 0,
+            floor(Int8, parse(Float64, gm_move["buffApplyChance"]) * 100) : Int8(0),
+            haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][1]) : Int8(0),
+            haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][2]) : Int8(0),
+            haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][1]) : Int8(0),
+            haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][2]) : Int8(0)
         )
     else
         return Move(
                 get_type_id(gm_move["type"]),
-                (get_type_id(gm_move["type"]) in types) ? 1.2 : 1,
-                gm_move["power"],
-                gm_move["energyGain"],
-                gm_move["cooldown"],
-                Float32(0.0),
+                (get_type_id(gm_move["type"]) in types) ? Int8(12) : Int8(1),
+                UInt8(gm_move["power"]),
+                Int8(gm_move["energyGain"]),
+                Int8(gm_move["cooldown"] ÷ 500),
+                Int8(0),
                 Int8(0),
                 Int8(0),
                 Int8(0),
@@ -91,54 +75,53 @@ struct Pokemon
     stats::Stats
     fastMove::Move
     chargedMoves::SVector{2,Move}
-    toString::String
 
     #These values are initialized, but change throughout the battle
     hp::Int16                 #Initially hp stat of mon
     energy::Int8              #Initially 0
-    fastMoveCooldown::Int16   #Initially based on fast move
+    fastMoveCooldown::Int8   #Initially based on fast move
 end
 
 function vectorize(mon::Pokemon)
-    return [1 in mon.types, 2 in mon.types, 3 in mon.types, 4 in mon.types,
-        5 in mon.types, 6 in mon.types, 7 in mon.types, 8 in mon.types,
-        9 in mon.types, 10 in mon.types, 11 in mon.types, 12 in mon.types,
-        13 in mon.types, 14 in mon.types, 15 in mon.types, 16 in mon.types,
-        17 in mon.types, 18 in mon.types, mon.stats.attack, mon.stats.defense,
-        mon.stats.hitpoints, 1 == mon.fastMove.moveType,
-        2 == mon.fastMove.moveType, 3 == mon.fastMove.moveType,
-        4 == mon.fastMove.moveType, 5 == mon.fastMove.moveType,
-        6 == mon.fastMove.moveType, 7 == mon.fastMove.moveType,
-        8 == mon.fastMove.moveType, 9 == mon.fastMove.moveType,
-        10 == mon.fastMove.moveType, 11 == mon.fastMove.moveType,
-        12 == mon.fastMove.moveType, 13 == mon.fastMove.moveType,
-        14 == mon.fastMove.moveType, 15 == mon.fastMove.moveType,
-        16 == mon.fastMove.moveType, 17 == mon.fastMove.moveType,
-        18 == mon.fastMove.moveType, mon.fastMove.stab,
+    @inbounds return [Int8(1) in mon.types, Int8(2) in mon.types, Int8(3) in mon.types, Int8(4) in mon.types,
+        Int8(5) in mon.types, Int8(6) in mon.types, Int8(7) in mon.types, Int8(8) in mon.types,
+        Int8(9) in mon.types, Int8(10) in mon.types, Int8(11) in mon.types, Int8(12) in mon.types,
+        Int8(13) in mon.types, Int8(14) in mon.types, Int8(15) in mon.types, Int8(16) in mon.types,
+        Int8(17) in mon.types, Int8(18) in mon.types, mon.stats.attack, mon.stats.defense,
+        mon.stats.hitpoints, Int8(1) == mon.fastMove.moveType,
+        Int8(2) == mon.fastMove.moveType, Int8(3) == mon.fastMove.moveType,
+        Int8(4) == mon.fastMove.moveType, Int8(5) == mon.fastMove.moveType,
+        Int8(6) == mon.fastMove.moveType, Int8(7) == mon.fastMove.moveType,
+        Int8(8) == mon.fastMove.moveType, Int8(9) == mon.fastMove.moveType,
+        Int8(10) == mon.fastMove.moveType, Int8(11) == mon.fastMove.moveType,
+        Int8(12) == mon.fastMove.moveType, Int8(13) == mon.fastMove.moveType,
+        Int8(14) == mon.fastMove.moveType, Int8(15) == mon.fastMove.moveType,
+        Int8(16) == mon.fastMove.moveType, Int8(17) == mon.fastMove.moveType,
+        Int8(18) == mon.fastMove.moveType, mon.fastMove.stab,
         mon.fastMove.power, mon.fastMove.energy, mon.fastMove.cooldown,
-        1 == mon.chargedMoves[1].moveType, 2 == mon.chargedMoves[1].moveType,
-        3 == mon.chargedMoves[1].moveType, 4 == mon.chargedMoves[1].moveType,
-        5 == mon.chargedMoves[1].moveType, 6 == mon.chargedMoves[1].moveType,
-        7 == mon.chargedMoves[1].moveType, 8 == mon.chargedMoves[1].moveType,
-        9 == mon.chargedMoves[1].moveType, 10 == mon.chargedMoves[1].moveType,
-        11 == mon.chargedMoves[1].moveType, 12 == mon.chargedMoves[1].moveType,
-        13 == mon.chargedMoves[1].moveType, 14 == mon.chargedMoves[1].moveType,
-        15 == mon.chargedMoves[1].moveType, 16 == mon.chargedMoves[1].moveType,
-        17 == mon.chargedMoves[1].moveType, 18 == mon.chargedMoves[1].moveType,
+        Int8(1) == mon.chargedMoves[1].moveType, Int8(2) == mon.chargedMoves[1].moveType,
+        Int8(3) == mon.chargedMoves[1].moveType, Int8(4) == mon.chargedMoves[1].moveType,
+        Int8(5) == mon.chargedMoves[1].moveType, Int8(6) == mon.chargedMoves[1].moveType,
+        Int8(7) == mon.chargedMoves[1].moveType, Int8(8) == mon.chargedMoves[1].moveType,
+        Int8(9) == mon.chargedMoves[1].moveType, Int8(10) == mon.chargedMoves[1].moveType,
+        Int8(11) == mon.chargedMoves[1].moveType, Int8(12) == mon.chargedMoves[1].moveType,
+        Int8(13) == mon.chargedMoves[1].moveType, Int8(14) == mon.chargedMoves[1].moveType,
+        Int8(15) == mon.chargedMoves[1].moveType, Int8(16) == mon.chargedMoves[1].moveType,
+        Int8(17) == mon.chargedMoves[1].moveType, Int8(18) == mon.chargedMoves[1].moveType,
         mon.chargedMoves[1].stab, mon.chargedMoves[1].power,
         mon.chargedMoves[1].energy, mon.chargedMoves[1].buffChance,
         mon.chargedMoves[1].oppAtkModifier, mon.chargedMoves[1].oppDefModifier,
         mon.chargedMoves[1].selfAtkModifier,
-        mon.chargedMoves[1].selfDefModifier, 1 == mon.chargedMoves[2].moveType,
-        2 == mon.chargedMoves[2].moveType, 3 == mon.chargedMoves[2].moveType,
-        4 == mon.chargedMoves[2].moveType, 5 == mon.chargedMoves[2].moveType,
-        6 == mon.chargedMoves[2].moveType, 7 == mon.chargedMoves[2].moveType,
-        8 == mon.chargedMoves[2].moveType, 9 == mon.chargedMoves[2].moveType,
-        10 == mon.chargedMoves[2].moveType, 11 == mon.chargedMoves[2].moveType,
-        12 == mon.chargedMoves[2].moveType, 13 == mon.chargedMoves[2].moveType,
-        14 == mon.chargedMoves[2].moveType, 15 == mon.chargedMoves[2].moveType,
-        16 == mon.chargedMoves[2].moveType, 17 == mon.chargedMoves[2].moveType,
-        18 == mon.chargedMoves[2].moveType, mon.chargedMoves[2].stab,
+        mon.chargedMoves[1].selfDefModifier, Int8(1) == mon.chargedMoves[2].moveType,
+        Int8(2) == mon.chargedMoves[2].moveType, Int8(3) == mon.chargedMoves[2].moveType,
+        Int8(4) == mon.chargedMoves[2].moveType, Int8(5) == mon.chargedMoves[2].moveType,
+        Int8(6) == mon.chargedMoves[2].moveType, Int8(7) == mon.chargedMoves[2].moveType,
+        Int8(8) == mon.chargedMoves[2].moveType, Int8(9) == mon.chargedMoves[2].moveType,
+        Int8(10) == mon.chargedMoves[2].moveType, Int8(11) == mon.chargedMoves[2].moveType,
+        Int8(12) == mon.chargedMoves[2].moveType, Int8(13) == mon.chargedMoves[2].moveType,
+        Int8(14) == mon.chargedMoves[2].moveType, Int8(15) == mon.chargedMoves[2].moveType,
+        Int8(16) == mon.chargedMoves[2].moveType, Int8(17) == mon.chargedMoves[2].moveType,
+        Int8(18) == mon.chargedMoves[2].moveType, mon.chargedMoves[2].stab,
         mon.chargedMoves[2].power, mon.chargedMoves[2].energy,
         mon.chargedMoves[2].buffChance, mon.chargedMoves[2].oppAtkModifier,
         mon.chargedMoves[2].oppDefModifier, mon.chargedMoves[2].selfAtkModifier,
@@ -154,12 +137,12 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
     types = get_type_id.(convert(Array{String}, gm["types"]))
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
-        level, atk, def, hp = parse.(Int, custom_stats)
+        level, atk, def, hp = parse.(Int8, custom_stats)
         if level == 0
             function get_cp(lvl)
                 attack = (atk + gm["baseStats"]["atk"]) * cpm[lvl]
                 defense = (def + gm["baseStats"]["def"]) * cpm[lvl]
-                hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[lvl])
+                hitpoints = floor(Int16, (hp + gm["baseStats"]["hp"]) * cpm[lvl])
                 cp = floor(max(10, (attack * sqrt(defense) * sqrt(hitpoints)) / 10.0))
                 return cp
             end
@@ -173,9 +156,9 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
         def = gm["defaultIVs"]["cp$(cp_limit)"][3]
         hp = gm["defaultIVs"]["cp$(cp_limit)"][4]
     end
-    attack = (atk + gm["baseStats"]["atk"]) * cpm[level]
-    defense = (def + gm["baseStats"]["def"]) * cpm[level]
-    hitpoints = floor((hp + gm["baseStats"]["hp"]) * cpm[level])
+    attack = floor(UInt16, (atk + gm["baseStats"]["atk"]) * cpm[level] * 100)
+    defense = floor(UInt16, (def + gm["baseStats"]["def"]) * cpm[level] * 100)
+    hitpoints = floor(Int16, (hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
     if haskey(rankings[i], "moveStr")
         moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
@@ -196,22 +179,16 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
         chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
         chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[3]],)]
         chargedMoves = [Move(chargedMove1Gm, types), Move(chargedMove2Gm, types)]
-        toString = rankings[i]["speciesId"] * "," * fastMovesAvailable[moves[1]+1] *
-                   "," * chargedMovesAvailable[moves[2]] * "," *
-                   chargedMovesAvailable[moves[3]]
     else
         moveset = custom_moveset == ["none"] ? rankings[i]["moveset"] : custom_moveset
         fastMove = Move(moveset[1]::String, types)
         chargedMoves = [Move(moveset[2]::String, types), Move(moveset[3]::String, types)]
-        toString = rankings[i]["speciesId"] * "," * moveset[1] *
-                   "," * moveset[2] * "," * moveset[3]
     end
     return Pokemon(
         types,
         stats,
         fastMove,
         chargedMoves,
-        toString,
         hitpoints,
         Int8(0),
         fastMove.cooldown,

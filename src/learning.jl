@@ -68,10 +68,11 @@ function play_nn_random_battle(initial_state::BattleState, model1)
 end
 
 function testing_best(models, meta)
-    scores = map(x -> Mean(), 1:length(models))
-    for j in 1:length(models), i in 1:300
-        s = State([meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString])
-        fit!(scores[j], play_nn_random_battle(s, models[j]))
-    end
-    return findmax(map(x -> scores[x].μ, 1:length(models)))
+    #scores = map(x -> Mean(), 1:length(models))
+    println("Sorry, this is broken")
+    #for j in 1:length(models), i in 1:300
+    #    s = State([meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString meta.pokemon[rand(meta.weights)].toString])
+    #    fit!(scores[j], play_nn_random_battle(s, models[j]))
+    #end
+    #return findmax(map(x -> scores[x].μ, 1:length(models)))
 end
