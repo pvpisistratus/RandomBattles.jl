@@ -1,4 +1,4 @@
-using StaticArrays
+using StaticArrays, Setfield
 
 struct Stats
     attack::UInt16
@@ -216,4 +216,6 @@ function Pokemon(mon::String; league = "great", cup = "open")
     end
 end
 
-StaticArrays.:setindex(arr::StaticArrays.SVector{3, Pokemon}, p::Pokemon, i::Int8) = i == Int8(1) ? setindex(arr, p, 1) : i == Int8(2) ? setindex(arr, t, 2) : setindex(arr, t, 3)
+function Setfield.:setindex(arr::StaticArrays.SVector{3, Pokemon}, p::Pokemon, i::Int8)
+    return i == Int8(1) ? setindex(arr, p, 1) : i == Int8(2) ? setindex(arr, t, 2) : setindex(arr, t, 3)
+end
