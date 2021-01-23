@@ -29,4 +29,4 @@ Team(mons::Array{String}; league::String = "great", cup::String = "open") =
 Team(mons::Array{Pokemon}) =
     Team(mons, defaultBuff, Int8(0), Int8(2), Int8(1), rand(Bool))
 
-setindex(arr::StaticArrays.SVector{2, Team}, t::Team, i::Int8) = i == Int8(1) ? setindex(arr, t, 1) : setindex(arr, t, 2)
+StaticArrays.:setindex(arr::StaticArrays.SVector{2, Team}, t::Team, i::Int8) = i == Int8(1) ? setindex(arr, t, 1) : setindex(arr, t, 2)
