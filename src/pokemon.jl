@@ -219,3 +219,7 @@ end
 function Setfield.:setindex(arr::StaticArrays.SVector{3, Pokemon}, p::Pokemon, i::Int8)
     return setindex(arr, p, Int64(i))
 end
+
+function Setfield.:setindex(arr::StaticArrays.SVector{1, Pokemon}, p::Pokemon, i::Int8)
+    return setindex(arr, p, 1)
+end
