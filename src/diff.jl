@@ -1,4 +1,4 @@
-function diff(p1::RandomBattles.Pokemon, p2::RandomBattles.Pokemon)
+function diff(p1::Pokemon, p2::Pokemon)
     if p1.hp != p2.hp
         println("Hp changed from $(p1.hp) to $(p2.hp)")
     end
@@ -10,7 +10,7 @@ function diff(p1::RandomBattles.Pokemon, p2::RandomBattles.Pokemon)
     end
 end
 
-function diff(b1::RandomBattles.StatBuffs, b2::RandomBattles.StatBuffs)
+function diff(b1::StatBuffs, b2::StatBuffs)
     if b1.atk != s2.atk
         println("Attack changed from $(s1.atk) to $(s2.atk)")
     end
@@ -49,7 +49,21 @@ function diff(t1::Team, t2::Team)
     end
 end
 
-function diff(s1::BattleState, s2::BattleState)
+function diff(s1::IndividualBattleState, s2::IndividualBattleState)
+    if s1.agent != s2.agent
+        println("Agent changed from $(s1.agent) to $(s2.agent)")
+    end
+    if s1.teams[1] != s2.teams[1]
+        println("Team 1: ")
+        diff(s1.teams[1], s2.teams[1])
+    end
+    if s1.teams[2] != s2.teams[2]
+        println("Team 2: ")
+        diff(s1.teams[2], s2.teams[2])
+    end
+end
+
+function diff(s1::State, s2::State)
     if s1.agent != s2.agent
         println("Agent changed from $(s1.agent) to $(s2.agent)")
     end

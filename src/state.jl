@@ -1,7 +1,5 @@
 using StaticArrays
 
-abstract type BattleState end
-
 struct ChargedAction
     move::Int8
     charge::Int8
@@ -28,7 +26,7 @@ function Setfield.:setindex(arr::StaticArrays.SVector{2, Bool}, b::Bool, i::Int8
     return setindex(arr, b, Int64(i))
 end
 
-struct State <: BattleState
+struct State
     teams::SVector{2,Team}
     agent::Int8
     fastMovesPending::SVector{2,Bool}

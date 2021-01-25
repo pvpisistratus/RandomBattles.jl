@@ -2,7 +2,8 @@ using Setfield, Match
 
 get_other_agent(agent::Int8) = agent == Int8(1) ? Int8(2) : Int8(1)
 
-switch_agent(state::BattleState) = @set state.agent = get_other_agent(state.agent)
+switch_agent(state::State) = @set state.agent = get_other_agent(state.agent)
+switch_agent(state::IndividualBattleState) = @set state.agent = get_other_agent(state.agent)
 
 function get_gamemaster_mon_id(name::String)
     for i = 1:length(gamemaster["pokemon"])
@@ -79,7 +80,7 @@ function silph_to_pvpoke(name::String)
     return name
 end;
 
-function get_min_score(state::BattleState)
+function get_min_score(state::State)
     return 0.5 * (state.teams[2].mons[1].stats.hitpoints -
       state.teams[2].mons[1].hp +
       state.teams[2].mons[2].stats.hitpoints -
@@ -91,7 +92,7 @@ function get_min_score(state::BattleState)
       state.teams[2].mons[3].stats.hitpoints)
 end
 
-function get_max_score(state::BattleState)
+function get_max_score(state::State)
     return 0.5 + (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
          state.teams[1].mons[3].hp) /
         (state.teams[1].mons[1].stats.hitpoints +
@@ -99,19 +100,27 @@ function get_max_score(state::BattleState)
          state.teams[1].mons[3].stats.hitpoints))
 end
 
-function get_battle_score(state::BattleState)
-    if typeof(state) == IndividualBattleState
-        return (0.5 * (state.teams[1].mons[1].hp) /
-            (state.teams[1].mons[1].stats.hitpoints)) +
-           (0.5 * (state.teams[2].mons[1].stats.hitpoints -
-             state.teams[2].mons[1].hp) /
-            (state.teams[2].mons[1].stats.hitpoints))
-    else
-        return get_min_score(state) + get_max_score(state) - 0.5
-    end
+function get_battle_score(state::IndividualBattleState)
+    return (0.5 * (state.teams[1].mons[1].hp) /
+        (state.teams[1].mons[1].stats.hitpoints)) +
+       (0.5 * (state.teams[2].mons[1].stats.hitpoints -
+         state.teams[2].mons[1].hp) /
+        (state.teams[2].mons[1].stats.hitpoints))
 end
 
-function step_timers(state::BattleState)
+function get_battle_score(state::State)
+    return get_min_score(state) + get_max_score(state) - 0.5
+end
+
+function step_timers(state::IndividualBattleState)
+    next_state = @set next_state.teams[1].mon.fastMoveCooldown = max(Int8(0),
+        state.teams[1].mon.fastMoveCooldown - Int8(1))
+    next_state = @set next_state.teams[2].mon.fastMoveCooldown = max(Int8(0),
+        state.teams[2].mon.fastMoveCooldown - Int8(1))
+    return next_state
+end
+
+function step_timers(state::State)
     next_state = @set state.teams[1].switchCooldown = max(Int8(0), state.teams[1].switchCooldown - Int8(1))
     next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = max(Int8(0),
         state.teams[1].mons[state.teams[1].active].fastMoveCooldown - Int8(1))

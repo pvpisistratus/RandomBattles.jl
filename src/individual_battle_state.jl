@@ -1,6 +1,6 @@
 using StaticArrays
 
-struct IndividualBattleState <: BattleState
+struct IndividualBattleState
     teams::SVector{2,Individual}
     agent::Int8
     fastMovesPending::SVector{2,Bool}
@@ -24,27 +24,23 @@ IndividualBattleState(team1::Individual, team2::Individual) = IndividualBattleSt
 IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open", shields = 2) = IndividualBattleState(
     [
      Individual(
-         [Pokemon(
+         Pokemon(
             teams[1],
             league = league,
             cup = cup,
-         )],
+         ),
          defaultBuff,
-         Int8(0),
          shields,
-         Int8(1),
          rand(Bool),
      ),
      Individual(
-         [Pokemon(
-             teams[2],
-             league = league,
-             cup = cup,
-         )],
+         Pokemon(
+            teams[2],
+            league = league,
+            cup = cup,
+         ),
          defaultBuff,
-         Int8(0),
          shields,
-         Int8(1),
          rand(Bool),
      ),
     ],

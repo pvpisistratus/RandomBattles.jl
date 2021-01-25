@@ -2,16 +2,14 @@ using StaticArrays
 
 struct Individual
     #These values are initialized, but change throughout the battle
-    mons::SVector{1,Pokemon}
+    mon::Pokemon
     buffs::StatBuffs         #Initially 0, 0
-    switchCooldown::Int8     #Initially 0
     shields::Int8            #Initially 2
-    active::Int8             #Initially 1 (the lead)
     shielding::Bool          #Initially random
 end
 
 function vectorize(ind::Individual)
-    return vcat(vectorize(ind.mons[1]), [ind.buffs.atk, ind.buffs.def, ind.switchCooldown, ind.shields])
+    return vcat(vectorize(ind.mon), [ind.buffs.atk, ind.buffs.def, ind.shields])
 end
 
 Individual(
