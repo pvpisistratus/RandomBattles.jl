@@ -1,7 +1,8 @@
 using Distributions, Setfield, Match, StaticArrays
 
 function get_possible_decisions(state::IndividualBattleState; allow_nothing = false)
-    @inbounds activeMon = state.teams[state.agent].mons[state.teams[state.agent].active]
+    @inbounds activeTeam = state.teams[state.agent]
+    @inbounds activeMon = activeTeam.mons[activeTeam.active]
     @inbounds return @SVector [((allow_nothing || activeMon.fastMoveCooldown > 0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
                                 ((allow_nothing || activeMon.fastMoveCooldown > 0) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
                                 (activeMon.fastMoveCooldown <= 0 && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
