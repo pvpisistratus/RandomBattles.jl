@@ -19,11 +19,11 @@ Individual(
     shields = 2,
 ) = Individual(Pokemon.(mons, league = league, cup = cup), defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
 
-Individual(mons::Array{String}; league::String = "great", cup::String = "open", shields = 2) =
-    Individual(Pokemon.(mons, league = league, cup = cup), defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
+Individual(mons::String; league::String = "great", cup::String = "open", shields = 2) =
+    Individual(Pokemon(mon, league = league, cup = cup), defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
 
-Individual(mons::Array{Pokemon}, shields = 2) =
-    Individual(mons, defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
+Individual(mon::Pokemon, shields = 2) =
+    Individual(mon, defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
 
 function Setfield.:setindex(arr::StaticArrays.SVector{2, Individual}, t::Individual, i::Int8)
     return setindex(arr, t, Int64(i))
