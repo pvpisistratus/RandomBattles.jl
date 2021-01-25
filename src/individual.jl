@@ -4,9 +4,9 @@ struct Individual
     #These values are initialized, but change throughout the battle
     mons::SVector{1,Pokemon}
     buffs::StatBuffs         #Initially 0, 0
-    switchCooldown::Int64    #Initially 0
+    switchCooldown::Int8     #Initially 0
     shields::Int8            #Initially 2
-    active::Int64            #Initially 1 (the lead)
+    active::Int8             #Initially 1 (the lead)
     shielding::Bool          #Initially random
 end
 
@@ -19,10 +19,10 @@ Individual(
     league::String = "great",
     cup::String = "open",
     shields = 2,
-) = Individual(Pokemon.(mons, league = league, cup = cup), StatBuffs(0, 0), 0, shields, 1, rand(Bool))
+) = Individual(Pokemon.(mons, league = league, cup = cup), defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
 
 Individual(mons::Array{String}; league::String = "great", cup::String = "open", shields = 2) =
-    Individual(Pokemon.(mons, league = league, cup = cup), StatBuffs(0, 0), 0, shields, 1, rand(Bool))
+    Individual(Pokemon.(mons, league = league, cup = cup), defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
 
 Individual(mons::Array{Pokemon}, shields = 2) =
-    Individual(mons, StatBuffs(0, 0), 0, shields, 1, rand(Bool))
+    Individual(mons, defaultBuff, Int8(0), shields, Int8(1), rand(Bool))

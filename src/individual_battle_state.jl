@@ -2,7 +2,7 @@ using StaticArrays
 
 struct IndividualBattleState <: BattleState
     teams::SVector{2,Individual}
-    agent::Int64
+    agent::Int8
     fastMovesPending::SVector{2,Bool}
     chargedMovesPending::SVector{2,ChargedAction}
     switchesPending::SVector{2,SwitchAction}
@@ -15,13 +15,10 @@ end
 
 IndividualBattleState(team1::Individual, team2::Individual) = IndividualBattleState(
     [team1, team2],
-    1,
+    Int8(1),
     [false, false],
-    [
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-    ],
-    [SwitchAction(0, 0), SwitchAction(0, 0)],
+    [defaultCharge, defaultCharge],
+    [defaultSwitch, defaultSwitch],
 )
 
 IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open", shields = 2) = IndividualBattleState(
@@ -32,10 +29,10 @@ IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open", shiel
             league = league,
             cup = cup,
          )],
-         StatBuffs(0, 0),
-         0,
+         defaultBuff,
+         Int8(0),
          shields,
-         1,
+         Int8(1),
          rand(Bool),
      ),
      Individual(
@@ -44,29 +41,23 @@ IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open", shiel
              league = league,
              cup = cup,
          )],
-         StatBuffs(0, 0),
-         0,
+         defaultBuff,
+         Int8(0),
          shields,
-         1,
+         Int8(1),
          rand(Bool),
      ),
     ],
-    1,
+    Int8(1),
     [false, false],
-    [
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-    ],
-    [SwitchAction(0, 0), SwitchAction(0, 0)],
+    [defaultCharge, defaultCharge],
+    [defaultSwitch, defaultSwitch],
 )
 
 IndividualBattleState(teams::Array{String}; league = "great", cup = "open", shields = 2) = IndividualBattleState(
     [Individual([teams[1]], league = league, cup = cup, shields = shields), Individual([teams[2]], league = league, cup = cup, shields = shields)],
-    1,
+    Int8(1),
     [false, false],
-    [
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-     ChargedAction(Move(0, 0.0, 0, 0, 0, 0.0, 0, 0, 0, 0), 0),
-    ],
-    [SwitchAction(0, 0), SwitchAction(0, 0)],
+    [defaultCharge, defaultCharge],
+    [defaultSwitch, defaultSwitch],
 )
