@@ -30,12 +30,12 @@ function get_possible_decisions(state::State; allow_nothing = false)
                                 (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(2) && activeTeam.mons[2].hp > Int16(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
                                 (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
                                 (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-                                (activeMon.hp < Int16(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
-                                (activeMon.hp < Int16(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
-                                (activeMon.hp < Int16(0) && activeTeam.mons[2].hp > Int16(0)) ? 1.0 : 0.0,
-                                (activeMon.hp < Int16(0) && activeTeam.mons[2].hp > Int16(0)) ? 1.0 : 0.0,
-                                (activeMon.hp < Int16(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0,
-                                (activeMon.hp < Int16(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0]
+                                (activeMon.hp == Int16(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
+                                (activeMon.hp == Int16(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
+                                (activeMon.hp == Int16(0) && activeTeam.mons[2].hp > Int16(0)) ? 1.0 : 0.0,
+                                (activeMon.hp == Int16(0) && activeTeam.mons[2].hp > Int16(0)) ? 1.0 : 0.0,
+                                (activeMon.hp == Int16(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0,
+                                (activeMon.hp == Int16(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0]
 end
 
 function play_decision(state::BattleState, decision::Int64)
