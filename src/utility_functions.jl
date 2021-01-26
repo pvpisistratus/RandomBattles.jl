@@ -113,7 +113,7 @@ function get_battle_score(state::State)
 end
 
 function step_timers(state::IndividualBattleState)
-    next_state = @set next_state.teams[1].mon.fastMoveCooldown = max(Int8(0),
+    next_state = @set state.teams[1].mon.fastMoveCooldown = max(Int8(0),
         state.teams[1].mon.fastMoveCooldown - Int8(1))
     next_state = @set next_state.teams[2].mon.fastMoveCooldown = max(Int8(0),
         state.teams[2].mon.fastMoveCooldown - Int8(1))
@@ -123,7 +123,7 @@ end
 function step_timers(state::State)
     next_state = @set state.teams[1].switchCooldown = max(Int8(0), state.teams[1].switchCooldown - Int8(1))
     next_state = @set next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown = max(Int8(0),
-        state.teams[1].mons[state.teams[1].active].fastMoveCooldown - Int8(1))
+        next_state.teams[1].mons[next_state.teams[1].active].fastMoveCooldown - Int8(1))
     next_state = @set next_state.teams[2].switchCooldown = max(Int8(0), next_state.teams[2].switchCooldown - Int8(1))
     next_state = @set next_state.teams[2].mons[next_state.teams[2].active].fastMoveCooldown = max(Int8(0),
         state.teams[2].mons[state.teams[2].active].fastMoveCooldown - Int8(1))
