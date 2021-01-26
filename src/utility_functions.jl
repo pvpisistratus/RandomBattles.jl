@@ -101,11 +101,9 @@ function get_max_score(state::State)
 end
 
 function get_battle_score(state::IndividualBattleState)
-    return (0.5 * (state.teams[1].mons[1].hp) /
-        (state.teams[1].mons[1].stats.hitpoints)) +
-       (0.5 * (state.teams[2].mons[1].stats.hitpoints -
-         state.teams[2].mons[1].hp) /
-        (state.teams[2].mons[1].stats.hitpoints))
+    return (0.5 * (state.teams[1].mon.hp) / (state.teams[1].mon.stats.hitpoints)) +
+        (0.5 * (state.teams[2].mon.stats.hitpoints - state.teams[2].mon.hp) /
+        (state.teams[2].mon.stats.hitpoints))
 end
 
 function get_battle_score(state::State)
