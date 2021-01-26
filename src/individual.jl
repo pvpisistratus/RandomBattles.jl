@@ -13,13 +13,13 @@ function vectorize(ind::Individual)
 end
 
 Individual(
-    mons::Array{Int64};
+    mon::Int64;
     league::String = "great",
     cup::String = "open",
     shields = 2,
-) = Individual(Pokemon.(mons, league = league, cup = cup), defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
+) = Individual(Pokemon(mon, league = league, cup = cup), defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
 
-Individual(mons::String; league::String = "great", cup::String = "open", shields = 2) =
+Individual(mon::String; league::String = "great", cup::String = "open", shields = 2) =
     Individual(Pokemon(mon, league = league, cup = cup), defaultBuff, Int8(0), shields, Int8(1), rand(Bool))
 
 Individual(mon::Pokemon, shields = 2) =
