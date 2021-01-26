@@ -16,13 +16,13 @@ Individual(
     mon::Int64;
     league::String = "great",
     cup::String = "open",
-    shields = 2,
+    shields = Int8(2),
 ) = Individual(Pokemon(mon, league = league, cup = cup), defaultBuff, shields, rand(Bool))
 
-Individual(mon::String; league::String = "great", cup::String = "open", shields = 2) =
+Individual(mon::String; league::String = "great", cup::String = "open", shields = Int8(2)) =
     Individual(Pokemon(mon, league = league, cup = cup), defaultBuff, shields, rand(Bool))
 
-Individual(mon::Pokemon, shields = 2) =
+Individual(mon::Pokemon, shields = Int8(2)) =
     Individual(mon, defaultBuff, shields, rand(Bool))
 
 function Setfield.:setindex(arr::StaticArrays.SVector{2, Individual}, t::Individual, i::Int8)
