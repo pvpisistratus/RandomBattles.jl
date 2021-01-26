@@ -160,7 +160,7 @@ function evaluate_fast_moves(state::IndividualBattleState)
             next_state.teams[2].mon.fastMove.cooldown
         @inbounds next_state = @set next_state.teams[2].mon.energy =
             min(next_state.teams[2].mon.energy + next_state.teams[2].mon.fastMove.energy, Int8(100))
-        @inbounds next_state = @set next_state.teams[1].mons[next_state.teams[1].active].hp = max(
+        @inbounds next_state = @set next_state.teams[1].mon.hp = max(
             Int16(0),
             next_state.teams[1].mon.hp -
             calculate_damage(
