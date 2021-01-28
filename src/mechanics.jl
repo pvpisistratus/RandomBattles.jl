@@ -25,7 +25,7 @@ function calculate_damage(
 end
 
 function queue_fast_move(state::IndividualBattleState, agent::Int64)
-    @inbounds return @set state.fastMovesPending[agent] = state.teams[agent].mons[state.teams[agent].active].fastMove.cooldown
+    @inbounds return @set state.fastMovesPending[agent] = state.teams[agent].mon.fastMove.cooldown
 end
 
 function queue_fast_move(state::State, agent::Int64)
@@ -172,19 +172,19 @@ end
 
 function evaluate_fast_moves(state::State, agent::Int64)
     next_state = state
-    @inbounds next_state = @set next_state.teams[agent].mon.energy =
-        min(next_state.teams[agent].mon.energy +
-        next_state.teams[agent].mon.fastMove.energy, Int8(100))
+    @inbounds next_state = @set next_state.teams[agent].mons[next_state.teams[agent].active].energy =
+        min(next_state.teams[agent].mons[next_state.teams[agent].active].energy +
+        next_state.teams[agent].mons[next_state.teams[agent].active].fastMove.energy, Int8(100))
     other_agent = agent == 1 ? 2 : 1
-    @inbounds next_state = @set next_state.teams[other_agent].mon.hp = max(
+    @inbounds next_state = @set next_state.teams[other_agent].mons[next_state.teams[other_agent].active].hp = max(
         Int16(0),
-        next_state.teams[other_agent].mon.hp -
+        next_state.teams[other_agent].mons[next_state.teams[other_agent].active].hp -
         calculate_damage(
-            next_state.teams[agent].mon,
+            next_state.teams[agent].mons[next_state.teams[agent].active],
             next_state.teams[agent].buffs.atk,
-            next_state.teams[other_agent].mon,
+            next_state.teams[other_agent].mons[next_state.teams[other_agent].active],
             next_state.teams[other_agent].buffs.def,
-            next_state.teams[agent].mon.fastMove,
+            next_state.teams[agent].mons[next_state.teams[agent].active].fastMove,
             Int8(100),
         ),
     )
