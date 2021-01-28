@@ -5,9 +5,6 @@ function diff(p1::Pokemon, p2::Pokemon)
     if p1.energy != p2.energy
         println("Energy changed from $(p1.energy) to $(p2.energy)")
     end
-    if p1.fastMoveCooldown != p2.fastMoveCooldown
-        println("Fast Move Cooldown changed from $(p1.fastMoveCooldown) to $(p2.fastMoveCooldown)")
-    end
 end
 
 function diff(b1::StatBuffs, b2::StatBuffs)

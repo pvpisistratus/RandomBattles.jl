@@ -79,7 +79,6 @@ struct Pokemon
     #These values are initialized, but change throughout the battle
     hp::Int16                 #Initially hp stat of mon
     energy::Int8              #Initially 0
-    fastMoveCooldown::Int8   #Initially based on fast move
 end
 
 function vectorize(mon::Pokemon)
@@ -125,8 +124,7 @@ function vectorize(mon::Pokemon)
         mon.chargedMoves[2].power, mon.chargedMoves[2].energy,
         mon.chargedMoves[2].buffChance, mon.chargedMoves[2].oppAtkModifier,
         mon.chargedMoves[2].oppDefModifier, mon.chargedMoves[2].selfAtkModifier,
-        mon.chargedMoves[2].selfDefModifier, mon.hp, mon.energy,
-        mon.fastMoveCooldown]
+        mon.chargedMoves[2].selfDefModifier, mon.hp, mon.energy]
 end
 
 
@@ -191,7 +189,6 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
         chargedMoves,
         hitpoints,
         Int8(0),
-        fastMove.cooldown,
     )
 end
 

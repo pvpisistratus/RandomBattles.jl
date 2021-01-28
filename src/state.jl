@@ -22,14 +22,14 @@ end
 
 const defaultSwitch = SwitchAction(Int8(0), Int8(0))
 
-function Setfield.:setindex(arr::StaticArrays.SVector{2, Bool}, b::Bool, i::Int8)
-    return setindex(arr, b, Int64(i))
+function Setfield.:setindex(arr::StaticArrays.SVector{2, Int8}, n::Int8, i::Int8)
+    return setindex(arr, n, Int64(i))
 end
 
 struct State
     teams::SVector{2,Team}
     agent::Int8
-    fastMovesPending::SVector{2,Bool}
+    fastMovesPending::SVector{2,Int8}
     chargedMovesPending::SVector{2,ChargedAction}
     switchesPending::SVector{2,SwitchAction}
 end
@@ -42,7 +42,7 @@ end
 State(team1::Team, team2::Team) = State(
     [team1, team2],
     Int8(1),
-    [false, false],
+    [Int8(-1), Int8(-1)],
     [defaultCharge, defaultCharge],
     [defaultSwitch, defaultSwitch]
 )
@@ -75,7 +75,7 @@ State(teams::Array{Int64}; league = "great", cup = "open") = State(
      ),
     ],
     Int8(1),
-    [false, false],
+    [Int8(-1), Int8(-1)],
     [defaultCharge, defaultCharge],
     [defaultSwitch, defaultSwitch]
 )
@@ -83,7 +83,7 @@ State(teams::Array{Int64}; league = "great", cup = "open") = State(
 State(teams::Array{String}; league = "great", cup = "open") = State(
     [Team(teams[1:3], league = league, cup = cup), Team(teams[4:6], league = league, cup = cup)],
     Int8(1),
-    [false, false],
+    [Int8(-1), Int8(-1)],
     [defaultCharge, defaultCharge],
     [defaultSwitch, defaultSwitch]
 )

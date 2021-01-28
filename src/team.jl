@@ -7,7 +7,7 @@ struct Team
     switchCooldown::Int8    #Initially 0
     shields::Int8            #Initially 2
     active::Int8            #Initially 1 (the lead)
-    shielding::Bool          #Initially random
+    shielding::Bool          #Initially false
 end
 
 function vectorize(team::Team)
@@ -21,13 +21,13 @@ Team(
     mons::Array{Int64};
     league::String = "great",
     cup::String = "open",
-) = Team(Pokemon.(mons, league = league, cup = cup), defaultBuff, Int8(0), Int8(2), Int8(1), rand(Bool))
+) = Team(Pokemon.(mons, league = league, cup = cup), defaultBuff, Int8(0), Int8(2), Int8(1), false)
 
 Team(mons::Array{String}; league::String = "great", cup::String = "open") =
-    Team(Pokemon.(mons, league = league, cup = cup), defaultBuff, Int8(0), Int8(2), Int8(1), rand(Bool))
+    Team(Pokemon.(mons, league = league, cup = cup), defaultBuff, Int8(0), Int8(2), Int8(1), false)
 
 Team(mons::Array{Pokemon}) =
-    Team(mons, defaultBuff, Int8(0), Int8(2), Int8(1), rand(Bool))
+    Team(mons, defaultBuff, Int8(0), Int8(2), Int8(1), false)
 
 function Setfield.:setindex(arr::StaticArrays.SVector{2, Team}, t::Team, i::Int8)
     return setindex(arr, t, Int64(i))

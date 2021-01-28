@@ -3,7 +3,7 @@ using StaticArrays
 struct IndividualBattleState
     teams::SVector{2,Individual}
     agent::Int8
-    fastMovesPending::SVector{2,Bool}
+    fastMovesPending::SVector{2,Int8}
     chargedMovesPending::SVector{2,ChargedAction}
     switchesPending::SVector{2,SwitchAction}
 end
@@ -16,7 +16,7 @@ end
 IndividualBattleState(team1::Individual, team2::Individual) = IndividualBattleState(
     [team1, team2],
     Int8(1),
-    [false, false],
+    [Int8(-1), Int8(-1)],
     [defaultCharge, defaultCharge],
     [defaultSwitch, defaultSwitch],
 )
@@ -37,7 +37,7 @@ IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open", shiel
      ),
     ],
     Int8(1),
-    [false, false],
+    [Int8(-1), Int8(-1)],
     [defaultCharge, defaultCharge],
     [defaultSwitch, defaultSwitch],
 )
@@ -45,7 +45,7 @@ IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open", shiel
 IndividualBattleState(teams::Array{String}; league = "great", cup = "open", shields = 2) = IndividualBattleState(
     [Individual(teams[1], league = league, cup = cup, shields = shields), Individual(teams[2], league = league, cup = cup, shields = shields)],
     Int8(1),
-    [false, false],
+    [Int8(-1), Int8(-1)],
     [defaultCharge, defaultCharge],
     [defaultSwitch, defaultSwitch],
 )
