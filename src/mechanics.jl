@@ -111,7 +111,7 @@ end
 
 function apply_buffs(state::State, cmp::Int8)
     next_state = state
-    move = next_state.teams[cmp].mons[state.teams[cmp].active].chargedMoves[next_state.chargedMovesPending[cmp].move]
+    move = next_state.teams[cmp].mons[next_state.teams[cmp].active].chargedMoves[next_state.chargedMovesPending[cmp].move]
     @inbounds if rand(Int8(0):Int8(99)) < move.buffChance
         if move.oppAtkModifier != Int8(0)
             @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs.atk = clamp(
@@ -227,8 +227,8 @@ function evaluate_charged_moves(state::State)
     cmp = get_cmp(state)
     next_state = state
     if cmp > Int8(0)
-        move = next_state.teams[cmp].mons[state.teams[cmp].active].chargedMoves[next_state.chargedMovesPending[cmp].move]
-        @inbounds next_state = @set next_state.teams[cmp].mons[state.teams[cmp].active].energy -= move.energy
+        move = next_state.teams[cmp].mons[next_state.teams[cmp].active].chargedMoves[next_state.chargedMovesPending[cmp].move]
+        @inbounds next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].energy -= move.energy
         @inbounds next_state = @set next_state.teams[1].switchCooldown = max(Int8(0), next_state.teams[1].switchCooldown - Int8(20))
         @inbounds next_state = @set next_state.teams[2].switchCooldown = max(Int8(0), next_state.teams[2].switchCooldown - Int8(20))
         @inbounds if next_state.teams[get_other_agent(cmp)].shields > Int8(0) && next_state.teams[get_other_agent(cmp)].shielding
