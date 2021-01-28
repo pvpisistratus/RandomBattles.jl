@@ -154,6 +154,12 @@ function play_turn(state::IndividualBattleState, decision::Tuple{Int64,Int64})
         next_state = queue_fast_move(next_state, 2)
     end
     next_state = step_timers(next_state)
+    if next_state.teams[1].shielding
+        @inbounds next_state = @set state.teams[1].shielding = false
+    end
+    if next_state.teams[2].shielding
+        @inbounds next_state = @set state.teams[2].shielding = false
+    end
     return next_state
 end
 
@@ -187,6 +193,12 @@ function play_turn(state::State, decision::Tuple{Int64,Int64})
         next_state = queue_fast_move(next_state, 2)
     end
     next_state = step_timers(next_state)
+    if next_state.teams[1].shielding
+        @inbounds next_state = @set state.teams[1].shielding = false
+    end
+    if next_state.teams[2].shielding
+        @inbounds next_state = @set state.teams[2].shielding = false
+    end
     return next_state
 end
 
