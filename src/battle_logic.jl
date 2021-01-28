@@ -148,10 +148,10 @@ function play_turn(state::IndividualBattleState, decision::Tuple{Int64,Int64})
         next_state = evaluate_fast_moves(next_state, 2)
     end
     if decision[1] == 3 || decision[1] == 4
-        next_state = queue_fast_moves(next_state, 1)
+        next_state = queue_fast_move(next_state, 1)
     end
     if decision[2] == 3 || decision[2] == 4
-        next_state = queue_fast_moves(next_state, 2)
+        next_state = queue_fast_move(next_state, 2)
     end
     next_state = step_timers(next_state)
     return next_state
@@ -181,10 +181,10 @@ function play_turn(state::State, decision::Tuple{Int64,Int64})
         next_state = evaluate_fast_moves(next_state, 2)
     end
     if decision[1] == 3 || decision[1] == 4
-        next_state = queue_fast_moves(next_state, 1)
+        next_state = queue_fast_move(next_state, 1)
     end
     if decision[2] == 3 || decision[2] == 4
-        next_state = queue_fast_moves(next_state, 2)
+        next_state = queue_fast_move(next_state, 2)
     end
     next_state = step_timers(next_state)
     return next_state
