@@ -77,14 +77,6 @@ function play_turn(state::IndividualBattleState, decision::Tuple{Int64,Int64})
     @inbounds next_state = play_decision((@set next_state.agent = Int8(2)), decision[2])
     next_state = @set next_state.agent = Int8(1)
 
-    if next_state.chargedMovesPending[1].charge != Int8(0) ||
-        next_state.chargedMovesPending[2].charge != Int8(0)
-        next_state = evaluate_charged_moves(next_state)
-    end
-    if next_state.chargedMovesPending[1].charge != Int8(0) ||
-        next_state.chargedMovesPending[2].charge != Int8(0)
-        next_state = evaluate_charged_moves(next_state)
-    end
     if next_state.fastMovesPending[1] == Int8(0)
         next_state = evaluate_fast_moves(next_state, 1)
     end
@@ -96,6 +88,14 @@ function play_turn(state::IndividualBattleState, decision::Tuple{Int64,Int64})
     end
     if decision[2] == 3 || decision[2] == 4
         next_state = queue_fast_move(next_state, 2)
+    end
+    if next_state.chargedMovesPending[1].charge != Int8(0) ||
+        next_state.chargedMovesPending[2].charge != Int8(0)
+        next_state = evaluate_charged_moves(next_state)
+    end
+    if next_state.chargedMovesPending[1].charge != Int8(0) ||
+        next_state.chargedMovesPending[2].charge != Int8(0)
+        next_state = evaluate_charged_moves(next_state)
     end
     next_state = step_timers(next_state)
     if next_state.teams[1].shielding
@@ -112,18 +112,6 @@ function play_turn(state::State, decision::Tuple{Int64,Int64})
     @inbounds next_state = play_decision((@set next_state.agent = Int8(2)), decision[2])
     next_state = @set next_state.agent = Int8(1)
 
-    if next_state.switchesPending[1].pokemon != Int8(0) ||
-        next_state.switchesPending[2].pokemon != Int8(0)
-        next_state = evaluate_switches(next_state)
-    end
-    if next_state.chargedMovesPending[1].charge != Int8(0) ||
-        next_state.chargedMovesPending[2].charge != Int8(0)
-        next_state = evaluate_charged_moves(next_state)
-    end
-    if next_state.chargedMovesPending[1].charge != Int8(0) ||
-        next_state.chargedMovesPending[2].charge != Int8(0)
-        next_state = evaluate_charged_moves(next_state)
-    end
     if next_state.fastMovesPending[1] == Int8(0)
         next_state = evaluate_fast_moves(next_state, 1)
     end
@@ -135,6 +123,18 @@ function play_turn(state::State, decision::Tuple{Int64,Int64})
     end
     if decision[2] == 3 || decision[2] == 4
         next_state = queue_fast_move(next_state, 2)
+    end
+    if next_state.switchesPending[1].pokemon != Int8(0) ||
+        next_state.switchesPending[2].pokemon != Int8(0)
+        next_state = evaluate_switches(next_state)
+    end
+    if next_state.chargedMovesPending[1].charge != Int8(0) ||
+        next_state.chargedMovesPending[2].charge != Int8(0)
+        next_state = evaluate_charged_moves(next_state)
+    end
+    if next_state.chargedMovesPending[1].charge != Int8(0) ||
+        next_state.chargedMovesPending[2].charge != Int8(0)
+        next_state = evaluate_charged_moves(next_state)
     end
     next_state = step_timers(next_state)
     if next_state.teams[1].shielding

@@ -167,6 +167,7 @@ function evaluate_fast_moves(state::IndividualBattleState, agent::Int64)
             Int8(100),
         ),
     )
+    @inbounds next_state = @set next_state.fastMovesPending[agent] = Int8(-1)
     return next_state
 end
 
@@ -188,6 +189,7 @@ function evaluate_fast_moves(state::State, agent::Int64)
             Int8(100),
         ),
     )
+
     return next_state
 end
 
@@ -215,9 +217,8 @@ function evaluate_charged_moves(state::IndividualBattleState)
         end
         next_state = apply_buffs(next_state, cmp)
         if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
-            next_state = @set next_state.fastMovesPending[get_other_agent(cmp)] = Int8(0)
+            next_state = evaluate_fast_moves(next_state, cmp == Int8(2) ? 1 : 2)
         end
-        next_state = @set next_state.fastMovesPending[cmp] = Int8(-1)
         @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
     end
     return next_state
@@ -249,9 +250,8 @@ function evaluate_charged_moves(state::State)
         end
         next_state = apply_buffs(next_state, cmp)
         if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
-            next_state = @set next_state.fastMovesPending[get_other_agent(cmp)] = Int8(0)
+            next_state = evaluate_fast_moves(next_state, cmp == Int8(2) ? 1 : 2)
         end
-        next_state = @set next_state.fastMovesPending[cmp] = Int8(-1)
         @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
     end
     return next_state
