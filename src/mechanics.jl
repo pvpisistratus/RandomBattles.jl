@@ -32,14 +32,6 @@ function queue_fast_move(state::State, agent::Int64)
     @inbounds return @set state.fastMovesPending[agent] = state.teams[agent].mons[state.teams[agent].active].fastMove.cooldown
 end
 
-function queue_charged_move(state::IndividualBattleState, move::Int8)
-    @inbounds return @set state.chargedMovesPending[state.agent] = ChargedAction(move, 100)
-end
-
-function queue_charged_move(state::State, move::Int8)
-    @inbounds return @set state.chargedMovesPending[state.agent] = ChargedAction(move, 100)
-end
-
 function queue_switch(state::State, switchTo::Int8; time::Int8 = Int8(0))
     @inbounds return @set state.switchesPending[state.agent] = SwitchAction(switchTo, time)
 end
