@@ -156,9 +156,9 @@ function evaluate_charged_moves(state::IndividualBattleState)
                 Int16(0),
                 next_state.teams[get_other_agent(cmp)].mon.hp - calculate_damage(
                     next_state.teams[cmp].mon,
-                    get_atk(next_state.teams[agent].buffs),
+                    get_atk(next_state.teams[cmp].buffs),
                     next_state.teams[get_other_agent(cmp)].mon,
-                    get_def(next_state.teams[other_agent].buffs),
+                    get_def(next_state.teams[get_other_agent(cmp)].buffs),
                     move,
                     next_state.chargedMovesPending[cmp].charge,
                 ),
@@ -189,9 +189,9 @@ function evaluate_charged_moves(state::State)
                 Int16(0),
                 next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active].hp - calculate_damage(
                     next_state.teams[cmp].mons[next_state.teams[cmp].active],
-                    get_atk(next_state.teams[agent].buffs),
+                    get_atk(next_state.teams[cmp].buffs),
                     next_state.teams[get_other_agent(cmp)].mons[next_state.teams[get_other_agent(cmp)].active],
-                    get_def(next_state.teams[other_agent].buffs),
+                    get_def(next_state.teams[get_other_agent(cmp)].buffs),
                     move,
                     next_state.chargedMovesPending[cmp].charge,
                 ),
