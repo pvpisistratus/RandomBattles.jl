@@ -187,6 +187,7 @@ end
 
 function evaluate_charged_moves(state::IndividualBattleState)
     cmp = get_cmp(state)
+    println(cmp)
     next_state = state
     if cmp > Int8(0)
         move = next_state.teams[cmp].mon.chargedMoves[next_state.chargedMovesPending[cmp].move]
