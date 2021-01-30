@@ -77,9 +77,9 @@ function apply_buffs(state::IndividualBattleState, cmp::Int8)
     move = next_state.teams[cmp].mon.chargedMoves[next_state.chargedMovesPending[cmp].move]
     @inbounds if rand(Int8(0):Int8(99)) < move.buffChance
         if move.opp_buffs != defaultBuff
-            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buff += move.opp_buffs
+            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += move.opp_buffs
         else
-            @inbounds next_state = @set next_state.teams[cmp].buff += move.self_buffs
+            @inbounds next_state = @set next_state.teams[cmp].buffs += move.self_buffs
         end
     end
     return next_state
@@ -90,9 +90,9 @@ function apply_buffs(state::State, cmp::Int8)
     move = next_state.teams[cmp].mons[next_state.teams[cmp].active].chargedMoves[next_state.chargedMovesPending[cmp].move]
     @inbounds if rand(Int8(0):Int8(99)) < move.buffChance
         if move.opp_buffs != defaultBuff
-            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buff += move.opp_buffs
+            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += move.opp_buffs
         else
-            @inbounds next_state = @set next_state.teams[cmp].buff += move.self_buffs
+            @inbounds next_state = @set next_state.teams[cmp].buffs += move.self_buffs
         end
     end
     return next_state
