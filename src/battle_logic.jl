@@ -129,10 +129,12 @@ function play_turn(state::State, decision::Tuple{Int64,Int64})
     end
     if next_state.chargedMovesPending[1].charge != Int8(0) ||
         next_state.chargedMovesPending[2].charge != Int8(0)
+        println(next_state.chargedMovesPending[1], next_state.chargedMovesPending[2])
         next_state = evaluate_charged_moves(next_state)
     end
     if next_state.chargedMovesPending[1].charge != Int8(0) ||
         next_state.chargedMovesPending[2].charge != Int8(0)
+        println(next_state.chargedMovesPending[1], next_state.chargedMovesPending[2])
         next_state = evaluate_charged_moves(next_state)
     end
     next_state = step_timers(next_state)
