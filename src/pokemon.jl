@@ -14,8 +14,8 @@ function StatBuffs(atk::Int8, def::Int8)
     StatBuffs((clamp(atk, Int8(-4), Int8(4)) + Int8(8)) + (clamp(def, Int8(-4), Int8(4)) + Int16(8))<<Int16(4))
 end
 
-get_atk(x::StatBuffs) = (x.val & 0x0F) - Int8(8)
-get_def(x::StatBuffs) = (x.val >> 4) - Int8(8)
+get_atk(x::StatBuffs) = Int8(x.val & 0x0F) - Int8(8)
+get_def(x::StatBuffs) = Int8(x.val >> 4) - Int8(8)
 
 Base.:+(x::StatBuffs, y::StatBuffs) = StatBuffs(get_atk(x) + get_atk(y), get_def(x) + get_def(y))
 
