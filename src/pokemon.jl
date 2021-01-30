@@ -188,8 +188,8 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
         chargedMoves = [Move(chargedMove1Gm, types), Move(chargedMove2Gm, types)]
     else
         moveset = custom_moveset == ["none"] ? rankings[i]["moveset"] : custom_moveset
-        fastMove = Move(moveset[1]::String, types)
-        chargedMoves = [Move(moveset[2]::String, types), Move(moveset[3]::String, types)]
+        fastMove = FastMove(moveset[1]::String, types)
+        chargedMoves = [ChargedMove(moveset[2]::String, types), ChargedMove(moveset[3]::String, types)]
     end
     return Pokemon(
         types,
