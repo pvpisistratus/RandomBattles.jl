@@ -8,11 +8,11 @@ function diff(p1::Pokemon, p2::Pokemon)
 end
 
 function diff(b1::StatBuffs, b2::StatBuffs)
-    if b1.atk != s2.atk
-        println("Attack changed from $(s1.atk) to $(s2.atk)")
+    if get_atk(b1) != get_atk(b2)
+        println("Attack changed from $(get_atk(b1)) to $(get_atk(b2))")
     end
-    if b1.def != s2.def
-        println("Defense changed from $(s1.def) to $(s2.def)")
+    if get_def(b1) != get_def(b2)
+        println("Defense changed from $(get_def(b1)) to $(get_def(b2))")
     end
 end
 

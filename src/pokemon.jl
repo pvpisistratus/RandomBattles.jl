@@ -7,74 +7,83 @@ struct Stats
 end
 
 struct StatBuffs
-    atk::Int8
-    def::Int8
+    val::UInt8
 end
+
+function StatBuffs(atk::Int8, def::Int8)
+    StatBuffs((clamp(atk, Int8(-4), Int8(4)) + Int8(8)) + (clamp(def, Int8(-4), Int8(4)) + Int16(8))<<Int16(4))
+end
+
+get_atk(x::StatBuffs) = (x.val & 0x0F) - Int8(8)
+get_def(x::StatBuffs) = (x.val >> 4) - Int8(8)
+
+Base.:+(x::StatBuffs, y::StatBuffs) = StatBuffs(get_atk(x) + get_atk(y), get_def(x) + get_def(y))
 
 const defaultBuff = StatBuffs(Int8(0), Int8(0))
 
-struct Move
+struct FastMove
     moveType::Int8
     stab::Int8
     power::UInt8
     energy::Int8
     cooldown::Int8
-    buffChance::Int8
-    oppAtkModifier::Int8
-    oppDefModifier::Int8
-    selfAtkModifier::Int8
-    selfDefModifier::Int8
 end
 
-const defaultMove = Move(Int8(0), Int8(0), UInt8(0), Int8(0), Int8(0), Int8(0), Int8(0), Int8(0), Int8(0), Int8(0))
+struct ChargedMove
+    moveType::Int8
+    stab::Int8
+    power::UInt8
+    energy::Int8
+    buffChance::Int8
+    opp_buffs::StatBuffs
+    self_buffs::StatBuffs
+end
 
-function Move(move_name::String, types)
+function FastMove(move_name::String, types)
+    move_index = findfirst(isequal(move_name), map(x ->
+        gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))
+    gm_move = gamemaster["moves"][move_index]
+    return FastMove(gm_move, types)
+end
+
+function FastMove(gm_move::Dict{String,Any}, types)
+    return FastMove(
+            get_type_id(gm_move["type"]),
+            (get_type_id(gm_move["type"]) in types) ? Int8(12) : Int8(1),
+            UInt8(gm_move["power"]),
+            Int8(gm_move["energyGain"]),
+            Int8(gm_move["cooldown"] ÷ 500)
+        )
+end
+
+function ChargedMove(move_name::String, types)
     if move_name == "NONE"
-        return defaultMove
+        return ChargedMove(Int8(0), Int8(0), UInt8(0), Int8(0), Int8(0), defaultBuff, defaultBuff)
     end
     move_index = findfirst(isequal(move_name), map(x ->
         gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))
     gm_move = gamemaster["moves"][move_index]
-    return Move(gm_move, types)
+    return ChargedMove(gm_move, types)
 end
 
-function Move(gm_move::Dict{String,Any}, types)
-    if gm_move["energyGain"] == 0
-        return Move(
-            get_type_id(gm_move["type"]),
-            (get_type_id(gm_move["type"]) in types) ? Int8(12) : Int8(10),
-            UInt8(gm_move["power"]),
-            Int8(gm_move["energy"]),
-            Int8(0),
-            haskey(gm_move, "buffs") ?
-            floor(Int8, parse(Float64, gm_move["buffApplyChance"]) * 100) : Int8(0),
-            haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][1]) : Int8(0),
-            haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][2]) : Int8(0),
-            haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][1]) : Int8(0),
-            haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][2]) : Int8(0)
-        )
-    else
-        return Move(
-                get_type_id(gm_move["type"]),
-                (get_type_id(gm_move["type"]) in types) ? Int8(12) : Int8(1),
-                UInt8(gm_move["power"]),
-                Int8(gm_move["energyGain"]),
-                Int8(gm_move["cooldown"] ÷ 500),
-                Int8(0),
-                Int8(0),
-                Int8(0),
-                Int8(0),
-                Int8(0),
-            )
-    end
+function ChargedMove(gm_move::Dict{String,Any}, types)
+    return ChargedMove(
+        get_type_id(gm_move["type"]),
+        (get_type_id(gm_move["type"]) in types) ? Int8(12) : Int8(10),
+        UInt8(gm_move["power"]),
+        Int8(gm_move["energy"]),
+        haskey(gm_move, "buffs") ? floor(Int8, parse(Float64, gm_move["buffApplyChance"]) * 100) : Int8(0),
+        StatBuffs(haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][2]) : Int8(0)),
+        StatBuffs(haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][2]) : Int8(0))
+    )
 end
 
 struct Pokemon
     #These values are determined on initialization, and do not change in battle
     types::SVector{2,Int8}
     stats::Stats
-    fastMove::Move
-    chargedMoves::SVector{2,Move}
+    fastMove::FastMove
+    chargedMoves::SVector{2,ChargedMove}
 
     #These values are initialized, but change throughout the battle
     hp::Int16                 #Initially hp stat of mon
