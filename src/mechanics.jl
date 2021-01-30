@@ -38,10 +38,9 @@ end
 
 function get_cmp(state::IndividualBattleState)
     @inbounds charges = state.chargedMovesPending[1].charge, state.chargedMovesPending[2].charge
-    @inbounds charges[1] == Int8(0) && charges[2] == Int8(0) && return Int8(0)
     @inbounds hps = state.teams[1].mon.hp, state.teams[2].mon.hp
-    @inbounds charges[1] != Int8(0) && charges[2] == Int8(0) && hps[2] > Int8(0) && return Int8(1)
-    @inbounds charges[1] == Int8(0) && charges[2] != Int8(0) && hps[1] > Int8(0) && return Int8(2)
+    @inbounds charges[2] == Int8(0) && return Int8(1)
+    @inbounds charges[1] == Int8(0) && return Int8(2)
     @inbounds attacks = state.teams[1].mon.stats.attack, state.teams[2].mon.stats.attack
     @inbounds attacks[1] > attacks[2] && return Int8(1)
     @inbounds attacks[1] < attacks[2] && return Int8(2)
@@ -50,10 +49,9 @@ end
 
 function get_cmp(state::State)
     @inbounds charges = state.chargedMovesPending[1].charge, state.chargedMovesPending[2].charge
-    @inbounds charges[1] == Int8(0) && charges[2] == Int8(0) && return Int8(0)
-    @inbounds hps = state.teams[1].mons[state.teams[1].active].hp, state.teams[2].mons[state.teams[2].active].hp
-    @inbounds charges[1] != Int8(0) && charges[2] == Int8(0) && hps[2] > Int8(0) && return Int8(1)
-    @inbounds charges[1] == Int8(0) && charges[2] != Int8(0) && hps[1] > Int8(0) && return Int8(2)
+    @inbounds hps = state.teams[1].mon.hp, state.teams[2].mon.hp
+    @inbounds charges[2] == Int8(0) && return Int8(1)
+    @inbounds charges[1] == Int8(0) && return Int8(2)
     @inbounds attacks = state.teams[1].mons[state.teams[1].active].stats.attack,
         state.teams[2].mons[state.teams[2].active].stats.attack
     @inbounds attacks[1] > attacks[2] && return Int8(1)
