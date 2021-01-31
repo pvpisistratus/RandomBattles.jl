@@ -3,39 +3,45 @@ using Distributions, Setfield, Match, StaticArrays
 function get_possible_decisions(state::IndividualBattleState; allow_nothing = false)
     @inbounds activeTeam = state.teams[state.agent]
     @inbounds activeMon = state.teams[state.agent].mon
-    @inbounds return @SVector [((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+    activeMon.hp < Int16(0) && return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    @inbounds return @SVector [((allow_nothing || state.fastMovesPending[state.agent] > Int8(0))) ? 1.0 : 0.0,
+        ((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1))) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
         ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[2].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[2].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0]
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[2].energy && activeTeam.shields > Int8(0)) ? 1.0 : 0.0]
 end
 
 function get_possible_decisions(state::State; allow_nothing = false)
     @inbounds activeTeam = state.teams[state.agent]
     @inbounds activeMon = activeTeam.mons[activeTeam.active]
-    @inbounds return @SVector [((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.hp > 0) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeTeam.shields > Int8(0) && activeMon.hp > 0) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[2].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[2].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(1) && activeTeam.mons[1].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(1) && activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(2) && activeTeam.mons[2].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(2) && activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(3) && activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (activeMon.hp == Int16(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
-        (activeMon.hp == Int16(0) && activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
-        (activeMon.hp == Int16(0) && activeTeam.mons[2].hp > Int16(0)) ? 1.0 : 0.0,
-        (activeMon.hp == Int16(0) && activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0)) ? 1.0 : 0.0,
-        (activeMon.hp == Int16(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0,
-        (activeMon.hp == Int16(0) && activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0]
+    if activeMon.hp == Int16(0)
+        @inbounds return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
+            (activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
+            activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0,
+            (activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0)) ? 1.0 : 0.0,
+            activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0,
+            (activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0]
+    else
+        @inbounds return @SVector [((allow_nothing || state.fastMovesPending[state.agent] > Int8(0))) ? 1.0 : 0.0,
+            ((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
+            ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1))) ? 1.0 : 0.0,
+            ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
+            ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy) ? 1.0 : 0.0,
+            ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
+            ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[2].energy) ? 1.0 : 0.0,
+            ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[2].energy && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
+            (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(1) && activeTeam.mons[1].hp > Int16(0)) ? 0.5 : 0.0,
+            (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(1) && activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0)) ? 0.5 : 0.0,
+            (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(2) && activeTeam.mons[2].hp > Int16(0)) ? 0.5 : 0.0,
+            (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(2) && activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0)) ? 0.5 : 0.0,
+            (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0)) ? 0.5 : 0.0,
+            (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(3) && activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0)) ? 0.5 : 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    end
 end
 
 function play_decision(state::IndividualBattleState, decision::Int64)
