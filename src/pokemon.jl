@@ -37,7 +37,7 @@ function Pokemon(i::Int64; league::String = "great", cup = "open", custom_movese
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
-    typing = Int8(findfirst(x -> x == get_type_id.(convert(Array{String}, gm["types"])), typings))
+    typing = Int8(findfirst(x -> x == sort(get_type_id.(convert(Array{String}, gm["types"]))), typings))
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
         level, atk, def, hp = parse.(Int8, custom_stats)
