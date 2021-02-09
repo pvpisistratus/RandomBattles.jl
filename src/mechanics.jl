@@ -59,7 +59,7 @@ function apply_buffs(state::IndividualBattleState, cmp::Int8)
 end
 
 function apply_buffs(state::State, cmp::Int8)
-    move = next_state.chargedMovesPending[cmp].move
+    move = state.chargedMovesPending[cmp].move
     chance = charged_moves[move, 4]
     chance == Int8(0) && return state
     next_state = state
