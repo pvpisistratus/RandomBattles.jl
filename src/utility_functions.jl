@@ -31,7 +31,7 @@ function get_fast_move_id(name::String)
 end
 
 function get_charged_move_id(name::String)
-    move_name == "NONE" && return Int8(0)
+    name == "NONE" && return Int8(0)
     j = 1
     for i = 1:length(gamemaster["moves"])
         gamemaster["moves"][i]["moveId"] == name && return Int8(j)
