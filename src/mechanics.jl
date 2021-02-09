@@ -9,9 +9,9 @@ function calculate_damage(attack::Int64, defense::Int64, power::Int64,
     def_typing::Int8, move_typing::Int8
 )
     stab = move_typing in typings[atk_typing] ? 12 : 10
-    return Int16((power * stab * attack * get_buff_modifier(atkBuff) *
+    return Int16((power * stab * attack * get_buff_modifier(atk_buff) *
         get_eff(effectiveness[def_typing, move_typing]) * charge * 65) ÷
-        (defense * get_buff_modifier(defBuff) * 1_280_000_000) + 1)
+        (defense * get_buff_modifier(def_buff) * 1_280_000_000) + 1)
 end
 
 function queue_fast_move(state::IndividualBattleState, agent::Int64)
