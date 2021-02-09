@@ -13,18 +13,10 @@ include("battle_logic.jl")
 include("pokemon_meta.jl")
 include("strategy.jl")
 include("rankings.jl")
-include("learning.jl")
 
-export State, IndividualBattleState,
-       Team, Individual,
-       Pokemon,
-       Strategy, plot_strategy,
-       get_possible_decisions,
-       get_battle_score, get_battle_scores,
-       gamemaster, greatRankings, ultraRankings, masterRankings,
-       play_turn, play_battle,
-       rank, PokemonMeta,
-       diff, vectorize,
-       crossover_and_mutate, play_nn_battle, play_nn_random_battle, testing_best
+export State, IndividualBattleState, Team, Individual, Pokemon, Strategy,
+      plot_strategy, get_possible_decisions, play_turn, play_battle,
+      get_battle_score, get_battle_scores, rank, PokemonMeta, diff, vectorize,
+      gamemaster, greatRankings, ultraRankings, masterRankings
 
 end # module
