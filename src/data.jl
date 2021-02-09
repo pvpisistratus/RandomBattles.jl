@@ -1,4 +1,4 @@
-using JSON, StaticArrays, Colors, Memoize
+using JSON, StaticArrays, Colors, Memoize, Setfield
 
 const gamemaster = JSON.parsefile(joinpath(@__DIR__, "../data/gamemaster.json"))
 const greatRankings = JSON.parsefile(joinpath(@__DIR__, "../data/rankings-1500.json"))
