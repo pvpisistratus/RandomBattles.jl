@@ -24,20 +24,20 @@ end
 function get_fast_move_id(name::String)
     j = 1
     for i = 1:length(gamemaster["moves"])
-        gamemaster["moves"][i]["moveId"] == name && return Int8(j)
+        gamemaster["moves"][i]["moveId"] == name && return UInt8(j)
         j += gamemaster["moves"][i]["energy"] == 0 ? 1 : 0
     end
-    return Int8(0)
+    return UInt8(0)
 end
 
 function get_charged_move_id(name::String)
-    name == "NONE" && return Int8(0)
+    name == "NONE" && return UInt8(0)
     j = 1
     for i = 1:length(gamemaster["moves"])
-        gamemaster["moves"][i]["moveId"] == name && return Int8(j)
+        gamemaster["moves"][i]["moveId"] == name && return UInt8(j)
         j += gamemaster["moves"][i]["energy"] != 0 ? 1 : 0
     end
-    return Int8(0)
+    return UInt8(0)
 end
 
 function convert_indices(

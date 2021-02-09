@@ -10,8 +10,8 @@ struct Pokemon
     #These values are determined on initialization, and do not change in battle
     typing::Int8
     stats::Stats
-    fastMove::Int8
-    chargedMoves::SVector{2,Int8}
+    fastMove::UInt8
+    chargedMoves::SVector{2,UInt8}
 
     #These values are initialized, but change throughout the battle
     hp::Int16                 #Initially hp stat of mon
