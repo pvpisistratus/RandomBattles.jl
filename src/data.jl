@@ -18,6 +18,31 @@ end
 
 get_cp_limit(league::String) = league == "master" ? 10_000 : league == "ultra" ? 2_500 : 1_500
 
+function get_type_id(typeName::String)
+    type_id = @match typeName begin
+        "normal"   => Int8(1)
+        "fighting" => Int8(2)
+        "flying"   => Int8(3)
+        "poison"   => Int8(4)
+        "ground"   => Int8(5)
+        "rock"     => Int8(6)
+        "bug"      => Int8(7)
+        "ghost"    => Int8(8)
+        "steel"    => Int8(9)
+        "fire"     => Int8(10)
+        "water"    => Int8(11)
+        "grass"    => Int8(12)
+        "electric" => Int8(13)
+        "psychic"  => Int8(14)
+        "ice"      => Int8(15)
+        "dragon"   => Int8(16)
+        "dark"     => Int8(17)
+        "fairy"    => Int8(18)
+        _          => Int8(19)
+    end
+    return type_id
+end
+
 𛲜 = 1.6      # weakness
 Θ = 1 / 𛲜    # resistance
 ✗ = Θ^2      # "immunity"
