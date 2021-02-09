@@ -4,9 +4,9 @@ struct Team
     #These values are initialized, but change throughout the battle
     mons::SVector{3,Pokemon}
     buffs::StatBuffs         #Initially 0, 0
-    switchCooldown::Int8    #Initially 0
+    switchCooldown::Int8     #Initially 0
     shields::Int8            #Initially 2
-    active::Int8            #Initially 1 (the lead)
+    active::Int8             #Initially 1 (the lead)
     shielding::Bool          #Initially false
 end
 

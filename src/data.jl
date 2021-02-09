@@ -115,3 +115,68 @@ const colors = [RGBA(153/255, 159/255, 161/255, 1.0),
                 RGBA(240/255, 152/255, 228/255, 1.0)]
 
 const shieldColor = RGBA(235/255,13/255,199/255, 1.0)
+
+const typings = unique(map(x -> sort(RandomBattles.get_type_id.(x["types"])), gamemaster["pokemon"]))
+function get_effectiveness(defenderTypes::Vector{Int8}, moveType::Int8)
+    return round(UInt16, 12_800 * type_effectiveness[defenderTypes[1], moveType] *
+        type_effectiveness[defenderTypes[2], moveType])
+end
+store_eff(e::UInt16) = return @match e begin
+     0x3200 => Int8(4)
+     0x1f40 => Int8(3)
+     0x1388 => Int8(2)
+     0x0c35 => Int8(1)
+     0x5000 => Int8(5)
+     0x8000 => Int8(6)
+end
+get_eff(e::Int8) = return @match e begin
+     Int8(1) => 3125
+     Int8(2) => 5000
+     Int8(3) => 8000
+     Int8(4) => 12800
+     Int8(5) => 20480
+     Int8(6) => 32768
+end
+const effectiveness = [store_eff(get_effectiveness(i, j))) for i in typings, j = Int8(1):Int8(18)]
+
+fast_moves_gm = filter(x -> x["energy"] == 0, gamemaster["moves"])
+const fast_moves = hcat(map(x -> Int8(x["power"]), fast_moves_gm), map(x -> Int8(x["energyGain"]), fast_moves_gm),
+    map(x -> RandomBattles.get_type_id(x["type"]), fast_moves_gm), map(x -> Int8(x["cooldown"] ÷ 500), fast_moves_gm))
+
+function get_buff_chance(c)
+    return @match c begin
+         "1" => Int8(1)
+         ".125" => Int8(8)
+         ".1" => Int8(10)
+         ".3" => Int8(3) # yeah, I know (will be fixed in apply_buffs)
+         ".5" => Int8(2)
+         "0.5" => Int8(2)
+         ".2" => Int8(5)
+    end
+end
+
+charged_moves_gm = filter(x -> x["energy"] != 0, gamemaster["moves"])
+const charged_moves = hcat(map(x -> RandomBattles.get_type_id(x["type"]), charged_moves_gm),
+    map(x -> Int8(x["power"] ÷ 5), charged_moves_gm), map(x -> Int8(x["energy"]), charged_moves_gm),
+    map(x -> haskey(x, "buffApplyChance") ? get_buff_chance(x["buffApplyChance"]) : Int8(0),  charged_moves_gm))
+
+struct StatBuffs
+    val::UInt8
+end
+
+function StatBuffs(atk::Int8, def::Int8)
+    StatBuffs((clamp(atk, Int8(-4), Int8(4)) + Int8(8)) + (clamp(def, Int8(-4), Int8(4)) + Int16(8))<<Int16(4))
+end
+
+get_atk(x::StatBuffs) = Int8(x.val & 0x0F) - Int8(8)
+get_def(x::StatBuffs) = Int8(x.val >> 4) - Int8(8)
+
+Base.:+(x::StatBuffs, y::StatBuffs) = StatBuffs(get_atk(x) + get_atk(y), get_def(x) + get_def(y))
+
+const defaultBuff = StatBuffs(Int8(0), Int8(0))
+
+const charged_moves_buffs = hcat(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opponent" ?
+    RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
+    charged_moves_gm), map(x -> haskey(x, "buffs") && x["buffTarget"] == "self" ?
+    RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
+    charged_moves_gm))

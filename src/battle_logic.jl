@@ -44,8 +44,8 @@ function play_decision(state::IndividualBattleState, decision::Int64)
         @inbounds next_state = @set state.teams[state.agent].shielding = true
     end
     next_state = @match decision begin
-        5  || 6  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(Int8(1), Int8(100))
-        7  || 8  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(Int8(2), Int8(100))
+        5  || 6  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(state.teams[state.agent].mon.chargedMoves[1], Int8(100))
+        7  || 8  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(state.teams[state.agent].mon.chargedMoves[2], Int8(100))
         _        => next_state
     end
     return next_state
@@ -57,8 +57,8 @@ function play_decision(state::State, decision::Int64)
         @inbounds next_state = @set state.teams[state.agent].shielding = true
     end
     next_state = @match decision begin
-        5  || 6  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(Int8(1), Int8(100))
-        7  || 8  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(Int8(2), Int8(100))
+        5  || 6  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(state.teams[state.agent].mons[state.teams[state.agent].active].chargedMoves[1], Int8(100))
+        7  || 8  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(state.teams[state.agent].mons[state.teams[state.agent].active].chargedMoves[2], Int8(100))
         9  || 10 => queue_switch(next_state, Int8(1))
         11 || 12 => queue_switch(next_state, Int8(2))
         13 || 14 => queue_switch(next_state, Int8(3))
