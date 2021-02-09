@@ -162,7 +162,7 @@ get_eff(e::Int8) = return @match e begin
      Int8(5) => 20480
      Int8(6) => 32768
 end
-const effectiveness = [store_eff(get_effectiveness(i, j))) for i in typings, j = Int8(1):Int8(18)]
+const effectiveness = [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
 
 fast_moves_gm = filter(x -> x["energy"] == 0, gamemaster["moves"])
 const fast_moves = hcat(map(x -> Int8(x["power"]), fast_moves_gm), map(x -> Int8(x["energyGain"]), fast_moves_gm),
