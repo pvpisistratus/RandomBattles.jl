@@ -59,9 +59,11 @@ function apply_buffs(state::IndividualBattleState, cmp::Int8)
 end
 
 function apply_buffs(state::State, cmp::Int8)
-    next_state = state
     move = next_state.chargedMovesPending[cmp].move
-    @inbounds if rand(Int8(1):charged_moves[move, 4]) == Int8(1)
+    chance = charged_moves[move, 4]
+    chance == Int8(0) && return state
+    next_state = state
+    @inbounds if rand(Int8(1):chance) == Int8(1)
         if charged_moves_buffs[move, 1] != defaultBuff
             @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += charged_moves_buffs[move, 1]
         else
