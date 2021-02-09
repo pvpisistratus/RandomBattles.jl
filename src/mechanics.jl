@@ -138,7 +138,7 @@ function evaluate_charged_moves(state::IndividualBattleState)
                     Int64(next_state.teams[cmp].mon.stats.attack),
                     Int64(next_state.teams[other_agent].mon.stats.defense),
                     5 * move[2],
-                    Int65(next_state.chargedMovesPending[cmp].charge),
+                    Int64(next_state.chargedMovesPending[cmp].charge),
                     get_atk(next_state.teams[cmp].buffs),
                     get_def(next_state.teams[other_agent].buffs),
                     next_state.teams[cmp].mon.typing,
