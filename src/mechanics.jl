@@ -47,11 +47,11 @@ end
 
 function apply_buffs(state::IndividualBattleState, cmp::Int8)
     move = state.chargedMovesPending[cmp].move
-    chance = charged_moves[move, 4]
+    @inbounds chance = charged_moves[move, 4]
     chance == Int8(0) && return state
     next_state = state
     @inbounds if rand(Int8(1):chance) == Int8(1)
-        if charged_moves_buffs[move, 1] != defaultBuff
+        @inbounds if charged_moves_buffs[move, 1] != defaultBuff
             @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += charged_moves_buffs[move, 1]
         else
             @inbounds next_state = @set next_state.teams[cmp].buffs += charged_moves_buffs[move, 2]
@@ -62,11 +62,11 @@ end
 
 function apply_buffs(state::State, cmp::Int8)
     move = state.chargedMovesPending[cmp].move
-    chance = charged_moves[move, 4]
+    @inbounds chance = charged_moves[move, 4]
     chance == Int8(0) && return state
     next_state = state
     @inbounds if rand(Int8(1):chance) == Int8(1)
-        if charged_moves_buffs[move, 1] != defaultBuff
+        @inbounds if charged_moves_buffs[move, 1] != defaultBuff
             @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += charged_moves_buffs[move, 1]
         else
             @inbounds next_state = @set next_state.teams[cmp].buffs += charged_moves_buffs[move, 2]
@@ -77,7 +77,7 @@ end
 
 function evaluate_fast_moves(state::IndividualBattleState, agent::Int64)
     next_state = state
-    move = fast_moves[next_state.teams[agent].mon.fastMove, 1:3]
+    @inbounds move = fast_moves[next_state.teams[agent].mon.fastMove, 1:3]
     @inbounds next_state = @set next_state.teams[agent].mon.energy =
         min(next_state.teams[agent].mon.energy + move[2], Int8(100))
     other_agent = agent == 1 ? 2 : 1
