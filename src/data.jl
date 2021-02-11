@@ -207,4 +207,4 @@ cmb_matrix = vcat(reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opp
     charged_moves_gm), 1, :), reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "self" ?
     RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
     charged_moves_gm), 1, :))
-const charged_moves_buffs = @SMatrix [cmb_matrix[i, j] for i = 1:4, j = 1:165]
+const charged_moves_buffs = @SMatrix [cmb_matrix[i, j] for i = 1:2, j = 1:165]
