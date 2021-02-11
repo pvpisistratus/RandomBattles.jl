@@ -142,10 +142,12 @@ const colors = [RGBA(153/255, 159/255, 161/255, 1.0),
 const shieldColor = RGBA(235/255,13/255,199/255, 1.0)
 
 const typings = unique(map(x -> sort(RandomBattles.get_type_id.(x["types"])), gamemaster["pokemon"]))
+
 function get_effectiveness(defenderTypes::Vector{Int8}, moveType::Int8)
     return round(UInt16, 12_800 * type_effectiveness[defenderTypes[1], moveType] *
         type_effectiveness[defenderTypes[2], moveType])
 end
+
 store_eff(e::UInt16) = return @match e begin
      0x3200 => Int8(4)
      0x1f40 => Int8(3)
@@ -154,6 +156,7 @@ store_eff(e::UInt16) = return @match e begin
      0x5000 => Int8(5)
      0x8000 => Int8(6)
 end
+
 get_eff(e::Int8) = return @match e begin
      Int8(1) => 3125
      Int8(2) => 5000
@@ -162,6 +165,7 @@ get_eff(e::Int8) = return @match e begin
      Int8(5) => 20480
      Int8(6) => 32768
 end
+
 const effectiveness = [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
 
 fast_moves_gm = filter(x -> x["energy"] == 0, gamemaster["moves"])

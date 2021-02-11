@@ -95,7 +95,7 @@ function evaluate_fast_moves(state::IndividualBattleState, agent::Int64)
             get_def(next_state.teams[other_agent].buffs),
             next_state.teams[agent].mon.typing,
             next_state.teams[other_agent].mon.typing,
-            move[1]
+            move[3]
         ),
     )
     @inbounds next_state = @set next_state.fastMovesPending[agent] = Int8(-1)
@@ -120,7 +120,7 @@ function evaluate_fast_moves(state::State, agent::Int64)
             get_def(next_state.teams[other_agent].buffs),
             next_state.teams[agent].mons[next_state.teams[agent].active].typing,
             next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing,
-            move[1]
+            move[3]
         ),
     )
 
