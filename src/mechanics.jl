@@ -7,7 +7,6 @@ end
 function calculate_damage(attack::UInt16, defense::UInt16, power::Int64,
     charge::Int8, atk_buff::Int8, def_buff::Int8, effectiveness::Int64,
     stab::Int8)
-)
     return Int16((65 * effectiveness * power * stab * attack * charge *
         get_buff_modifier(atk_buff)) ÷ (1_280_000_000 * defense *
         get_buff_modifier(def_buff)) + 1)
