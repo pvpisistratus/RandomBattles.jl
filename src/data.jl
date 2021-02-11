@@ -141,7 +141,7 @@ const colors = [RGBA(153/255, 159/255, 161/255, 1.0),
 
 const shieldColor = RGBA(235/255,13/255,199/255, 1.0)
 
-const typings = unique(map(x -> sort(RandomBattles.get_type_id.(x["types"])), gamemaster["pokemon"]))
+const typings = @SVector [t for t in unique(map(x -> sort(RandomBattles.get_type_id.(x["types"])), gamemaster["pokemon"]))]
 
 function get_effectiveness(defenderTypes::Vector{Int8}, moveType::Int8)
     return round(UInt16, 12_800 * type_effectiveness[defenderTypes[1], moveType] *
@@ -161,10 +161,11 @@ const eff = @SVector [3125, 5000, 8000, 12800, 20480, 32768]
 const effectiveness = @SMatrix [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
 
 fast_moves_gm = filter(x -> x["energy"] == 0, gamemaster["moves"])
-const fast_moves = vcat(reshape(map(x -> Int8(x["power"]), fast_moves_gm), 1, :),
+fm_matrix = vcat(reshape(map(x -> Int8(x["power"]), fast_moves_gm), 1, :),
     reshape(map(x -> Int8(x["energyGain"]), fast_moves_gm), 1, :),
     reshape(map(x -> get_type_id(x["type"]), fast_moves_gm), 1, :),
     reshape(map(x -> Int8(x["cooldown"] ÷ 500), fast_moves_gm), 1, :))
+const fast_moves = @SMatrix [fm_matrix[i, j] for i = 1:size(fm_matrix)[1], j = 1:size(fm_matrix)[2]]
 
 function get_buff_chance(c)
     return @match c begin
@@ -179,11 +180,12 @@ function get_buff_chance(c)
 end
 
 charged_moves_gm = filter(x -> x["energy"] != 0, gamemaster["moves"])
-const charged_moves = vcat(reshape(map(x -> get_type_id(x["type"]), charged_moves_gm), 1, :),
+cm_matrix = vcat(reshape(map(x -> get_type_id(x["type"]), charged_moves_gm), 1, :),
     reshape(map(x -> Int8(x["power"] ÷ 5), charged_moves_gm), 1, :),
     reshape(map(x -> Int8(x["energy"]), charged_moves_gm), 1, :),
     reshape(map(x -> haskey(x, "buffApplyChance") ? get_buff_chance(x["buffApplyChance"]) : Int8(0), charged_moves_gm), 1, :)
 )
+const charged_moves = @SMatrix [cm_matrix[i, j] for i = 1:size(cm_matrix)[1], j = 1:size(cm_matrix)[2]]
 
 struct StatBuffs
     val::UInt8
@@ -200,8 +202,9 @@ Base.:+(x::StatBuffs, y::StatBuffs) = StatBuffs(get_atk(x) + get_atk(y), get_def
 
 const defaultBuff = StatBuffs(Int8(0), Int8(0))
 
-const charged_moves_buffs = vcat(reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opponent" ?
+cmb_matrix = vcat(reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opponent" ?
     RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
     charged_moves_gm), 1, :), reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "self" ?
     RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
     charged_moves_gm), 1, :))
+const charged_moves_buffs = @SMatrix [cmb_matrix[i, j] for i = 1:size(cmb_matrix)[1], j = 1:size(cmb_matrix)[2]]
