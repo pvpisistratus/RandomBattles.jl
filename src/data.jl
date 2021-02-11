@@ -141,7 +141,7 @@ const colors = [RGBA(153/255, 159/255, 161/255, 1.0),
 
 const shieldColor = RGBA(235/255,13/255,199/255, 1.0)
 
-const typings = @SVector [t for t in unique(map(x -> sort(RandomBattles.get_type_id.(x["types"])), gamemaster["pokemon"]))]
+const typings = @SVector [t for t in unique(map(x -> sort(get_type_id.(x["types"])), gamemaster["pokemon"]))[1:137]]
 
 function get_effectiveness(defenderTypes::Vector{Int8}, moveType::Int8)
     return round(UInt16, 12_800 * type_effectiveness[defenderTypes[1], moveType] *
@@ -165,7 +165,7 @@ fm_matrix = vcat(reshape(map(x -> Int8(x["power"]), fast_moves_gm), 1, :),
     reshape(map(x -> Int8(x["energyGain"]), fast_moves_gm), 1, :),
     reshape(map(x -> get_type_id(x["type"]), fast_moves_gm), 1, :),
     reshape(map(x -> Int8(x["cooldown"] ÷ 500), fast_moves_gm), 1, :))
-const fast_moves = @SMatrix [fm_matrix[i, j] for i = 1:size(fm_matrix)[1], j = 1:size(fm_matrix)[2]]
+const fast_moves = @SMatrix [fm_matrix[i, j] for i = 1:4, j = 1:85]
 
 function get_buff_chance(c)
     return @match c begin
@@ -185,7 +185,7 @@ cm_matrix = vcat(reshape(map(x -> get_type_id(x["type"]), charged_moves_gm), 1, 
     reshape(map(x -> Int8(x["energy"]), charged_moves_gm), 1, :),
     reshape(map(x -> haskey(x, "buffApplyChance") ? get_buff_chance(x["buffApplyChance"]) : Int8(0), charged_moves_gm), 1, :)
 )
-const charged_moves = @SMatrix [cm_matrix[i, j] for i = 1:size(cm_matrix)[1], j = 1:size(cm_matrix)[2]]
+const charged_moves = @SMatrix [cm_matrix[i, j] for i = 1:4, j = 1:165]
 
 struct StatBuffs
     val::UInt8
@@ -207,4 +207,4 @@ cmb_matrix = vcat(reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opp
     charged_moves_gm), 1, :), reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "self" ?
     RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
     charged_moves_gm), 1, :))
-const charged_moves_buffs = @SMatrix [cmb_matrix[i, j] for i = 1:size(cmb_matrix)[1], j = 1:size(cmb_matrix)[2]]
+const charged_moves_buffs = @SMatrix [cmb_matrix[i, j] for i = 1:4, j = 1:165]
