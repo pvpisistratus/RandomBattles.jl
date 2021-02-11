@@ -13,46 +13,46 @@ function calculate_damage(attack::UInt16, defense::UInt16, power::Int64,
 end
 
 function queue_fast_move(state::IndividualBattleState, agent::Int64)
-    @inbounds return @set state.fastMovesPending[agent] = fast_moves[4, state.teams[agent].mon.fastMove]
+    return @set state.fastMovesPending[agent] = fast_moves[4, state.teams[agent].mon.fastMove]
 end
 
 function queue_fast_move(state::State, agent::Int64)
-    @inbounds return @set state.fastMovesPending[agent] = fast_moves[4, state.teams[agent].mons[state.teams[agent].active].fastMove.cooldown]
+    return @set state.fastMovesPending[agent] = fast_moves[4, state.teams[agent].mons[state.teams[agent].active].fastMove.cooldown]
 end
 
 function queue_switch(state::State, switchTo::Int8; time::Int8 = Int8(0))
-    @inbounds return @set state.switchesPending[state.agent] = SwitchAction(switchTo, time)
+    return @set state.switchesPending[state.agent] = SwitchAction(switchTo, time)
 end
 
 function get_cmp(state::IndividualBattleState)
-    @inbounds state.chargedMovesPending[2].charge == Int8(0) && return Int8(1)
-    @inbounds state.chargedMovesPending[1].charge == Int8(0) && return Int8(2)
-    @inbounds attacks = state.teams[1].mon.stats.attack, state.teams[2].mon.stats.attack
-    @inbounds attacks[1] > attacks[2] && return Int8(1)
-    @inbounds attacks[1] < attacks[2] && return Int8(2)
+    state.chargedMovesPending[2].charge == Int8(0) && return Int8(1)
+    state.chargedMovesPending[1].charge == Int8(0) && return Int8(2)
+    attacks = state.teams[1].mon.stats.attack, state.teams[2].mon.stats.attack
+    attacks[1] > attacks[2] && return Int8(1)
+    attacks[1] < attacks[2] && return Int8(2)
     return rand((Int8(1), Int8(2)))
 end
 
 function get_cmp(state::State)
-    @inbounds state.chargedMovesPending[2].charge == Int8(0) && return Int8(1)
-    @inbounds state.chargedMovesPending[1].charge == Int8(0) && return Int8(2)
-    @inbounds attacks = state.teams[1].mons[state.teams[1].active].stats.attack,
+    state.chargedMovesPending[2].charge == Int8(0) && return Int8(1)
+    state.chargedMovesPending[1].charge == Int8(0) && return Int8(2)
+    attacks = state.teams[1].mons[state.teams[1].active].stats.attack,
         state.teams[2].mons[state.teams[2].active].stats.attack
-    @inbounds attacks[1] > attacks[2] && return Int8(1)
-    @inbounds attacks[1] < attacks[2] && return Int8(2)
+    attacks[1] > attacks[2] && return Int8(1)
+    attacks[1] < attacks[2] && return Int8(2)
     return rand((Int8(1), Int8(2)))
 end
 
 function apply_buffs(state::IndividualBattleState, cmp::Int8)
     move = state.chargedMovesPending[cmp].move
-    @inbounds chance = charged_moves[4, move]
+    chance = charged_moves[4, move]
     chance == Int8(0) && return state
     next_state = state
-    @inbounds if rand(Int8(1):chance) == Int8(1)
-        @inbounds if charged_moves_buffs[1, move] != defaultBuff
-            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += charged_moves_buffs[1, move]
+    if rand(Int8(1):chance) == Int8(1)
+        if charged_moves_buffs[1, move] != defaultBuff
+            next_state = @set next_state.teams[get_other_agent(cmp)].buffs += charged_moves_buffs[1, move]
         else
-            @inbounds next_state = @set next_state.teams[cmp].buffs += charged_moves_buffs[2, move]
+            next_state = @set next_state.teams[cmp].buffs += charged_moves_buffs[2, move]
         end
     end
     return next_state
@@ -60,14 +60,14 @@ end
 
 function apply_buffs(state::State, cmp::Int8)
     move = state.chargedMovesPending[cmp].move
-    @inbounds chance = charged_moves[4, move]
+    chance = charged_moves[4, move]
     chance == Int8(0) && return state
     next_state = state
-    @inbounds if rand(Int8(1):chance) == Int8(1)
-        @inbounds if charged_moves_buffs[1, move] != defaultBuff
-            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += charged_moves_buffs[1, move]
+    if rand(Int8(1):chance) == Int8(1)
+        if charged_moves_buffs[1, move] != defaultBuff
+            next_state = @set next_state.teams[get_other_agent(cmp)].buffs += charged_moves_buffs[1, move]
         else
-            @inbounds next_state = @set next_state.teams[cmp].buffs += charged_moves_buffs[2, move]
+            next_state = @set next_state.teams[cmp].buffs += charged_moves_buffs[2, move]
         end
     end
     return next_state
@@ -75,11 +75,11 @@ end
 
 function evaluate_fast_moves(state::IndividualBattleState, agent::Int64)
     next_state = state
-    @inbounds move = fast_moves[1:3, next_state.teams[agent].mon.fastMove]
-    @inbounds next_state = @set next_state.teams[agent].mon.energy =
+    move = fast_moves[1:3, next_state.teams[agent].mon.fastMove]
+    next_state = @set next_state.teams[agent].mon.energy =
         min(next_state.teams[agent].mon.energy + move[2], Int8(100))
     other_agent = agent == 1 ? 2 : 1
-    @inbounds next_state = @set next_state.teams[other_agent].mon.hp = max(
+    next_state = @set next_state.teams[other_agent].mon.hp = max(
         Int16(0),
         next_state.teams[other_agent].mon.hp -
         calculate_damage(
@@ -93,18 +93,18 @@ function evaluate_fast_moves(state::IndividualBattleState, agent::Int64)
             move[3] in typings[next_state.teams[agent].mon.typing] ? Int8(12) : Int8(10)
         ),
     )
-    @inbounds next_state = @set next_state.fastMovesPending[agent] = Int8(-1)
+    next_state = @set next_state.fastMovesPending[agent] = Int8(-1)
     return next_state
 end
 
 function evaluate_fast_moves(state::State, agent::Int64)
     next_state = state
-    @inbounds move = fast_moves[1:3, next_state.teams[agent].mons[next_state.teams[agent].active].fastMove]
-    @inbounds next_state = @set next_state.teams[agent].mons[next_state.teams[agent].active].energy =
+    move = fast_moves[1:3, next_state.teams[agent].mons[next_state.teams[agent].active].fastMove]
+    next_state = @set next_state.teams[agent].mons[next_state.teams[agent].active].energy =
         min(next_state.teams[agent].mons[next_state.teams[agent].active].energy +
         next_state.teams[agent].mons[next_state.teams[agent].active].fastMove.energy, Int8(100))
     other_agent = agent == 1 ? 2 : 1
-    @inbounds next_state = @set next_state.teams[other_agent].mon.hp = max(
+    next_state = @set next_state.teams[other_agent].mon.hp = max(
         Int16(0),
         next_state.teams[other_agent].mon.hp -
         calculate_damage(
@@ -126,14 +126,14 @@ function evaluate_charged_moves(state::IndividualBattleState)
     cmp = get_cmp(state)
     cmp == Int8(0) && return state
     next_state = state
-    @inbounds move = charged_moves[1:3, next_state.chargedMovesPending[cmp].move]
-    @inbounds next_state = @set next_state.teams[cmp].mon.energy -= move[3]
+    move = charged_moves[1:3, next_state.chargedMovesPending[cmp].move]
+    next_state = @set next_state.teams[cmp].mon.energy -= move[3]
     other_agent = cmp == 1 ? 2 : 1
-    @inbounds if next_state.teams[other_agent].shields > Int8(0) && next_state.teams[other_agent].shielding
-        @inbounds next_state = @set next_state.teams[other_agent].shields -= Int8(1)
-        @inbounds next_state = @set next_state.teams[other_agent].shielding = false
+    if next_state.teams[other_agent].shields > Int8(0) && next_state.teams[other_agent].shielding
+        next_state = @set next_state.teams[other_agent].shields -= Int8(1)
+        next_state = @set next_state.teams[other_agent].shielding = false
     else
-        @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].mon.hp = max(
+        next_state = @set next_state.teams[get_other_agent(cmp)].mon.hp = max(
             Int16(0),
             next_state.teams[other_agent].mon.hp - calculate_damage(
                 next_state.teams[cmp].mon.stats.attack,
@@ -151,7 +151,7 @@ function evaluate_charged_moves(state::IndividualBattleState)
     if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
         next_state = evaluate_fast_moves(next_state, cmp == Int8(2) ? 1 : 2)
     end
-    @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
+    next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
     return next_state
 end
 
@@ -159,16 +159,16 @@ function evaluate_charged_moves(state::State)
     cmp = get_cmp(state)
     cmp == Int8(0) && return state
     next_state = state
-    @inbounds move = charged_moves[1:3, next_state.chargedMovesPending[cmp].move]
-    @inbounds next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].energy -= move[3]
-    @inbounds next_state = @set next_state.teams[1].switchCooldown = max(Int8(0), next_state.teams[1].switchCooldown - Int8(20))
-    @inbounds next_state = @set next_state.teams[2].switchCooldown = max(Int8(0), next_state.teams[2].switchCooldown - Int8(20))
+    move = charged_moves[1:3, next_state.chargedMovesPending[cmp].move]
+    next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].energy -= move[3]
+    next_state = @set next_state.teams[1].switchCooldown = max(Int8(0), next_state.teams[1].switchCooldown - Int8(20))
+    next_state = @set next_state.teams[2].switchCooldown = max(Int8(0), next_state.teams[2].switchCooldown - Int8(20))
     other_agent = cmp == 1 ? 2 : 1
-    @inbounds if next_state.teams[get_other_agent(cmp)].shields > Int8(0) && next_state.teams[get_other_agent(cmp)].shielding
-        @inbounds next_state = @set next_state.teams[other_agent].shields -= Int8(1)
-        @inbounds next_state = @set next_state.teams[other_agent].shielding = false
+    if next_state.teams[other_agent].shields > Int8(0) && next_state.teams[other_agent].shielding
+        next_state = @set next_state.teams[other_agent].shields -= Int8(1)
+        next_state = @set next_state.teams[other_agent].shielding = false
     else
-        @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].mon.hp = max(
+        next_state = @set next_state.teams[other_agent].mon.hp = max(
             Int16(0),
             next_state.teams[other_agent].mon.hp - calculate_damage(
                 next_state.teams[cmp].mon.stats.attack,
@@ -183,71 +183,71 @@ function evaluate_charged_moves(state::State)
         )
     end
     next_state = apply_buffs(next_state, cmp)
-    if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
+    if next_state.fastMovesPending[other_agent] != Int8(-1)
         next_state = evaluate_fast_moves(next_state, cmp == Int8(2) ? 1 : 2)
     end
-    @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
+    next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
     return next_state
 end
 
 function evaluate_switches(state::State)
     next_state = state
-    @inbounds if next_state.switchesPending[1].pokemon != Int8(0)
-        @inbounds next_state = @set next_state.teams[1].active = next_state.switchesPending[1].pokemon
-        @inbounds next_state = @set next_state.teams[1].buffs = defaultBuff
-        @inbounds if next_state.switchesPending[1].time != Int8(0)
-            @inbounds next_state = @set next_state.teams[2].switchCooldown = max(
+    if next_state.switchesPending[1].pokemon != Int8(0)
+        next_state = @set next_state.teams[1].active = next_state.switchesPending[1].pokemon
+        next_state = @set next_state.teams[1].buffs = defaultBuff
+        if next_state.switchesPending[1].time != Int8(0)
+            next_state = @set next_state.teams[2].switchCooldown = max(
                 Int8(0),
                 next_state.teams[2].switchCooldown - next_state.switchesPending[1].time - Int8(1),
             )
         else
-            @inbounds next_state = @set next_state.teams[1].switchCooldown = Int8(120)
+            next_state = @set next_state.teams[1].switchCooldown = Int8(120)
         end
-        @inbounds next_state = @set next_state.fastMovesPending[1] = Int8(-1)
-        @inbounds next_state = @set next_state.switchesPending[1] = defaultSwitch
+        next_state = @set next_state.fastMovesPending[1] = Int8(-1)
+        next_state = @set next_state.switchesPending[1] = defaultSwitch
     end
 
-    @inbounds if next_state.switchesPending[2].pokemon != Int8(0)
-        @inbounds next_state = @set next_state.teams[2].active = next_state.switchesPending[2].pokemon
-        @inbounds next_state = @set next_state.teams[2].buffs = defaultBuff
-        @inbounds if next_state.switchesPending[2].time != Int8(0)
-            @inbounds next_state = @set next_state.teams[1].switchCooldown = max(
+    if next_state.switchesPending[2].pokemon != Int8(0)
+        next_state = @set next_state.teams[2].active = next_state.switchesPending[2].pokemon
+        next_state = @set next_state.teams[2].buffs = defaultBuff
+        if next_state.switchesPending[2].time != Int8(0)
+            next_state = @set next_state.teams[1].switchCooldown = max(
                 Int8(0),
                 next_state.teams[1].switchCooldown - next_state.switchesPending[2].time - Int8(1),
             )
         else
-            @inbounds next_state = @set next_state.teams[2].switchCooldown = Int8(120)
+            next_state = @set next_state.teams[2].switchCooldown = Int8(120)
         end
-        @inbounds next_state = @set next_state.fastMovesPending[2] = Int8(-1)
-        @inbounds next_state = @set next_state.switchesPending[2] = defaultSwitch
+        next_state = @set next_state.fastMovesPending[2] = Int8(-1)
+        next_state = @set next_state.switchesPending[2] = defaultSwitch
     end
     return next_state
 end
 
 function step_timers(state::IndividualBattleState)
     next_state = state
-    @inbounds if state.fastMovesPending[1] != -1
-        @inbounds next_state = @set next_state.fastMovesPending[1] -= Int8(1)
+    if state.fastMovesPending[1] != Int8(-1)
+        next_state = @set next_state.fastMovesPending[1] -= Int8(1)
     end
-    @inbounds if state.fastMovesPending[2] != -1
-        @inbounds next_state = @set next_state.fastMovesPending[2] -= Int8(1)
+    if state.fastMovesPending[2] != Int8(-1)
+        next_state = @set next_state.fastMovesPending[2] -= Int8(1)
     end
     return next_state
 end
 
 function step_timers(state::State)
     next_state = state
-    @inbounds if state.fastMovesPending[1] != Int8(-1)
-        @inbounds next_state = @set next_state.fastMovesPending[1] -= Int8(1)
+    if state.fastMovesPending[1] != Int8(-1)
+        next_state = @set next_state.fastMovesPending[1] -= Int8(1)
     end
-    @inbounds if state.fastMovesPending[2] != Int8(-1)
-        @inbounds next_state = @set next_state.fastMovesPending[2] -= Int8(1)
+    if state.fastMovesPending[2] != Int8(-1)
+        next_state = @set next_state.fastMovesPending[2] -= Int8(1)
     end
-    @inbounds if state.teams[1].switchCooldown != Int8(0)
-        @inbounds next_state = @set next_state.teams[1].switchCooldown -= Int8(1)
+    if state.teams[1].switchCooldown != Int8(0)
+        next_state = @set next_state.teams[1].switchCooldown -= Int8(1)
     end
-    @inbounds if state.teams[2].switchCooldown != Int8(0)
-        @inbounds next_state = @set next_state.teams[2].switchCooldown -= Int8(1)
+    if state.teams[2].switchCooldown != Int8(0)
+        next_state = @set next_state.teams[2].switchCooldown -= Int8(1)
     end
     return next_state
 end
