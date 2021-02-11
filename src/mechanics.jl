@@ -9,11 +9,9 @@ function calculate_damage(attack::Int64, defense::Int64, power::Int64,
     def_typing::Int8, move_typing::Int8
 )
     stab = move_typing in typings[atk_typing] ? 12 : 10
-    dmg = Int16((power * stab * attack * get_buff_modifier(atk_buff) *
+    return Int16((power * stab * attack * get_buff_modifier(atk_buff) *
         get_eff(effectiveness[def_typing, move_typing]) * charge * 65) ÷
         (defense * get_buff_modifier(def_buff) * 1_280_000_000) + 1)
-    println(dmg)
-    return dmg
 end
 
 function queue_fast_move(state::IndividualBattleState, agent::Int64)
@@ -129,73 +127,71 @@ end
 
 function evaluate_charged_moves(state::IndividualBattleState)
     cmp = get_cmp(state)
+    cmp == Int8(0) && return state
     next_state = state
-    if cmp > Int8(0)
-        @inbounds move = charged_moves[next_state.chargedMovesPending[cmp].move, 1:3]
-        @inbounds next_state = @set next_state.teams[cmp].mon.energy -= move[3]
-        other_agent = cmp == 1 ? 2 : 1
-        @inbounds if next_state.teams[other_agent].shields > Int8(0) && next_state.teams[other_agent].shielding
-            @inbounds next_state = @set next_state.teams[other_agent].shields -= Int8(1)
-            @inbounds next_state = @set next_state.teams[other_agent].shielding = false
-        else
-            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].mon.hp = max(
-                Int16(0),
-                    next_state.teams[other_agent].mon.hp - calculate_damage(
-                    Int64(next_state.teams[cmp].mon.stats.attack),
-                    Int64(next_state.teams[other_agent].mon.stats.defense),
-                    5 * move[2],
-                    Int64(next_state.chargedMovesPending[cmp].charge),
-                    get_atk(next_state.teams[cmp].buffs),
-                    get_def(next_state.teams[other_agent].buffs),
-                    next_state.teams[cmp].mon.typing,
-                    next_state.teams[other_agent].mon.typing,
-                    move[1]
-                ),
-            )
-        end
-        next_state = apply_buffs(next_state, cmp)
-        if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
-            next_state = evaluate_fast_moves(next_state, cmp == Int8(2) ? 1 : 2)
-        end
-        @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
+    @inbounds move = charged_moves[next_state.chargedMovesPending[cmp].move, 1:3]
+    @inbounds next_state = @set next_state.teams[cmp].mon.energy -= move[3]
+    other_agent = cmp == 1 ? 2 : 1
+    @inbounds if next_state.teams[other_agent].shields > Int8(0) && next_state.teams[other_agent].shielding
+        @inbounds next_state = @set next_state.teams[other_agent].shields -= Int8(1)
+        @inbounds next_state = @set next_state.teams[other_agent].shielding = false
+    else
+        @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].mon.hp = max(
+            Int16(0),
+                next_state.teams[other_agent].mon.hp - calculate_damage(
+                Int64(next_state.teams[cmp].mon.stats.attack),
+                Int64(next_state.teams[other_agent].mon.stats.defense),
+                5 * move[2],
+                Int64(next_state.chargedMovesPending[cmp].charge),
+                get_atk(next_state.teams[cmp].buffs),
+                get_def(next_state.teams[other_agent].buffs),
+                next_state.teams[cmp].mon.typing,
+                next_state.teams[other_agent].mon.typing,
+                move[1]
+            ),
+        )
     end
+    next_state = apply_buffs(next_state, cmp)
+    if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
+        next_state = evaluate_fast_moves(next_state, cmp == Int8(2) ? 1 : 2)
+    end
+    @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
     return next_state
 end
 
 function evaluate_charged_moves(state::State)
     cmp = get_cmp(state)
+    cmp == Int8(0) && return state
     next_state = state
-    if cmp > Int8(0)
-        @inbounds move = charged_moves[next_state.chargedMovesPending[cmp].move, 1:3]
-        @inbounds next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].energy -= move[3]
-        @inbounds next_state = @set next_state.teams[1].switchCooldown = max(Int8(0), next_state.teams[1].switchCooldown - Int8(20))
-        @inbounds next_state = @set next_state.teams[2].switchCooldown = max(Int8(0), next_state.teams[2].switchCooldown - Int8(20))
-        other_agent = cmp == 1 ? 2 : 1
-        @inbounds if next_state.teams[get_other_agent(cmp)].shields > Int8(0) && next_state.teams[get_other_agent(cmp)].shielding
-            @inbounds next_state = @set next_state.teams[other_agent].shields -= Int8(1)
-            @inbounds next_state = @set next_state.teams[other_agent].shielding = false
-        else
-            @inbounds next_state = @set next_state.teams[other_agent].mon.hp = max(
-                Int16(0),
-                    next_state.teams[other_agent].mon.hp - calculate_damage(
-                    Int64(next_state.teams[cmp].mons[next_state.teams[cmp].active].stats.attack),
-                    Int64(next_state.teams[other_agent].mons[next_state.teams[other_agent].active].stats.defense),
-                    5 * move[2],
-                    Int64(next_state.chargedMovesPending[cmp].charge),
-                    get_atk(next_state.teams[cmp].buffs),
-                    get_def(next_state.teams[other_agent].buffs),
-                    next_state.teams[cmp].mons[next_state.teams[cmp].active].typing,
-                    next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing,
-                    move[1]
-                ),
-            )
-        end
-        next_state = apply_buffs(next_state, cmp)
-        if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
-            next_state = evaluate_fast_moves(next_state, cmp == Int8(2) ? 1 : 2)
-        end
-        @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
+    @inbounds move = charged_moves[next_state.chargedMovesPending[cmp].move, 1:3]
+    @inbounds next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].energy -= move[3]
+    @inbounds next_state = @set next_state.teams[1].switchCooldown = max(Int8(0), next_state.teams[1].switchCooldown - Int8(20))
+    @inbounds next_state = @set next_state.teams[2].switchCooldown = max(Int8(0), next_state.teams[2].switchCooldown - Int8(20))
+    other_agent = cmp == 1 ? 2 : 1
+    @inbounds if next_state.teams[get_other_agent(cmp)].shields > Int8(0) && next_state.teams[get_other_agent(cmp)].shielding
+        @inbounds next_state = @set next_state.teams[other_agent].shields -= Int8(1)
+        @inbounds next_state = @set next_state.teams[other_agent].shielding = false
+    else
+        @inbounds next_state = @set next_state.teams[other_agent].mon.hp = max(
+            Int16(0),
+                next_state.teams[other_agent].mon.hp - calculate_damage(
+                Int64(next_state.teams[cmp].mons[next_state.teams[cmp].active].stats.attack),
+                Int64(next_state.teams[other_agent].mons[next_state.teams[other_agent].active].stats.defense),
+                5 * move[2],
+                Int64(next_state.chargedMovesPending[cmp].charge),
+                get_atk(next_state.teams[cmp].buffs),
+                get_def(next_state.teams[other_agent].buffs),
+                next_state.teams[cmp].mons[next_state.teams[cmp].active].typing,
+                next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing,
+                move[1]
+            ),
+        )
     end
+    next_state = apply_buffs(next_state, cmp)
+    if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
+        next_state = evaluate_fast_moves(next_state, cmp == Int8(2) ? 1 : 2)
+    end
+    @inbounds next_state = @set next_state.chargedMovesPending[cmp] = defaultCharge
     return next_state
 end
 
