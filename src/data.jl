@@ -161,8 +161,10 @@ const eff = @SVector [3125, 5000, 8000, 12800, 20480, 32768]
 const effectiveness = [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
 
 fast_moves_gm = filter(x -> x["energy"] == 0, gamemaster["moves"])
-const fast_moves = hcat(map(x -> Int8(x["power"]), fast_moves_gm), map(x -> Int8(x["energyGain"]), fast_moves_gm),
-    map(x -> RandomBattles.get_type_id(x["type"]), fast_moves_gm), map(x -> Int8(x["cooldown"] ÷ 500), fast_moves_gm))
+const fast_moves = vcat(reshape(map(x -> Int8(x["power"]), fast_moves_gm), 1, :),
+    reshape(map(x -> Int8(x["energyGain"]), fast_moves_gm), 1, :),
+    reshape(map(x -> get_type_id(x["type"]), fast_moves_gm), 1, :),
+    reshape(map(x -> Int8(x["cooldown"] ÷ 500), fast_moves_gm), 1, :))
 
 function get_buff_chance(c)
     return @match c begin
@@ -177,9 +179,11 @@ function get_buff_chance(c)
 end
 
 charged_moves_gm = filter(x -> x["energy"] != 0, gamemaster["moves"])
-const charged_moves = hcat(map(x -> RandomBattles.get_type_id(x["type"]), charged_moves_gm),
-    map(x -> Int8(x["power"] ÷ 5), charged_moves_gm), map(x -> Int8(x["energy"]), charged_moves_gm),
-    map(x -> haskey(x, "buffApplyChance") ? get_buff_chance(x["buffApplyChance"]) : Int8(0),  charged_moves_gm))
+const charged_moves = vcat(reshape(map(x -> get_type_id(x["type"]), charged_moves_gm), 1, :),
+    reshape(map(x -> Int8(x["power"] ÷ 5), charged_moves_gm), 1, :),
+    reshape(map(x -> Int8(x["energy"]), charged_moves_gm), 1, :),
+    reshape(map(x -> haskey(x, "buffApplyChance") ? get_buff_chance(x["buffApplyChance"]) : Int8(0), charged_moves_gm), 1, :)
+)
 
 struct StatBuffs
     val::UInt8
@@ -196,8 +200,8 @@ Base.:+(x::StatBuffs, y::StatBuffs) = StatBuffs(get_atk(x) + get_atk(y), get_def
 
 const defaultBuff = StatBuffs(Int8(0), Int8(0))
 
-const charged_moves_buffs = hcat(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opponent" ?
+const charged_moves_buffs = vcat(reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opponent" ?
     RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
-    charged_moves_gm), map(x -> haskey(x, "buffs") && x["buffTarget"] == "self" ?
+    charged_moves_gm), 1, :), reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "self" ?
     RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
-    charged_moves_gm))
+    charged_moves_gm), 1, :))
