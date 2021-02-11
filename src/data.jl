@@ -158,7 +158,7 @@ store_eff(e::UInt16) = return @match e begin
 end
 const eff = @SVector [3125, 5000, 8000, 12800, 20480, 32768]
 
-const effectiveness = [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
+const effectiveness = @SMatrix [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
 
 fast_moves_gm = filter(x -> x["energy"] == 0, gamemaster["moves"])
 const fast_moves = vcat(reshape(map(x -> Int8(x["power"]), fast_moves_gm), 1, :),
