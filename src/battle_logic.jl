@@ -3,14 +3,17 @@ using Distributions, Setfield, Match, StaticArrays
 function get_possible_decisions(state::IndividualBattleState; allow_nothing = false)
     @inbounds activeTeam = state.teams[state.agent]
     @inbounds activeMon = state.teams[state.agent].mon
-    @inbounds return @SVector [((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[1]] && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[1]] && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[2]] && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[2]] && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0]
+    @inbounds fastMovePending = state.fastMovesPending[state.agent]
+    @inbounds energy1 = charged_moves[3, activeMon.chargedMoves[1]]
+    @inbounds energy2 = charged_moves[3, activeMon.chargedMoves[2]]
+    @inbounds return @SVector [((allow_nothing || fastMovePending > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((allow_nothing || fastMovePending > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((fastMovePending == Int8(0) || fastMovePending == Int8(-1)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((fastMovePending == Int8(0) || fastMovePending == Int8(-1)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((fastMovePending == Int8(0) || fastMovePending == Int8(-1)) && activeMon.energy >= energy1 && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((fastMovePending == Int8(0) || fastMovePending == Int8(-1)) && activeMon.energy >= energy1 && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((fastMovePending == Int8(0) || fastMovePending == Int8(-1)) && activeMon.energy >= energy2 && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((fastMovePending == Int8(0) || fastMovePending == Int8(-1)) && activeMon.energy >= energy2 && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0]
 end
 
 function get_possible_decisions(state::State; allow_nothing = false)
