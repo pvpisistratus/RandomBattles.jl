@@ -144,11 +144,21 @@ const shieldColor = RGBA(235/255,13/255,199/255, 1.0)
 const typings = @SVector [t for t in unique(map(x -> sort(get_type_id.(x["types"])), gamemaster["pokemon"]))[1:137]]
 
 function get_effectiveness(defenderTypes::Vector{Int8}, moveType::Int8)
-    return round(Int64, 12_800 * type_effectiveness[defenderTypes[1], moveType] *
+    return round(UInt16, 12_800 * type_effectiveness[defenderTypes[1], moveType] *
         type_effectiveness[defenderTypes[2], moveType])
 end
 
-const effectiveness = @SMatrix [get_effectiveness(i, j) for i in typings, j = Int8(1):Int8(18)]
+store_eff(e::UInt16) = return @match e begin
+     0x3200 => Int8(4)
+     0x1f40 => Int8(3)
+     0x1388 => Int8(2)
+     0x0c35 => Int8(1)
+     0x5000 => Int8(5)
+     0x8000 => Int8(6)
+end
+const eff = @SVector [3125, 5000, 8000, 12800, 20480, 32768]
+
+const effectiveness = @SMatrix [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
 
 const fast_moves = @SMatrix [vcat(reshape(map(x -> Int8(x["power"]), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :),
     reshape(map(x -> Int8(x["energyGain"]), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :),

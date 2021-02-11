@@ -84,7 +84,7 @@ function evaluate_fast_moves(state::IndividualBattleState, agent::Int64)
             Int8(100),
             get_atk(next_state.teams[agent].buffs),
             get_def(next_state.teams[other_agent].buffs),
-            effectiveness[next_state.teams[other_agent].mon.typing, fast_moves[3, next_state.teams[agent].mon.fastMove]],
+            eff[effectiveness[next_state.teams[other_agent].mon.typing, fast_moves[3, next_state.teams[agent].mon.fastMove]]],
             fast_moves[3, next_state.teams[agent].mon.fastMove] in typings[next_state.teams[agent].mon.typing] ? Int8(12) : Int8(10)
         ),
     )
@@ -108,8 +108,8 @@ function evaluate_fast_moves(state::State, agent::Int64)
             Int8(100),
             get_atk(next_state.teams[agent].buffs),
             get_def(next_state.teams[other_agent].buffs),
-            effectiveness[next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing,
-                fast_moves[3, next_state.teams[agent].mons[next_state.team[agent].active].fastMove]],
+            eff[effectiveness[next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing,
+                fast_moves[3, next_state.teams[agent].mons[next_state.team[agent].active].fastMove]]],
             fast_moves[3, next_state.teams[agent].mons[next_state.team[agent].active].fastMove] in
                 typings[next_state.teams[agent].mons[next_state.teams[agent].active].typing] ? Int8(12) : Int8(10)
         ),
@@ -137,7 +137,7 @@ function evaluate_charged_moves(state::IndividualBattleState)
                 next_state.chargedMovesPending[cmp].charge,
                 get_atk(next_state.teams[cmp].buffs),
                 get_def(next_state.teams[other_agent].buffs),
-                effectiveness[next_state.teams[other_agent].mon.typing, charged_moves[1, next_state.chargedMovesPending[cmp].move]],
+                eff[effectiveness[next_state.teams[other_agent].mon.typing, charged_moves[1, next_state.chargedMovesPending[cmp].move]]],
                 charged_moves[1, next_state.chargedMovesPending[cmp].move] in typings[next_state.teams[cmp].mon.typing] ? Int8(12) : Int8(10)
             )
         )
@@ -171,8 +171,8 @@ function evaluate_charged_moves(state::State)
                 next_state.chargedMovesPending[cmp].charge,
                 get_atk(next_state.teams[cmp].buffs),
                 get_def(next_state.teams[other_agent].buffs),
-                effectiveness[next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing,
-                    charged_moves[1, next_state.chargedMovesPending[cmp].move]],
+                eff[effectiveness[next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing,
+                    charged_moves[1, next_state.chargedMovesPending[cmp].move]]],
                 charged_moves[1, next_state.chargedMovesPending[cmp].move] in
                     typings[next_state.teams[cmp].mons[next_state.teams[cmp].active].typing] ? Int8(12) : Int8(10)
             )
