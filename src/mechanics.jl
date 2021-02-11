@@ -90,7 +90,7 @@ function evaluate_fast_moves(state::IndividualBattleState, agent::Int64)
             Int8(100),
             get_atk(next_state.teams[agent].buffs),
             get_def(next_state.teams[other_agent].buffs),
-            @inbounds get_eff(effectiveness[next_state.teams[other_agent].mon.typing, move[3]]),
+            @inbounds eff[effectiveness[next_state.teams[other_agent].mon.typing, move[3]]],
             @inbounds move[3] in typings[next_state.teams[agent].mon.typing] ? Int8(12) : Int8(10)
         ),
     )
@@ -114,7 +114,7 @@ function evaluate_fast_moves(state::State, agent::Int64)
             Int8(100),
             get_atk(next_state.teams[agent].buffs),
             get_def(next_state.teams[other_agent].buffs),
-            @inbounds get_eff(effectiveness[next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing, move[3]]),
+            @inbounds eff[effectiveness[next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing, move[3]]],
             @inbounds move[3] in typings[next_state.teams[agent].mons[next_state.teams[agent].active].typing] ? Int8(12) : Int8(10)
         ),
     )
@@ -142,7 +142,7 @@ function evaluate_charged_moves(state::IndividualBattleState)
                 next_state.chargedMovesPending[cmp].charge,
                 get_atk(next_state.teams[agent].buffs),
                 get_def(next_state.teams[other_agent].buffs),
-                @inbounds get_eff(effectiveness[next_state.teams[other_agent].mon.typing, move[1]]),
+                @inbounds eff[effectiveness[next_state.teams[other_agent].mon.typing, move[1]]],
                 @inbounds move[1] in typings[next_state.teams[agent].mon.typing] ? Int8(12) : Int8(10)
             )
         )
@@ -177,7 +177,7 @@ function evaluate_charged_moves(state::State)
                 next_state.chargedMovesPending[cmp].charge,
                 get_atk(next_state.teams[agent].buffs),
                 get_def(next_state.teams[other_agent].buffs),
-                @inbounds get_eff(effectiveness[next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing, move[1]]),
+                @inbounds eff[effectiveness[next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing, move[1]]],
                 @inbounds move[1] in typings[next_state.teams[agent].mons[next_state.teams[agent].active].typing] ? Int8(12) : Int8(10)
             )
         )

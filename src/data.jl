@@ -156,15 +156,7 @@ store_eff(e::UInt16) = return @match e begin
      0x5000 => Int8(5)
      0x8000 => Int8(6)
 end
-
-get_eff(e::Int8) = return @match e begin
-     Int8(1) => 3125
-     Int8(2) => 5000
-     Int8(3) => 8000
-     Int8(4) => 12800
-     Int8(5) => 20480
-     Int8(6) => 32768
-end
+const eff = @SVector [3125, 5000, 8000, 12800, 20480, 32768]
 
 const effectiveness = [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
 
