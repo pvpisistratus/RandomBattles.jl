@@ -160,12 +160,10 @@ const eff = @SVector [3125, 5000, 8000, 12800, 20480, 32768]
 
 const effectiveness = @SMatrix [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
 
-fast_moves_gm = filter(x -> x["energy"] == 0, gamemaster["moves"])
-fm_matrix = vcat(reshape(map(x -> Int8(x["power"]), fast_moves_gm), 1, :),
-    reshape(map(x -> Int8(x["energyGain"]), fast_moves_gm), 1, :),
-    reshape(map(x -> get_type_id(x["type"]), fast_moves_gm), 1, :),
-    reshape(map(x -> Int8(x["cooldown"] ÷ 500), fast_moves_gm), 1, :))
-const fast_moves = @SMatrix [fm_matrix[i, j] for i = 1:4, j = 1:85]
+const fast_moves = @SMatrix [vcat(reshape(map(x -> Int8(x["power"]), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> Int8(x["energyGain"]), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> get_type_id(x["type"]), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> Int8(x["cooldown"] ÷ 500), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :))[i, j] for i = 1:4, j = 1:85]
 
 function get_buff_chance(c)
     return @match c begin
@@ -179,13 +177,9 @@ function get_buff_chance(c)
     end
 end
 
-charged_moves_gm = filter(x -> x["energy"] != 0, gamemaster["moves"])
-cm_matrix = vcat(reshape(map(x -> get_type_id(x["type"]), charged_moves_gm), 1, :),
-    reshape(map(x -> Int8(x["power"] ÷ 5), charged_moves_gm), 1, :),
-    reshape(map(x -> Int8(x["energy"]), charged_moves_gm), 1, :),
-    reshape(map(x -> haskey(x, "buffApplyChance") ? get_buff_chance(x["buffApplyChance"]) : Int8(0), charged_moves_gm), 1, :)
-)
-const charged_moves = @SMatrix [cm_matrix[i, j] for i = 1:4, j = 1:165]
+const charged_moves = @SMatrix [vcat(reshape(map(x -> get_type_id(x["type"]), filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> Int8(x["power"] ÷ 5), filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :),reshape(map(x -> Int8(x["energy"]), filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> haskey(x, "buffApplyChance") ? get_buff_chance(x["buffApplyChance"]) : Int8(0), filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :))[i, j] for i = 1:4, j = 1:165]
 
 struct StatBuffs
     val::UInt8
@@ -202,9 +196,7 @@ Base.:+(x::StatBuffs, y::StatBuffs) = StatBuffs(get_atk(x) + get_atk(y), get_def
 
 const defaultBuff = StatBuffs(Int8(0), Int8(0))
 
-cmb_matrix = vcat(reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opponent" ?
-    RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
-    charged_moves_gm), 1, :), reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "self" ?
-    RandomBattles.StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : RandomBattles.defaultBuff,
-    charged_moves_gm), 1, :))
-const charged_moves_buffs = @SMatrix [cmb_matrix[i, j] for i = 1:2, j = 1:165]
+const charged_moves_buffs = @SMatrix [vcat(reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opponent" ?
+    StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : defaultBuff, filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "self" ? StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : defaultBuff,
+    filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :))[i, j] for i = 1:2, j = 1:165]
