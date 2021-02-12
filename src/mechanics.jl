@@ -104,13 +104,13 @@ function evaluate_fast_moves(state::State, agent::Int64)
         calculate_damage(
             next_state.teams[agent].mons[next_state.teams[agent].active].stats.attack,
             next_state.teams[other_agent].mons[next_state.teams[other_agent].active].stats.defense,
-            Int64(fast_moves[1, next_state.teams[agent].mons[next_state.team[agent].active].fastMove]),
+            Int64(fast_moves[1, next_state.teams[agent].mons[next_state.teams[agent].active].fastMove]),
             Int8(100),
             get_atk(next_state.teams[agent].buffs),
             get_def(next_state.teams[other_agent].buffs),
             eff[effectiveness[next_state.teams[other_agent].mons[next_state.teams[other_agent].active].typing,
-                fast_moves[3, next_state.teams[agent].mons[next_state.team[agent].active].fastMove]]],
-            fast_moves[3, next_state.teams[agent].mons[next_state.team[agent].active].fastMove] in
+                fast_moves[3, next_state.teams[agent].mons[next_state.teams[agent].active].fastMove]]],
+            fast_moves[3, next_state.teams[agent].mons[next_state.teams[agent].active].fastMove] in
                 typings[next_state.teams[agent].mons[next_state.teams[agent].active].typing] ? Int8(12) : Int8(10)
         ),
     )
