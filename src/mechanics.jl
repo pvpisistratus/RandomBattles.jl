@@ -162,7 +162,7 @@ function evaluate_charged_moves(state::State)
         next_state = @set next_state.teams[other_agent].shields -= Int8(1)
         next_state = @set next_state.teams[other_agent].shielding = false
     else
-        next_state = @set next_state.teams[other_agent].mon.hp = max(
+        next_state = @set next_state.teams[other_agent].mons[next_state.teams[other_agent].active].hp = max(
             Int16(0),
             next_state.teams[other_agent].mons[next_state.teams[other_agent].active].hp - calculate_damage(
                 next_state.teams[cmp].mons[next_state.teams[cmp].active].stats.attack,
