@@ -96,7 +96,7 @@ function evaluate_fast_moves(state::State, agent::Int64)
     next_state = state
     next_state = @set next_state.teams[agent].mons[next_state.teams[agent].active].energy =
         min(next_state.teams[agent].mons[next_state.teams[agent].active].energy +
-        fast_moves[2, next_state.teams[agent].mons[next_state.team[agent].active].fastMove], Int8(100))
+        fast_moves[2, next_state.teams[agent].mons[next_state.teams[agent].active].fastMove], Int8(100))
     other_agent = agent == 1 ? 2 : 1
     next_state = @set next_state.teams[other_agent].mon.hp = max(
         Int16(0),
