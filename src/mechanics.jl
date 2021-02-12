@@ -98,12 +98,12 @@ function evaluate_fast_moves(state::State, agent::Int64)
         min(next_state.teams[agent].mons[next_state.teams[agent].active].energy +
         fast_moves[2, next_state.teams[agent].mons[next_state.teams[agent].active].fastMove], Int8(100))
     other_agent = agent == 1 ? 2 : 1
-    next_state = @set next_state.teams[other_agent].mon.hp = max(
+    next_state = @set next_state.teams[other_agent].mons[next_state.teams[agent].active].hp = max(
         Int16(0),
-        next_state.teams[other_agent].mon.hp -
+        next_state.teams[other_agent].mons[next_state.teams[other_agent].active].hp -
         calculate_damage(
-            next_state.teams[agent].mon.stats.attack,
-            next_state.teams[other_agent].mon.stats.defense,
+            next_state.teams[agent].mons[next_state.teams[agent].active].stats.attack,
+            next_state.teams[other_agent].mons[next_state.teams[other_agent].active].stats.defense,
             Int64(fast_moves[1, next_state.teams[agent].mons[next_state.team[agent].active].fastMove]),
             Int8(100),
             get_atk(next_state.teams[agent].buffs),
@@ -164,9 +164,9 @@ function evaluate_charged_moves(state::State)
     else
         next_state = @set next_state.teams[other_agent].mon.hp = max(
             Int16(0),
-            next_state.teams[other_agent].mon.hp - calculate_damage(
-                next_state.teams[cmp].mon.stats.attack,
-                next_state.teams[other_agent].mon.stats.defense,
+            next_state.teams[other_agent].mons[next_state.teams[other_agent].active].hp - calculate_damage(
+                next_state.teams[cmp].mons[next_state.teams[cmp].active].stats.attack,
+                next_state.teams[other_agent].mons[next_state.teams[other_agent].active].stats.defense,
                 5 * charged_moves[2, next_state.chargedMovesPending[cmp].move],
                 next_state.chargedMovesPending[cmp].charge,
                 get_atk(next_state.teams[cmp].buffs),
