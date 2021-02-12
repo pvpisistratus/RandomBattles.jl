@@ -17,7 +17,7 @@ function queue_fast_move(state::IndividualBattleState, agent::Int64)
 end
 
 function queue_fast_move(state::State, agent::Int64)
-    return @set state.fastMovesPending[agent] = fast_moves[4, state.teams[agent].mons[state.teams[agent].active].fastMove.cooldown]
+    return @set state.fastMovesPending[agent] = fast_moves[4, state.teams[agent].mons[state.teams[agent].active].fastMove]
 end
 
 function queue_switch(state::State, switchTo::Int8; time::Int8 = Int8(0))

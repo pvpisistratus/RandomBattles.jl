@@ -156,6 +156,7 @@ store_eff(e::UInt16) = return @match e begin
      0x5000 => Int8(5)
      0x8000 => Int8(6)
 end
+
 const eff = @SVector [3125, 5000, 8000, 12800, 20480, 32768]
 
 const effectiveness = @SMatrix [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
