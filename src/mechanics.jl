@@ -207,7 +207,7 @@ function evaluate_switches(state::DynamicState, dec::Decision)
     @inbounds if dec.switchesPending[1].pokemon != Int8(0)
         @inbounds next_state = @set next_state.teams[1].active = dec.switchesPending[1].pokemon
         @inbounds next_state = @set next_state.teams[1].buffs = defaultBuff
-        @inbounds if next_state.switchesPending[1].time != Int8(0)
+        @inbounds if dec.switchesPending[1].time != Int8(0)
             @inbounds next_state = @set next_state.teams[2].switchCooldown = max(
                 Int8(0),
                 next_state.teams[2].switchCooldown - dec.switchesPending[1].time - Int8(1),
@@ -221,7 +221,7 @@ function evaluate_switches(state::DynamicState, dec::Decision)
     @inbounds if dec.switchesPending[2].pokemon != Int8(0)
         @inbounds next_state = @set next_state.teams[2].active = dec.switchesPending[2].pokemon
         @inbounds next_state = @set next_state.teams[2].buffs = defaultBuff
-        @inbounds if next_state.switchesPending[2].time != Int8(0)
+        @inbounds if dec.switchesPending[2].time != Int8(0)
             @inbounds next_state = @set next_state.teams[1].switchCooldown = max(
                 Int8(0),
                 next_state.teams[1].switchCooldown - dec.switchesPending[2].time - Int8(1),
