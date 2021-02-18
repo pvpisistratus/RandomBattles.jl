@@ -26,8 +26,6 @@ StaticTeam(mons::Array{Int64}; league::String = "great", cup::String = "open") =
 StaticTeam(mons::Array{String}; league::String = "great", cup::String = "open") =
     StaticTeam(StaticPokemon.(mons, league = league, cup = cup))
 
-StaticTeam(mons::Array{StaticPokemon}) = StaticTeam(mons)
-
 DynamicTeam(team::StaticTeam) = DynamicTeam(DynamicPokemon.(StaticPokemon.(team.mons)),
     defaultBuff, Int8(0), Int8(2), Int8(1))
 
