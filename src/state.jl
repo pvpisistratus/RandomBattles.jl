@@ -57,7 +57,7 @@ StaticState(teams::Array{String}; league = "great", cup = "open") = StaticState(
 )
 
 DynamicState(state::StaticState) = DynamicState(
-    StaticTeam.(state.teams),
+    DynamicTeam.(state.teams),
     Int8(1),
     [Int8(-1), Int8(-1)],
 )
