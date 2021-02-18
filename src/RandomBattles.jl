@@ -17,7 +17,7 @@ include("battle_logic.jl")
 
 export DynamicState, StaticState, IndividualBattleState,
        DynamicTeam, StaticTeam, Individual,
-       DynamicPokemon, StaticPokemon
+       DynamicPokemon, StaticPokemon,
        #Strategy, plot_strategy,
        get_possible_decisions,
        get_battle_score, get_battle_scores,
