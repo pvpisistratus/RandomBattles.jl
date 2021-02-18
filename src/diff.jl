@@ -1,4 +1,4 @@
-function diff(p1::Pokemon, p2::Pokemon)
+function diff(p1::DynamicPokemon, p2::DynamicPokemon)
     if p1.hp != p2.hp
         println("Hp changed from $(p1.hp) to $(p2.hp)")
     end
@@ -16,7 +16,7 @@ function diff(b1::StatBuffs, b2::StatBuffs)
     end
 end
 
-function diff(t1::Team, t2::Team)
+function diff(t1::DynamicTeam, t2::DynamicTeam)
     if t1.active != t2.active
         println("Active mon changed from $(t1.active) to $(t2.active)")
     end
@@ -60,7 +60,7 @@ function diff(s1::IndividualBattleState, s2::IndividualBattleState)
     end
 end
 
-function diff(s1::State, s2::State)
+function diff(s1::DynamicState, s2::DynamicState)
     if s1.agent != s2.agent
         println("Agent changed from $(s1.agent) to $(s2.agent)")
     end
@@ -71,5 +71,11 @@ function diff(s1::State, s2::State)
     if s1.teams[2] != s2.teams[2]
         println("Team 2: ")
         diff(s1.teams[2], s2.teams[2])
+    end
+    if s1.fastMovesPending[1] != s2.fastMovesPending[1]
+        println("Agent 1's fast move queue changed from $(s1.fastMovesPending[1]) to $(s2.fastMovesPending[1])")
+    end
+    if s1.fastMovesPending[2] != s2.fastMovesPending[2]
+        println("Agent 2's fast move queue changed from $(s1.fastMovesPending[2]) to $(s2.fastMovesPending[2])")
     end
 end

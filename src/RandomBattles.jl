@@ -7,7 +7,7 @@ include("individual.jl")
 include("state.jl")
 include("individual_battle_state.jl")
 include("utility_functions.jl")
-#include("diff.jl")
+include("diff.jl")
 include("mechanics.jl")
 include("battle_logic.jl")
 #include("pokemon_meta.jl")
@@ -22,9 +22,8 @@ export DynamicState, StaticState, IndividualBattleState,
        get_possible_decisions,
        get_battle_score, get_battle_scores,
        gamemaster, greatRankings, ultraRankings, masterRankings,
-       play_turn, play_battle
-       #rank, PokemonMeta,
-       #diff, vectorize,
+       play_turn, play_battle, diff
+       #rank, PokemonMeta, vectorize,
        #crossover_and_mutate, play_nn_battle, play_nn_random_battle, testing_best
 
 end # module
