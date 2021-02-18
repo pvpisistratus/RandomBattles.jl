@@ -113,10 +113,10 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
     if dec.switchesPending[1].pokemon != Int8(0) || dec.switchesPending[2].pokemon != Int8(0)
         next_state = evaluate_switches(next_state, dec)
     end
-    if next_state.chargedMovesPending[1].charge != Int8(0) || next_state.chargedMovesPending[2].charge != Int8(0)
+    if dec.chargedMovesPending[1].charge != Int8(0) || dec.chargedMovesPending[2].charge != Int8(0)
         next_state, dec = evaluate_charged_moves(next_state, static_state, dec)
     end
-    if next_state.chargedMovesPending[1].charge != Int8(0) || next_state.chargedMovesPending[2].charge != Int8(0)
+    if dec.chargedMovesPending[1].charge != Int8(0) || dec.chargedMovesPending[2].charge != Int8(0)
         next_state, dec = evaluate_charged_moves(next_state, static_state, dec)
     end
     next_state = step_timers(next_state)
