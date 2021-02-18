@@ -170,6 +170,7 @@ function evaluate_charged_moves(state::IndividualBattleState)
 end
 
 function evaluate_charged_moves(state::DynamicState, static_state::StaticState, dec::Decision)
+    println("evaluate_charged_moves called")
     cmp = get_cmp(state, static_state, dec)
     next_state = state
     if cmp > Int8(0)
