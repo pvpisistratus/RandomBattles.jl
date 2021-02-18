@@ -43,7 +43,7 @@ function queue_fast_move(state::IndividualBattleState, agent::Int8)
     @inbounds return @set state.fastMovesPending[agent] = state.teams[agent].mon.fastMove.cooldown
 end
 
-function queue_fast_move(state::DynamicState, static_state::StaticState, agent::Int64)
+function queue_fast_move(state::DynamicState, static_state::StaticState, agent::Int8)
     @inbounds return @set state.fastMovesPending[agent] = static_state.teams[agent].mons[state.teams[agent].active].fastMove.cooldown
 end
 
