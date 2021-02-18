@@ -115,6 +115,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
     end
     next_state, dec = queue_decision(next_state, static_state, dec, decision[1])
     next_state, dec = queue_decision((@set next_state.agent = Int8(2)), static_state, dec, decision[2])
+    println(next_state.agent)
     if dec.switchesPending[1].pokemon != Int8(0) || dec.switchesPending[2].pokemon != Int8(0)
         next_state = evaluate_switches(next_state, dec)
     end
@@ -148,7 +149,6 @@ function play_battle(starting_state::DynamicState, static_state::StaticState)
     while true
         weights1 = get_possible_decisions(state, static_state)
         weights2 = get_possible_decisions((@set state.agent = Int8(2)), static_state)
-        println(state.agent)
         (iszero(sum(weights1)) || iszero(sum(weights2))) && return get_battle_score(state, static_state)
 
         decision1 = rand(Categorical(weights1 / sum(weights1)))
