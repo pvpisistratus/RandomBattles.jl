@@ -180,7 +180,9 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
         other_agent = get_other_agent(cmp)
         @inbounds if next_state.teams[other_agent].shields > Int8(0) && dec.shielding[other_agent]
             @inbounds next_state = @set next_state.teams[other_agent].shields -= Int8(1)
+            println("shield used")
         else
+            println("damage applied")
             @inbounds next_state = @set next_state.teams[other_agent].mons[next_state.teams[other_agent].active].hp = max(
                 Int16(0),
                 next_state.teams[get_other_agent(cmp)].mons[next_state.teams[other_agent].active].hp - calculate_damage(
