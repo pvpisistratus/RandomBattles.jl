@@ -148,6 +148,7 @@ function play_battle(starting_state::DynamicState, static_state::StaticState)
     while true
         weights1 = get_possible_decisions(state, static_state)
         weights2 = get_possible_decisions((@set state.agent = Int8(2)), static_state)
+        println(state.agent)
         (iszero(sum(weights1)) || iszero(sum(weights2))) && return get_battle_score(state, static_state)
 
         decision1 = rand(Categorical(weights1 / sum(weights1)))
