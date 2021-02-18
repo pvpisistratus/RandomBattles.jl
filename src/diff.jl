@@ -23,9 +23,6 @@ function diff(t1::DynamicTeam, t2::DynamicTeam)
     if t1.shields != t2.shields
         println("Shields changed from $(t1.shields) to $(t2.shields)")
     end
-    if t1.shielding != t2.shielding
-        println("Shielding changed from $(t1.shielding) to $(t2.shielding)")
-    end
     if t1.switchCooldown != t2.switchCooldown
         println("Switch Cooldown changed from $(t1.switchCooldown) to $(t2.switchCooldown)")
     end
