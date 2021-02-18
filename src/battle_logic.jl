@@ -115,7 +115,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
     end
     next_state, dec = queue_decision(next_state, static_state, dec, decision[1])
     next_state, dec = queue_decision((@set next_state.agent = Int8(2)), static_state, dec, decision[2])
-    println(next_state.agent)
+    next_state = @set next_state.agent = Int8(1)
     if dec.switchesPending[1].pokemon != Int8(0) || dec.switchesPending[2].pokemon != Int8(0)
         next_state = evaluate_switches(next_state, dec)
     end
