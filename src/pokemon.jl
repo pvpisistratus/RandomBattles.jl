@@ -90,6 +90,19 @@ struct DynamicPokemon
     energy::Int8              #Initially 0
 end
 
+# leaving this in for now so as to not break individuals
+struct Pokemon
+    #These values are determined on initialization, and do not change in battle
+    types::SVector{2,Int8}
+    stats::Stats
+    fastMove::FastMove
+    chargedMoves::SVector{2,ChargedMove}
+
+    #These values are initialized, but change throughout the battle
+    hp::Int16                 #Initially hp stat of mon
+    energy::Int8              #Initially 0
+end
+
 #function vectorize(mon::Pokemon)
 #    @inbounds return [Int8(1) in mon.types, Int8(2) in mon.types, Int8(3) in mon.types, Int8(4) in mon.types,
 #        Int8(5) in mon.types, Int8(6) in mon.types, Int8(7) in mon.types, Int8(8) in mon.types,
