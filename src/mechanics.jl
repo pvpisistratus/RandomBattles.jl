@@ -39,7 +39,7 @@ function calculate_damage(
         Int64(get_buff_modifier(defBuff)) * 1_280_000_000) + 1)
 end
 
-function queue_fast_move(state::IndividualBattleState, agent::Int64)
+function queue_fast_move(state::IndividualBattleState, agent::Int8)
     @inbounds return @set state.fastMovesPending[agent] = state.teams[agent].mon.fastMove.cooldown
 end
 
