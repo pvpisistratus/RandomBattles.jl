@@ -26,64 +26,36 @@ function Setfield.:setindex(arr::StaticArrays.SVector{2, Int8}, n::Int8, i::Int8
     return setindex(arr, n, Int64(i))
 end
 
-struct State
-    teams::SVector{2,Team}
+struct StaticState
+    teams::SVector{2,StaticTeam}
+end
+
+struct DynamicState
+    teams::SVector{2,DynamicTeam}
     agent::Int8
     fastMovesPending::SVector{2,Int8}
+end
+
+struct Decision
     chargedMovesPending::SVector{2,ChargedAction}
+    shielding::SVector{2, Bool}
     switchesPending::SVector{2,SwitchAction}
 end
 
-function vectorize(state::State)
-    return vcat(vectorize(state.teams[1]), vcat(vectorize(state.teams[2]),
-        [Int8(1) == state.agent, Int8(2) == state.agent]))
-end
+#function vectorize(state::State)
+#    return vcat(vectorize(state.teams[1]), vcat(vectorize(state.teams[2]),
+#        [Int8(1) == state.agent, Int8(2) == state.agent]))
+#end
 
-State(team1::Team, team2::Team) = State(
-    [team1, team2],
-    Int8(1),
-    [Int8(-1), Int8(-1)],
-    [defaultCharge, defaultCharge],
-    [defaultSwitch, defaultSwitch]
+StaticState(teams::Array{Int64}; league = "great", cup = "open") = 
+    StaticState(Team(teams[1:(length(teams)÷2)]), Team(teams[(length(teams)÷2+1):length(teams)]))
+
+StaticState(teams::Array{String}; league = "great", cup = "open") = StaticState(
+    [StaticTeam(teams[1:3], league = league, cup = cup), StaticTeam(teams[4:6], league = league, cup = cup)]
 )
 
-State(teams::Array{Int64}; league = "great", cup = "open") = State(
-    [
-     Team(
-         Pokemon.(
-            teams[1:(length(teams)÷2)],
-            league = league,
-            cup = cup,
-         ),
-         defaultBuff,
-         Int8(0),
-         Int8(2),
-         Int8(1),
-         rand(Bool),
-     ),
-     Team(
-         Pokemon.(
-             teams[(length(teams)÷2+1):length(teams)],
-             league = league,
-             cup = cup,
-         ),
-         defaultBuff,
-         Int8(0),
-         Int8(2),
-         Int8(1),
-         rand(Bool),
-     ),
-    ],
+DynamicState(state::StaticState) = DynamicState(
+    StaticTeam.(state.teams)
     Int8(1),
     [Int8(-1), Int8(-1)],
-    [defaultCharge, defaultCharge],
-    [defaultSwitch, defaultSwitch]
-)
-
-State(teams::Array{String}; league = "great", cup = "open") = State(
-    [Team(teams[1:3], league = league, cup = cup), Team(teams[4:6], league = league, cup = cup)],
-    Int8(1),
-    [Int8(-1), Int8(-1)],
-    [defaultCharge, defaultCharge],
-    [defaultSwitch, defaultSwitch]
 )
