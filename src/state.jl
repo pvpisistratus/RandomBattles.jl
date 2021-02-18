@@ -44,6 +44,10 @@ end
 
 const defaultDecision = Decision([defaultCharge, defaultCharge], [false, false], [defaultSwitch, defaultSwitch])
 
+function Setfield.:setindex(arr::StaticArrays.SVector{2, Bool}, n::Bool, i::Int8)
+    return setindex(arr, n, Int64(i))
+end
+
 #function vectorize(state::State)
 #    return vcat(vectorize(state.teams[1]), vcat(vectorize(state.teams[2]),
 #        [Int8(1) == state.agent, Int8(2) == state.agent]))
