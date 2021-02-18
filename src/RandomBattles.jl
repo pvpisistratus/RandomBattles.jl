@@ -15,9 +15,9 @@ include("battle_logic.jl")
 #include("rankings.jl")
 #include("learning.jl")
 
-export State, IndividualBattleState,
-       Team, Individual,
-       Pokemon,
+export DynamicState, StaticState, IndividualBattleState,
+       DynamicTeam, StaticTeam, Individual,
+       DynamicPokemon, StaticPokemon
        #Strategy, plot_strategy,
        get_possible_decisions,
        get_battle_score, get_battle_scores,
