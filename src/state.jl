@@ -42,12 +42,14 @@ struct Decision
     switchesPending::SVector{2,SwitchAction}
 end
 
+const defaultDecision = Decision([defaultCharge, defaultCharge], [false, false], [defaultSwitch, defaultSwitch])
+
 #function vectorize(state::State)
 #    return vcat(vectorize(state.teams[1]), vcat(vectorize(state.teams[2]),
 #        [Int8(1) == state.agent, Int8(2) == state.agent]))
 #end
 
-StaticState(teams::Array{Int64}; league = "great", cup = "open") = 
+StaticState(teams::Array{Int64}; league = "great", cup = "open") =
     StaticState(Team(teams[1:(length(teams)÷2)]), Team(teams[(length(teams)÷2+1):length(teams)]))
 
 StaticState(teams::Array{String}; league = "great", cup = "open") = StaticState(
@@ -55,7 +57,7 @@ StaticState(teams::Array{String}; league = "great", cup = "open") = StaticState(
 )
 
 DynamicState(state::StaticState) = DynamicState(
-    StaticTeam.(state.teams)
+    StaticTeam.(state.teams),
     Int8(1),
     [Int8(-1), Int8(-1)],
 )
