@@ -106,10 +106,17 @@ end
 
 function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{Int64,Int64})
     dec = defaultDecision
-    @inbounds next_state = state.fastMovesPending[1] == Int8(0) ? evaluate_fast_moves(state, static_state, 1) : state
-    @inbounds next_state = next_state.fastMovesPending[2] == Int8(0) ? evaluate_fast_moves(next_state, static_state, 2) : next_state
-    @inbounds next_state, dec = queue_decision(state, static_state, dec, decision[1])
-    @inbounds next_state, dec = queue_decision((@set next_state.agent = Int8(2)), static_state, dec, decision[2])
+    next_state = state
+    if state.fastMovesPending[1] == Int8(0)
+        println("evaluating fast move")
+        next_state = evaluate_fast_moves(state, static_state, 1)
+    end
+    if state.fastMovesPending[2] == Int8(0)
+        println("evaluating fast move")
+        next_state = evaluate_fast_moves(state, static_state, 2)
+    end
+    next_state, dec = queue_decision(state, static_state, dec, decision[1])
+    next_state, dec = queue_decision((@set next_state.agent = Int8(2)), static_state, dec, decision[2])
     if dec.switchesPending[1].pokemon != Int8(0) || dec.switchesPending[2].pokemon != Int8(0)
         next_state = evaluate_switches(next_state, dec)
     end
