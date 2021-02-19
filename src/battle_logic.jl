@@ -62,6 +62,9 @@ function queue_decision(state::DynamicState, static_state::StaticState, dec::Dec
     if iseven(decision)
         @inbounds new_dec = @set dec.shielding[state.agent] = true
     end
+    if 5 <= decision <= 6
+        println("should be a charged move")
+    end
     if decision == 1 || decision == 2
         return next_state, new_dec
     elseif decision == 3 || decision == 4
