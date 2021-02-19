@@ -58,27 +58,28 @@ end
 
 function queue_decision(state::DynamicState, static_state::StaticState, dec::Decision, decision::Int64)
     next_state = state
+    new_dec = dec
     if iseven(decision)
-        @inbounds dec = @set dec.shielding[state.agent] = true
+        @inbounds new_dec = @set dec.shielding[state.agent] = true
     end
     if decision == 1 || decision == 2
-        return next_state, dec
+        return next_state, new_dec
     elseif decision == 3 || decision == 4
         next_state = queue_fast_move(next_state, static_state, next_state.agent)
     else
-        dec = @match decision begin
-            5  || 6  => @inbounds @set dec.chargedMovesPending[state.agent] = ChargedAction(Int8(1), Int8(100))
-            7  || 8  => @inbounds @set dec.chargedMovesPending[state.agent] = ChargedAction(Int8(2), Int8(100))
-            9  || 10 => @inbounds @set dec.switchesPending[state.agent] = SwitchAction(Int8(1), Int8(0))
-            11 || 12 => @inbounds @set dec.switchesPending[state.agent] = SwitchAction(Int8(2), Int8(0))
-            13 || 14 => @inbounds @set dec.switchesPending[state.agent] = SwitchAction(Int8(3), Int8(0))
-            15 || 16 => @inbounds @set dec.switchesPending[state.agent] = SwitchAction(Int8(1), Int8(24))
-            17 || 18 => @inbounds @set dec.switchesPending[state.agent] = SwitchAction(Int8(2), Int8(24))
-            19 || 20 => @inbounds @set dec.switchesPending[state.agent] = SwitchAction(Int8(3), Int8(24))
-            _        => dec
+        new_dec = @match decision begin
+            5  || 6  => @inbounds @set new_dec.chargedMovesPending[state.agent] = ChargedAction(Int8(1), Int8(100))
+            7  || 8  => @inbounds @set new_dec.chargedMovesPending[state.agent] = ChargedAction(Int8(2), Int8(100))
+            9  || 10 => @inbounds @set new_dec.switchesPending[state.agent] = SwitchAction(Int8(1), Int8(0))
+            11 || 12 => @inbounds @set new_dec.switchesPending[state.agent] = SwitchAction(Int8(2), Int8(0))
+            13 || 14 => @inbounds @set new_dec.switchesPending[state.agent] = SwitchAction(Int8(3), Int8(0))
+            15 || 16 => @inbounds @set new_dec.switchesPending[state.agent] = SwitchAction(Int8(1), Int8(24))
+            17 || 18 => @inbounds @set new_dec.switchesPending[state.agent] = SwitchAction(Int8(2), Int8(24))
+            19 || 20 => @inbounds @set new_dec.switchesPending[state.agent] = SwitchAction(Int8(3), Int8(24))
+            _        => new_dec
         end
     end
-    return next_state, dec
+    return next_state, new_dec
 end
 
 function play_turn(state::IndividualBattleState, decision::Tuple{Int64,Int64})
