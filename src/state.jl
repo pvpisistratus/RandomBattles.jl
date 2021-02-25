@@ -32,7 +32,6 @@ end
 
 struct DynamicState
     teams::SVector{2,DynamicTeam}
-    agent::Int8
     fastMovesPending::SVector{2,Int8}
 end
 
@@ -62,6 +61,5 @@ StaticState(teams::Array{String}; league = "great", cup = "open") = StaticState(
 
 DynamicState(state::StaticState) = DynamicState(
     DynamicTeam.(state.teams),
-    Int8(1),
     [Int8(-1), Int8(-1)],
 )
