@@ -67,21 +67,26 @@ end
 
 function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{Int64,Int64})
     next_state = state
-    if state.fastMovesPending[1] == Int8(0)
-        next_state = evaluate_fast_moves(state, static_state, Int8(1))
+    if next_state.fastMovesPending[1] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, static_state, Int8(1))
     end
-    if state.fastMovesPending[2] == Int8(0)
-        next_state = evaluate_fast_moves(state, static_state, Int8(2))
+    if next_state.fastMovesPending[2] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
     end
     next_state, dec = queue_decision(next_state, static_state, defaultDecision, decision)
     if dec.switchesPending[1].pokemon != Int8(0) || dec.switchesPending[2].pokemon != Int8(0)
         next_state = evaluate_switches(next_state, dec)
     end
-    if dec.chargedMovesPending[1].charge != Int8(0) || dec.chargedMovesPending[2].charge != Int8(0)
-        next_state, dec = evaluate_charged_moves(next_state, static_state, dec)
+    cmp = get_cmp(next_state, static_state, dec::Decision)
+    if cmp != 0
+        next_state = evaluate_charged_moves(next_state, static_state, cmp,
+            dec.chargedMovesPending[cmp].move, dec.chargedMovesPending[cmp].charge, dec.shielding[get_other_agent(cmp)])
+        dec.chargedMovesPending[cmp] = defaultCharge
     end
-    if dec.chargedMovesPending[1].charge != Int8(0) || dec.chargedMovesPending[2].charge != Int8(0)
-        next_state, dec = evaluate_charged_moves(next_state, static_state, dec)
+    cmp = get_cmp(next_state, static_state, dec::Decision)
+    if cmp != 0
+        next_state = evaluate_charged_moves(next_state, static_state, cmp,
+            dec.chargedMovesPending[cmp].move, dec.chargedMovesPending[cmp].charge, dec.shielding[get_other_agent(cmp)])
     end
     next_state = step_timers(next_state)
     return next_state
