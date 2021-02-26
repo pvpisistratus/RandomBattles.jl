@@ -74,8 +74,11 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
         next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
     end
     next_state, dec = queue_decision(next_state, static_state, defaultDecision, decision)
-    if dec.switchesPending[1].pokemon != Int8(0) || dec.switchesPending[2].pokemon != Int8(0)
-        next_state = evaluate_switches(next_state, dec)
+    if dec.switchesPending[1].pokemon != 0
+        next_state = evaluate_switch(next_state, Int8(1), dec.switchesPending[1].pokemon, dec.switchesPending[1].time)
+    end
+    if dec.switchesPending[2].pokemon != 0
+        next_state = evaluate_switch(next_state, Int8(2), dec.switchesPending[2].pokemon, dec.switchesPending[2].time)
     end
     cmp = get_cmp(next_state, static_state, dec::Decision)
     if cmp != 0
@@ -87,12 +90,6 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
     if cmp != 0
         next_state = evaluate_charged_moves(next_state, static_state, cmp,
             dec.chargedMovesPending[cmp].move, dec.chargedMovesPending[cmp].charge, dec.shielding[get_other_agent(cmp)])
-    end
-    if dec.switchesPending[1].pokemon != 0
-        next_state = evaluate_switch(next_state, Int8(1), dec.switchesPending[1].pokemon, dec.switchesPending[1].time)
-    end
-    if dec.switchesPending[2].pokemon != 0
-        next_state = evaluate_switch(next_state, Int8(2), dec.switchesPending[2].pokemon, dec.switchesPending[2].time)
     end
     next_state = step_timers(next_state)
     return next_state
