@@ -116,7 +116,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
     return next_state
 end
 
-function evaluate_switches(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
+function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
     next_state = state
     @inbounds next_state = @set next_state.teams[agent].active = to_switch
     @inbounds next_state = @set next_state.teams[agent].buffs = defaultBuff
