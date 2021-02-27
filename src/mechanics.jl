@@ -43,28 +43,6 @@ function queue_fast_move(state::DynamicState, static_state::StaticState, agent::
     @inbounds return @set state.fastMovesPending[agent] = static_state.teams[agent].mons[state.teams[agent].active].fastMove.cooldown
 end
 
-function get_cmp(state::DynamicState, static_state::StaticState, dec::Decision)
-    @inbounds dec.chargedMovesPending[1].charge + dec.chargedMovesPending[2].charge == Int8(0) && return Int8(0)
-    @inbounds dec.chargedMovesPending[2].charge == Int8(0) && return Int8(1)
-    @inbounds dec.chargedMovesPending[1].charge == Int8(0) && return Int8(2)
-    @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack > static_state.teams[2].mons[state.teams[2].active].stats.attack && return Int8(1)
-    @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack < static_state.teams[2].mons[state.teams[2].active].stats.attack && return Int8(2)
-    return rand((Int8(1), Int8(2)))
-end
-
-function apply_buffs(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8)
-    next_state = state
-    @inbounds move = static_state.teams[cmp].mons[state.teams[cmp].active].chargedMoves[move_id]
-    @inbounds if rand(Int8(0):Int8(99)) < move.buffChance
-        if move.opp_buffs != defaultBuff
-            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += move.opp_buffs
-        else
-            @inbounds next_state = @set next_state.teams[cmp].buffs += move.self_buffs
-        end
-    end
-    return next_state
-end
-
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState, agent::Int8)
     next_state = state
     @inbounds next_state = @set next_state.teams[agent].mons[next_state.teams[agent].active].energy =
@@ -84,6 +62,28 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
         ),
     )
 
+    return next_state
+end
+
+function get_cmp(state::DynamicState, static_state::StaticState, dec::Decision)
+    @inbounds dec.chargedMovesPending[1].charge + dec.chargedMovesPending[2].charge == Int8(0) && return Int8(0)
+    @inbounds dec.chargedMovesPending[2].charge == Int8(0) && return Int8(1)
+    @inbounds dec.chargedMovesPending[1].charge == Int8(0) && return Int8(2)
+    @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack > static_state.teams[2].mons[state.teams[2].active].stats.attack && return Int8(1)
+    @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack < static_state.teams[2].mons[state.teams[2].active].stats.attack && return Int8(2)
+    return rand((Int8(1), Int8(2)))
+end
+
+function apply_buffs(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8)
+    next_state = state
+    @inbounds move = static_state.teams[cmp].mons[state.teams[cmp].active].chargedMoves[move_id]
+    @inbounds if rand(Int8(0):Int8(99)) < move.buffChance
+        if move.opp_buffs != defaultBuff
+            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += move.opp_buffs
+        else
+            @inbounds next_state = @set next_state.teams[cmp].buffs += move.self_buffs
+        end
+    end
     return next_state
 end
 
@@ -116,21 +116,11 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
     return next_state
 end
 
-const switch_lens_1 = MultiLens((
-   (@lens _.teams[1].active),
-   (@lens _.teams[1].buffs),
-   (@lens _.teams[2].switchCooldown),
-   (@lens _.teams[1].switchCooldown),
-   (@lens _.fastMovesPending[1])
-))
+const switch_lens_1 = MultiLens(((@lens _.teams[1].active), (@lens _.teams[1].buffs),
+   (@lens _.teams[2].switchCooldown), (@lens _.teams[1].switchCooldown), (@lens _.fastMovesPending[1])))
 
-const switch_lens_2 = MultiLens((
-   (@lens _.teams[2].active),
-   (@lens _.teams[2].buffs),
-   (@lens _.teams[1].switchCooldown),
-   (@lens _.teams[2].switchCooldown),
-   (@lens _.fastMovesPending[2])
-))
+const switch_lens_2 = MultiLens(((@lens _.teams[2].active), (@lens _.teams[2].buffs),
+   (@lens _.teams[1].switchCooldown), (@lens _.teams[2].switchCooldown), (@lens _.fastMovesPending[2])))
 
 function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
     return agent == Int8(1) ? set(state, switch_lens_1, (to_switch, defaultBuff,
@@ -139,12 +129,8 @@ function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time
         max(Int8(0), state.teams[1].switchCooldown - time), Int8(120), Int8(-1)))
 end
 
-const timers_lens = MultiLens((
-   (@lens _.fastMovesPending[1]),
-   (@lens _.fastMovesPending[2]),
-   (@lens _.teams[1].switchCooldown),
-   (@lens _.teams[2].switchCooldown)
-))
+const timers_lens = MultiLens(((@lens _.fastMovesPending[1]), (@lens _.fastMovesPending[2]),
+   (@lens _.teams[1].switchCooldown), (@lens _.teams[2].switchCooldown)))
 
 function step_timers(state::DynamicState)
     return set(state, timers_lens, (
