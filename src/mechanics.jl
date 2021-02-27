@@ -133,7 +133,7 @@ const switch_lens_2 = MultiLens((
 ))
 
 function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
-    return agent == 1 ? set(state, switch_lens_1, (to_switch, defaultBuff,
+    return agent == Int8(1) ? set(state, switch_lens_1, (to_switch, defaultBuff,
         max(Int8(0), state.teams[2].switchCooldown - time), Int8(120),
         Int8(-1))) : set(state, switch_lens_2, (to_switch, defaultBuff,
         max(Int8(0), state.teams[1].switchCooldown - time), Int8(120), Int8(-1)))
