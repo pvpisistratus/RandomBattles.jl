@@ -116,21 +116,23 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
     return next_state
 end
 
-const switch_lens_1 = @batchlens begin
-    _.teams[1].active
-    _.teams[1].buffs
-    _.teams[2].switchCooldown
-    _.teams[1].switchCooldown
-    _.fastMovesPending[1]
-end
 
-const switch_lens_2 = @batchlens begin
-    _.teams[2].active
-    _.teams[2].buffs
-    _.teams[1].switchCooldown
-    _.teams[2].switchCooldown
-    _.fastMovesPending[2]
-end
+
+const switch_lens_1 = MultiLens((
+   (@lens _.teams[1].active),
+   (@lens _.teams[1].buffs),
+   (@lens _.teams[2].switchCooldown),
+   (@lens _.teams[1].switchCooldown),
+   (@lens _.fastMovesPending[1]),
+))
+
+const switch_lens_2 = MultiLens((
+   (@lens _.teams[2].active),
+   (@lens _.teams[2].buffs),
+   (@lens _.teams[1].switchCooldown),
+   (@lens _.teams[2].switchCooldown),
+   (@lens _.fastMovesPending[2]),
+))
 
 function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
     return agent == 1 ? set(state, switch_lens_1, (to_switch, defaultBuff,
