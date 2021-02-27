@@ -129,13 +129,11 @@ function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time
         max(Int8(0), state.teams[1].switchCooldown - time), Int8(120), Int8(-1)))
 end
 
-const timers_lens = MultiLens(((@lens _.fastMovesPending[1]), (@lens _.fastMovesPending[2]),
-   (@lens _.teams[1].switchCooldown), (@lens _.teams[2].switchCooldown)))
+#const timers_lens = MultiLens(((@lens _.fastMovesPending[1]), (@lens _.fastMovesPending[2]),
+#   (@lens _.teams[1].switchCooldown), (@lens _.teams[2].switchCooldown)))
 
 function step_timers(state::DynamicState)
     return DynamicState(
-        @SVector [DynamicTeam(state.teams[1].mons, state.teams[1].buffs, max(Int8(0), state.teams[1].switchCooldown - Int8(1)), state.teams[1].shields, state.teams[1].active),
-        DynamicTeam(state.teams[2].mons, state.teams[2].buffs, max(Int8(0), state.teams[2].switchCooldown - Int8(1)), state.teams[2].shields, state.teams[2].active)],
-        @SVector [max(Int8(-1), state.fastMovesPending[1] - Int8(1)), max(Int8(-1), state.fastMovesPending[2] - Int8(1))],
-    )
+        @SVector[DynamicTeam(state.teams[1].mons, state.teams[1].buffs, max(Int8(0), state.teams[1].switchCooldown - Int8(1)), state.teams[1].shields, state.teams[1].active), DynamicTeam(state.teams[2].mons, state.teams[2].buffs, max(Int8(0), state.teams[2].switchCooldown - Int8(1)), state.teams[2].shields, state.teams[2].active)],
+        @SVector[max(Int8(-1), state.fastMovesPending[1] - Int8(1)), max(Int8(-1), state.fastMovesPending[2] - Int8(1))])
 end
