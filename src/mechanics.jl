@@ -116,14 +116,12 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
     return next_state
 end
 
-
-
 const switch_lens_1 = MultiLens((
    (@lens _.teams[1].active),
    (@lens _.teams[1].buffs),
    (@lens _.teams[2].switchCooldown),
    (@lens _.teams[1].switchCooldown),
-   (@lens _.fastMovesPending[1]),
+   (@lens _.fastMovesPending[1])
 ))
 
 const switch_lens_2 = MultiLens((
@@ -131,7 +129,7 @@ const switch_lens_2 = MultiLens((
    (@lens _.teams[2].buffs),
    (@lens _.teams[1].switchCooldown),
    (@lens _.teams[2].switchCooldown),
-   (@lens _.fastMovesPending[2]),
+   (@lens _.fastMovesPending[2])
 ))
 
 function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
@@ -141,19 +139,17 @@ function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time
         max(Int8(0), state.teams[1].switchCooldown - time), Int8(120), Int8(-1)))
 end
 
+const timers_lens = MultiLens((
+   (@lens _.fastMovesPending[1]),
+   (@lens _.fastMovesPending[2]),
+   (@lens _.teams[1].switchCooldown),
+   (@lens _.teams[2].switchCooldown)
+))
+
 function step_timers(state::DynamicState)
-    next_state = state
-    @inbounds if state.fastMovesPending[1] != Int8(-1)
-        @inbounds next_state = @set next_state.fastMovesPending[1] -= Int8(1)
-    end
-    @inbounds if state.fastMovesPending[2] != Int8(-1)
-        @inbounds next_state = @set next_state.fastMovesPending[2] -= Int8(1)
-    end
-    @inbounds if state.teams[1].switchCooldown != Int8(0)
-        @inbounds next_state = @set next_state.teams[1].switchCooldown -= Int8(1)
-    end
-    @inbounds if state.teams[2].switchCooldown != Int8(0)
-        @inbounds next_state = @set next_state.teams[2].switchCooldown -= Int8(1)
-    end
-    return next_state
+    return set(state, timers_lens, (
+        max(Int8(-1), state.fastMovesPending[1] - Int8(1)),
+        max(Int8(-1), state.fastMovesPending[2] - Int8(1)),
+        max(Int8(0), state.teams[1].switchCooldown - Int8(1)),
+        max(Int8(0), state.teams[2].switchCooldown - Int8(1))))
 end
