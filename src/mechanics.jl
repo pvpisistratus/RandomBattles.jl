@@ -121,7 +121,7 @@ const switch_lens_1 = @batchlens begin
     _.teams[1].buffs
     _.teams[2].switchCooldown ∘ settingasℝ₊
     _.teams[1].switchCooldown
-    _.fastMovePending[1]
+    _.fastMovesPending[1]
 end
 
 const switch_lens_2 = @batchlens begin
@@ -129,7 +129,7 @@ const switch_lens_2 = @batchlens begin
     _.teams[2].buffs
     _.teams[1].switchCooldown ∘ settingasℝ₊
     _.teams[2].switchCooldown
-    _.fastMovePending[2]
+    _.fastMovesPending[2]
 end
 
 function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
