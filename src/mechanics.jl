@@ -1,4 +1,4 @@
-using Setfield, Kaleido
+using Setfield
 
 function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
     @inbounds return type_effectiveness[defenderTypes[1], moveType] *
@@ -40,7 +40,8 @@ function calculate_damage(
 end
 
 function queue_fast_move(state::DynamicState, static_state::StaticState, agent::Int8)
-    @inbounds return @set state.fastMovesPending[agent] = static_state.teams[agent].mons[state.teams[agent].active].fastMove.cooldown
+    @inbounds return @set state.fastMovesPending[agent] = static_state.teams[agent].mons[
+        state.teams[agent].active].fastMove.cooldown
 end
 
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState, agent::Int8)
@@ -69,8 +70,10 @@ function get_cmp(state::DynamicState, static_state::StaticState, dec::Decision)
     @inbounds dec.chargedMovesPending[1].charge + dec.chargedMovesPending[2].charge == Int8(0) && return Int8(0)
     @inbounds dec.chargedMovesPending[2].charge == Int8(0) && return Int8(1)
     @inbounds dec.chargedMovesPending[1].charge == Int8(0) && return Int8(2)
-    @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack > static_state.teams[2].mons[state.teams[2].active].stats.attack && return Int8(1)
-    @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack < static_state.teams[2].mons[state.teams[2].active].stats.attack && return Int8(2)
+    @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack > static_state.teams[2].mons[
+        state.teams[2].active].stats.attack && return Int8(1)
+    @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack < static_state.teams[2].mons[
+        state.teams[2].active].stats.attack && return Int8(2)
     return rand((Int8(1), Int8(2)))
 end
 
@@ -87,7 +90,8 @@ function apply_buffs(state::DynamicState, static_state::StaticState, cmp::Int8, 
     return next_state
 end
 
-function evaluate_charged_moves(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool)
+function evaluate_charged_moves(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8, charge::Int8,
+  shielding::Bool)
     next_state = state
     move = static_state.teams[cmp].mons[next_state.teams[cmp].active].chargedMoves[move_id]
     @inbounds next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].energy -= move.energy
