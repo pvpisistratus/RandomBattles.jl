@@ -1,4 +1,4 @@
-using Setfield
+using Setfield, Kaleido
 
 function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
     @inbounds return type_effectiveness[defenderTypes[1], moveType] *
@@ -116,20 +116,27 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
     return next_state
 end
 
+const switch_lens_1 = @batchlens begin
+    _.teams[1].active
+    _.teams[1].buffs
+    _.teams[2].switchCooldown ∘ settingasℝ₊
+    _.teams[1].switchCooldown
+    _.fastMovePending[1]
+end
+
+const switch_lens_2 = @batchlens begin
+    _.teams[2].active
+    _.teams[2].buffs
+    _.teams[1].switchCooldown ∘ settingasℝ₊
+    _.teams[2].switchCooldown
+    _.fastMovePending[2]
+end
+
 function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
-    next_state = state
-    @inbounds next_state = @set next_state.teams[agent].active = to_switch
-    @inbounds next_state = @set next_state.teams[agent].buffs = defaultBuff
-    if time != Int8(0)
-        @inbounds next_state = @set next_state.teams[get_other_agent(agent)].switchCooldown = max(
-            Int8(0),
-            next_state.teams[get_other_agent(agent)].switchCooldown - time - Int8(1),
-        )
-    else
-        @inbounds next_state = @set next_state.teams[agent].switchCooldown = Int8(120)
-    end
-    @inbounds next_state = @set next_state.fastMovesPending[agent] = Int8(-1)
-    return next_state
+    return agent == 1 ? set(state, switch_lens_1, (to_switch, defaultBuff,
+        state.teams[2].switchCooldown - time, Int8(120), Int8(-1))) : set(
+        state, switch_lens_1, (to_switch, defaultBuff, 
+        state.teams[1].switchCooldown - time, Int8(120), Int8(-1)))
 end
 
 function step_timers(state::DynamicState)
