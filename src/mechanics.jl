@@ -116,24 +116,23 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
     return next_state
 end
 
-const switch_lens_1 = MultiLens(((@lens _.teams[1].active), (@lens _.teams[1].buffs),
-   (@lens _.teams[2].switchCooldown), (@lens _.teams[1].switchCooldown), (@lens _.fastMovesPending[1])))
-
-const switch_lens_2 = MultiLens(((@lens _.teams[2].active), (@lens _.teams[2].buffs),
-   (@lens _.teams[1].switchCooldown), (@lens _.teams[2].switchCooldown), (@lens _.fastMovesPending[2])))
-
 function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
-    return agent == Int8(1) ? set(state, switch_lens_1, (to_switch, defaultBuff,
-        max(Int8(0), state.teams[2].switchCooldown - time), Int8(120),
-        Int8(-1))) : set(state, switch_lens_2, (to_switch, defaultBuff,
-        max(Int8(0), state.teams[1].switchCooldown - time), Int8(120), Int8(-1)))
+    return agent == Int8(1) ? DynamicState(
+        @SVector[DynamicTeam(state.teams[1].mons, defaultBuff, Int8(120), state.teams[1].shields, to_switch),
+            DynamicTeam(state.teams[2].mons, state.teams[2].buffs, max(Int8(0), state.teams[2].switchCooldown - time),
+            state.teams[2].shields, state.teams[2].active)],
+        @SVector[Int8(-1), state.fastMovesPending[2]]) : DynamicState(
+            @SVector[DynamicTeam(state.teams[1].mons, state.teams[1].buffs, max(Int8(0),
+                state.teams[1].switchCooldown - time), state.teams[1].shields, state.teams[1].active),
+                DynamicTeam(state.teams[2].mons, defaultBuff, Int8(120), state.teams[2].shields, to_switch)],
+            @SVector[state.fastMovesPending[1], Int8(-1)])
 end
 
-#const timers_lens = MultiLens(((@lens _.fastMovesPending[1]), (@lens _.fastMovesPending[2]),
-#   (@lens _.teams[1].switchCooldown), (@lens _.teams[2].switchCooldown)))
 
 function step_timers(state::DynamicState)
     return DynamicState(
-        @SVector[DynamicTeam(state.teams[1].mons, state.teams[1].buffs, max(Int8(0), state.teams[1].switchCooldown - Int8(1)), state.teams[1].shields, state.teams[1].active), DynamicTeam(state.teams[2].mons, state.teams[2].buffs, max(Int8(0), state.teams[2].switchCooldown - Int8(1)), state.teams[2].shields, state.teams[2].active)],
+        @SVector[DynamicTeam(state.teams[1].mons, state.teams[1].buffs, max(Int8(0), state.teams[1].switchCooldown - Int8(1)),
+            state.teams[1].shields, state.teams[1].active), DynamicTeam(state.teams[2].mons, state.teams[2].buffs, max(Int8(0),
+            state.teams[2].switchCooldown - Int8(1)), state.teams[2].shields, state.teams[2].active)],
         @SVector[max(Int8(-1), state.fastMovesPending[1] - Int8(1)), max(Int8(-1), state.fastMovesPending[2] - Int8(1))])
 end
