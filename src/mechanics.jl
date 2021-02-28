@@ -46,12 +46,12 @@ end
 
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState, agent::Int8)
     if agent == Int8(1)
-        return DynamicState(@SVector[DynamicTeam(@SVector[map(
+        return DynamicState(@SVector[DynamicTeam([map(
             x -> x == Int8(state.teams[1].active) ? DynamicPokemon(state.teams[1].mons[x].hp,
             min(state.teams[1].mons[x].energy + static_state.teams[1].mons[x].fastMove.energy,
             Int8(100))) : state.teams[1].mons[x], 1:3)], state.teams[1].buffs,
             state.teams[1].switchCooldown, state.teams[1].shields, state.teams[1].active),
-            DynamicTeam(@SVector[map(x -> x == Int8(state.teams[2].active) ? DynamicPokemon(max(
+            DynamicTeam([map(x -> x == Int8(state.teams[2].active) ? DynamicPokemon(max(
                 Int16(0),
                 next_state.teams[2].mons[x].hp -
                 calculate_damage(
@@ -65,7 +65,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
             ), state.teams[2].mons[x].energy) : state.teams[2].mons[x], 1:3)], state.teams[2].buffs,
             state.teams[2].switchCooldown, state.teams[2].shields, state.teams[2].active)], state.fastMovesPending)
     else
-        return DynamicState(@SVector[DynamicTeam(@SVector[map(x -> x == Int8(state.teams[1].active) ? DynamicPokemon(max(
+        return DynamicState(@SVector[DynamicTeam([map(x -> x == Int8(state.teams[1].active) ? DynamicPokemon(max(
                 Int16(0),
                 next_state.teams[1].mons[x].hp -
                 calculate_damage(
@@ -78,7 +78,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
                 ),
             ), state.teams[1].mons[x].energy) : state.teams[1].mons[x], 1:3)], state.teams[1].buffs,
             state.teams[1].switchCooldown, state.teams[1].shields, state.teams[1].active),
-            DynamicTeam(@SVector[map(
+            DynamicTeam([map(
             x -> x == Int8(state.teams[2].active) ? DynamicPokemon(state.teams[2].mons[x].hp,
             min(state.teams[2].mons[x].energy + static_state.teams[2].mons[x].fastMove.energy,
             Int8(100))) : state.teams[2].mons[x], 1:3)], state.teams[2].buffs,
