@@ -53,13 +53,13 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
             state.teams[1].switchCooldown, state.teams[1].shields, state.teams[1].active),
             DynamicTeam(map(x -> x == Int8(state.teams[2].active) ? DynamicPokemon(max(
                 Int16(0),
-                next_state.teams[2].mons[x].hp -
+                state.teams[2].mons[x].hp -
                 calculate_damage(
-                    static_state.teams[1].mons[next_state.teams[1].active],
-                    get_atk(next_state.teams[1].buffs),
+                    static_state.teams[1].mons[state.teams[1].active],
+                    get_atk(state.teams[1].buffs),
                     static_state.teams[2].mons[x],
-                    get_def(next_state.teams[2].buffs),
-                    static_state.teams[1].mons[next_state.teams[1].active].fastMove,
+                    get_def(state.teams[2].buffs),
+                    static_state.teams[1].mons[state.teams[1].active].fastMove,
                     Int8(100),
                 ),
             ), state.teams[2].mons[x].energy) : state.teams[2].mons[x], 1:3), state.teams[2].buffs,
@@ -67,13 +67,13 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
     else
         return DynamicState(@SVector[DynamicTeam(map(x -> x == Int8(state.teams[1].active) ? DynamicPokemon(max(
                 Int16(0),
-                next_state.teams[1].mons[x].hp -
+                state.teams[1].mons[x].hp -
                 calculate_damage(
-                    static_state.teams[2].mons[next_state.teams[2].active],
-                    get_atk(next_state.teams[2].buffs),
+                    static_state.teams[2].mons[state.teams[2].active],
+                    get_atk(state.teams[2].buffs),
                     static_state.teams[1].mons[x],
-                    get_def(next_state.teams[1].buffs),
-                    static_state.teams[2].mons[next_state.teams[2].active].fastMove,
+                    get_def(state.teams[1].buffs),
+                    static_state.teams[2].mons[state.teams[2].active].fastMove,
                     Int8(100),
                 ),
             ), state.teams[1].mons[x].energy) : state.teams[1].mons[x], 1:3), state.teams[1].buffs,
