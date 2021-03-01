@@ -153,7 +153,7 @@ function get_cmp(state::DynamicState, static_state::StaticState, dec::Decision)
     @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack < static_state.teams[2].mons[
         state.teams[2].active].stats.attack && return Int8(2), Int8(1)
     cmp = rand((Int8(1), Int8(2)))
-    return cmp, cmp == Int8(1) ? Int8(2) : Int8(1)
+    return cmp, (cmp == Int8(1) ? Int8(2) : Int8(1))
 end
 
 function evaluate_charged_moves(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool, buffs_applied::Bool)
