@@ -29,11 +29,11 @@ function Decision(decision::Tuple{Int64,Int64})
             17 <= decision[1] <= 18 ? SwitchAction(Int8(2), Int8(24)) :
             19 <= decision[1] <= 20 ? SwitchAction(Int8(3), Int8(24)) :
             defaultSwitch,
-            9 <= decision[1] <= 10 ? SwitchAction(Int8(1), Int8(0)) :
-            11 <= decision[1] <= 12 ? SwitchAction(Int8(2), Int8(0)) :
-            13 <= decision[1] <= 14 ? SwitchAction(Int8(3), Int8(0)) :
-            15 <= decision[1] <= 16 ? SwitchAction(Int8(1), Int8(24)) :
-            17 <= decision[1] <= 18 ? SwitchAction(Int8(2), Int8(24)) :
-            19 <= decision[1] <= 20 ? SwitchAction(Int8(3), Int8(24)) :
+            9 <= decision[2] <= 10 ? SwitchAction(Int8(1), Int8(0)) :
+            11 <= decision[2] <= 12 ? SwitchAction(Int8(2), Int8(0)) :
+            13 <= decision[2] <= 14 ? SwitchAction(Int8(3), Int8(0)) :
+            15 <= decision[2] <= 16 ? SwitchAction(Int8(1), Int8(24)) :
+            17 <= decision[2] <= 18 ? SwitchAction(Int8(2), Int8(24)) :
+            19 <= decision[2] <= 20 ? SwitchAction(Int8(3), Int8(24)) :
             defaultSwitch])
 end
