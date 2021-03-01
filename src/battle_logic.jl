@@ -85,7 +85,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
         next_state = evaluate_charged_moves(next_state, static_state, cmp,
             dec.chargedMovesPending[cmp].move, dec.chargedMovesPending[cmp].charge, dec.shielding[get_other_agent(cmp)],
             rand(Int8(0):Int8(99)) < static_state.teams[cmp].mons[next_state.teams[cmp].active].chargedMoves[dec.chargedMovesPending[cmp].move].buffChance)
-        if next_state.fastMovesPending[other_agent] != Int8(-1)
+        if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
             next_state = evaluate_fast_moves(next_state, static_state, cmp)
         end
         @set dec = dec.chargedMovesPending[cmp] = defaultCharge
@@ -95,7 +95,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
         next_state = evaluate_charged_moves(next_state, static_state, cmp,
             dec.chargedMovesPending[cmp].move, dec.chargedMovesPending[cmp].charge, dec.shielding[get_other_agent(cmp)],
             rand(Int8(0):Int8(99)) < static_state.teams[cmp].mons[next_state.teams[cmp].active].chargedMoves[dec.chargedMovesPending[cmp].move].buffChance)
-        if next_state.fastMovesPending[other_agent] != Int8(-1)
+        if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
             next_state = evaluate_fast_moves(next_state, static_state, cmp)
         end
     end
