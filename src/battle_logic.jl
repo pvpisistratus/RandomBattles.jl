@@ -32,8 +32,6 @@ end
 function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{Int64,Int64})
     next_state = state
 
-    println(decision)
-
     if next_state.fastMovesPending[1] == Int8(0)
         next_state = evaluate_fast_moves(next_state, static_state, Int8(1))
     end
