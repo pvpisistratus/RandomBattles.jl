@@ -1,4 +1,4 @@
-using Setfield
+using StaticArrays
 
 function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
     @inbounds return type_effectiveness[defenderTypes[1], moveType] *
