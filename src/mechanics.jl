@@ -39,11 +39,6 @@ function calculate_damage(
         Int64(get_buff_modifier(defBuff)) * 1_280_000_000) + 1)
 end
 
-function queue_fast_move(state::DynamicState, static_state::StaticState, agent::Int8)
-    @inbounds return @set state.fastMovesPending[agent] = static_state.teams[agent].mons[
-        state.teams[agent].active].fastMove.cooldown
-end
-
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState, agent::Int8)
     if agent == Int8(1)
         return DynamicState(@SVector[DynamicTeam(@SVector[
@@ -150,14 +145,15 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
 end
 
 function get_cmp(state::DynamicState, static_state::StaticState, dec::Decision)
-    @inbounds dec.chargedMovesPending[1].charge + dec.chargedMovesPending[2].charge == Int8(0) && return Int8(0)
-    @inbounds dec.chargedMovesPending[2].charge == Int8(0) && return Int8(1)
-    @inbounds dec.chargedMovesPending[1].charge == Int8(0) && return Int8(2)
+    @inbounds dec.chargedMovesPending[1].charge + dec.chargedMovesPending[2].charge == Int8(0) && return Int8(0), Int8(0)
+    @inbounds dec.chargedMovesPending[2].charge == Int8(0) && return Int8(1), Int8(0)
+    @inbounds dec.chargedMovesPending[1].charge == Int8(0) && return Int8(2), Int8(0)
     @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack > static_state.teams[2].mons[
-        state.teams[2].active].stats.attack && return Int8(1)
+        state.teams[2].active].stats.attack && return Int8(1), Int8(2)
     @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack < static_state.teams[2].mons[
-        state.teams[2].active].stats.attack && return Int8(2)
-    return rand((Int8(1), Int8(2)))
+        state.teams[2].active].stats.attack && return Int8(2), Int8(1)
+    cmp = rand((Int8(1), Int8(2)))
+    return cmp, cmp == Int8(1) ? Int8(2) : Int8(1)
 end
 
 function evaluate_charged_moves(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool, buffs_applied::Bool)
@@ -281,10 +277,11 @@ function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time
 end
 
 
-function step_timers(state::DynamicState)
+function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
     return DynamicState(
         @SVector[DynamicTeam(state.teams[1].mons, state.teams[1].buffs, max(Int8(0), state.teams[1].switchCooldown - Int8(1)),
             state.teams[1].shields, state.teams[1].active), DynamicTeam(state.teams[2].mons, state.teams[2].buffs, max(Int8(0),
             state.teams[2].switchCooldown - Int8(1)), state.teams[2].shields, state.teams[2].active)],
-        @SVector[max(Int8(-1), state.fastMovesPending[1] - Int8(1)), max(Int8(-1), state.fastMovesPending[2] - Int8(1))])
+        @SVector[fmCooldown1 == Int8(0) ? max(Int8(-1), state.fastMovesPending[1] - Int8(1)) : fmCooldown1 - Int8(1),
+            fmCooldown2 == Int8(0) ? max(Int8(-1), state.fastMovesPending[2] - Int8(1)) : fmCooldown2 - Int8(1)])
 end

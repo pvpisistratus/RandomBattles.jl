@@ -29,42 +29,6 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
         (activeMon.hp == Int16(0) && activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0]
 end
 
-function queue_decision(state::DynamicState, static_state::StaticState, dec::Decision, decision::Tuple{Int64,Int64})
-    next_state = state
-    new_dec = dec
-    @inbounds new_dec = @set new_dec.shielding = [iseven(decision[1]) && 5 <= decision[2] <= 8,
-        iseven(decision[2]) && 5 <= decision[1] <= 8]
-    if 3 <= decision[1] <= 4
-        next_state = queue_fast_move(next_state, static_state, Int8(1))
-    end
-    if 3 <= decision[2] <= 4
-        next_state = queue_fast_move(next_state, static_state, Int8(2))
-    end
-    new_dec = @match decision[1] begin
-        5  || 6  => @inbounds @set new_dec.chargedMovesPending[1] = ChargedAction(Int8(1), Int8(100))
-        7  || 8  => @inbounds @set new_dec.chargedMovesPending[1] = ChargedAction(Int8(2), Int8(100))
-        9  || 10 => @inbounds @set new_dec.switchesPending[1] = SwitchAction(Int8(1), Int8(0))
-        11 || 12 => @inbounds @set new_dec.switchesPending[1] = SwitchAction(Int8(2), Int8(0))
-        13 || 14 => @inbounds @set new_dec.switchesPending[1] = SwitchAction(Int8(3), Int8(0))
-        15 || 16 => @inbounds @set new_dec.switchesPending[1] = SwitchAction(Int8(1), Int8(24))
-        17 || 18 => @inbounds @set new_dec.switchesPending[1] = SwitchAction(Int8(2), Int8(24))
-        19 || 20 => @inbounds @set new_dec.switchesPending[1] = SwitchAction(Int8(3), Int8(24))
-        _        => new_dec
-    end
-    new_dec = @match decision[2] begin
-        5  || 6  => @inbounds @set new_dec.chargedMovesPending[2] = ChargedAction(Int8(1), Int8(100))
-        7  || 8  => @inbounds @set new_dec.chargedMovesPending[2] = ChargedAction(Int8(2), Int8(100))
-        9  || 10 => @inbounds @set new_dec.switchesPending[2] = SwitchAction(Int8(1), Int8(0))
-        11 || 12 => @inbounds @set new_dec.switchesPending[2] = SwitchAction(Int8(2), Int8(0))
-        13 || 14 => @inbounds @set new_dec.switchesPending[2] = SwitchAction(Int8(3), Int8(0))
-        15 || 16 => @inbounds @set new_dec.switchesPending[2] = SwitchAction(Int8(1), Int8(24))
-        17 || 18 => @inbounds @set new_dec.switchesPending[2] = SwitchAction(Int8(2), Int8(24))
-        19 || 20 => @inbounds @set new_dec.switchesPending[2] = SwitchAction(Int8(3), Int8(24))
-        _        => new_dec
-    end
-    return next_state, new_dec
-end
-
 function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{Int64,Int64})
     next_state = state
     if next_state.fastMovesPending[1] == Int8(0)
@@ -73,33 +37,39 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
     if next_state.fastMovesPending[2] == Int8(0)
         next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
     end
-    next_state, dec = queue_decision(next_state, static_state, defaultDecision, decision)
+
+    next_state = step_timers(next_state,
+        3 <= decision[1] <= 4 ? static_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : Int8(0),
+        3 <= decision[2] <= 4 ? static_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown : Int8(0))
+
+    dec = Decision(decision)
+
     if dec.switchesPending[1].pokemon != 0
         next_state = evaluate_switch(next_state, Int8(1), dec.switchesPending[1].pokemon, dec.switchesPending[1].time)
     end
     if dec.switchesPending[2].pokemon != 0
         next_state = evaluate_switch(next_state, Int8(2), dec.switchesPending[2].pokemon, dec.switchesPending[2].time)
     end
+
     cmp = get_cmp(next_state, static_state, dec::Decision)
-    if cmp != 0
-        next_state = evaluate_charged_moves(next_state, static_state, cmp,
-            dec.chargedMovesPending[cmp].move, dec.chargedMovesPending[cmp].charge, dec.shielding[get_other_agent(cmp)],
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp].mons[next_state.teams[cmp].active].chargedMoves[dec.chargedMovesPending[cmp].move].buffChance)
-        if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
-            next_state = evaluate_fast_moves(next_state, static_state, cmp)
+    if cmp[1] != 0
+        next_state = evaluate_charged_moves(next_state, static_state, cmp[1],
+            dec.chargedMovesPending[cmp[1]].move, dec.chargedMovesPending[cmp[1]].charge, dec.shielding[get_other_agent(cmp[1])],
+            rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].mons[next_state.teams[cmp[1]].active].chargedMoves[dec.chargedMovesPending[cmp[1]].move].buffChance)
+        if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
+            next_state = evaluate_fast_moves(next_state, static_state, cmp[1])
         end
-        @set dec = dec.chargedMovesPending[cmp] = defaultCharge
+        @set dec = dec.chargedMovesPending[cmp[1]] = defaultCharge
     end
-    cmp = get_cmp(next_state, static_state, dec::Decision)
-    if cmp != 0
-        next_state = evaluate_charged_moves(next_state, static_state, cmp,
-            dec.chargedMovesPending[cmp].move, dec.chargedMovesPending[cmp].charge, dec.shielding[get_other_agent(cmp)],
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp].mons[next_state.teams[cmp].active].chargedMoves[dec.chargedMovesPending[cmp].move].buffChance)
-        if next_state.fastMovesPending[get_other_agent(cmp)] != Int8(-1)
-            next_state = evaluate_fast_moves(next_state, static_state, cmp)
+    if cmp[2] != 0
+        next_state = evaluate_charged_moves(next_state, static_state, cmp[2],
+            dec.chargedMovesPending[cmp[2]].move, dec.chargedMovesPending[cmp[2]].charge, dec.shielding[get_other_agent(cmp[2])],
+            rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mons[next_state.teams[cmp[2]].active].chargedMoves[dec.chargedMovesPending[cmp[2]].move].buffChance)
+        if next_state.fastMovesPending[get_other_agent(cmp[2])] != Int8(-1)
+            next_state = evaluate_fast_moves(next_state, static_state, cmp[2])
         end
     end
-    next_state = step_timers(next_state)
+
     return next_state
 end
 
