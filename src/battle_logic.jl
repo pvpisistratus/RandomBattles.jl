@@ -42,6 +42,8 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
         3 <= decision[1] <= 4 ? static_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : Int8(0),
         3 <= decision[2] <= 4 ? static_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown : Int8(0))
 
+    println(next_state.fastMovesPending)
+
     dec = Decision(decision)
 
     if dec.switchesPending[1].pokemon != 0
