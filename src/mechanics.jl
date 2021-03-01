@@ -160,47 +160,112 @@ function get_cmp(state::DynamicState, static_state::StaticState, dec::Decision)
     return rand((Int8(1), Int8(2)))
 end
 
-function apply_buffs(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8)
-    next_state = state
-    @inbounds move = static_state.teams[cmp].mons[state.teams[cmp].active].chargedMoves[move_id]
-    @inbounds if rand(Int8(0):Int8(99)) < move.buffChance
-        if move.opp_buffs != defaultBuff
-            @inbounds next_state = @set next_state.teams[get_other_agent(cmp)].buffs += move.opp_buffs
-        else
-            @inbounds next_state = @set next_state.teams[cmp].buffs += move.self_buffs
-        end
-    end
-    return next_state
-end
-
-function evaluate_charged_moves(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8, charge::Int8,
-  shielding::Bool)
-    next_state = state
-    move = static_state.teams[cmp].mons[next_state.teams[cmp].active].chargedMoves[move_id]
-    @inbounds next_state = @set next_state.teams[cmp].mons[next_state.teams[cmp].active].energy -= move.energy
-    other_agent = get_other_agent(cmp)
-    @inbounds if shielding
-        @inbounds next_state = @set next_state.teams[other_agent].shields -= Int8(1)
+function evaluate_charged_moves(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool, buffs_applied::Bool)
+    if cmp == Int8(1)
+        return DynamicState(@SVector[DynamicTeam(@SVector[
+            (Int8(1) == state.teams[1].active ? DynamicPokemon(state.teams[1].mons[1].hp,
+            min(state.teams[1].mons[1].energy - static_state.teams[1].mons[1].chargedMoves[move_id].energy,
+            Int8(100))) : state.teams[1].mons[1]),
+            (Int8(2) == state.teams[1].active ? DynamicPokemon(state.teams[1].mons[2].hp,
+            min(state.teams[1].mons[2].energy - static_state.teams[1].mons[2].chargedMoves[move_id].energy,
+            Int8(100))) : state.teams[1].mons[2]),
+            (Int8(3) == state.teams[1].active ? DynamicPokemon(state.teams[1].mons[3].hp,
+            min(state.teams[1].mons[3].energy - static_state.teams[1].mons[3].chargedMoves[move_id].energy,
+            Int8(100))) : state.teams[1].mons[3]),
+            ], buffs_applied ? state.teams[1].buffs + static_state.teams[1].mons[3].chargedMoves[move_id].self_buffs : state.teams[1].buffs,
+            max(Int8(0), state.teams[1].switchCooldown - Int8(20)), state.teams[1].shields, state.teams[1].active),
+            DynamicTeam((sheilding ? state.teams[2].mon ? @SVector[Int8(1) == state.teams[2].active ? DynamicPokemon(max(
+                Int16(0),
+                state.teams[2].mons[1].hp -
+                calculate_damage(
+                    static_state.teams[1].mons[state.teams[1].active],
+                    get_atk(state.teams[1].buffs),
+                    static_state.teams[2].mons[1],
+                    get_def(state.teams[2].buffs),
+                    static_state.teams[1].mons[state.teams[1].active].chargedMoves[move_id],
+                    Int8(100),
+                ),
+            ), state.teams[2].mons[1].energy) : state.teams[2].mons[1],
+            Int8(2) == state.teams[2].active ? DynamicPokemon(max(
+                Int16(0),
+                state.teams[2].mons[2].hp -
+                calculate_damage(
+                    static_state.teams[1].mons[state.teams[1].active],
+                    get_atk(state.teams[1].buffs),
+                    static_state.teams[2].mons[2],
+                    get_def(state.teams[2].buffs),
+                    static_state.teams[1].mons[state.teams[1].active].chargedMoves[move_id],
+                    Int8(100),
+                ),
+            ), state.teams[2].mons[2].energy) : state.teams[2].mons[2],
+            Int8(3) == state.teams[2].active ? DynamicPokemon(max(
+                Int16(0),
+                state.teams[2].mons[3].hp -
+                calculate_damage(
+                    static_state.teams[1].mons[state.teams[1].active],
+                    get_atk(state.teams[1].buffs),
+                    static_state.teams[2].mons[3],
+                    get_def(state.teams[2].buffs),
+                    static_state.teams[1].mons[state.teams[1].active].chargedMoves[move_id],
+                    Int8(100),
+                ),
+            ), state.teams[2].mons[3].energy) : state.teams[2].mons[3]]),
+            buffs_applied ? state.teams[2].buffs + static_state.teams[1].mons[3].chargedMoves[move_id].opp_buffs : state.teams[2].buffs,
+            max(Int8(0), state.teams[2].switchCooldown - Int8(20)), (shielding ? state.teams[2].shields - Int8(1) : state.teams[2].shields),
+            state.teams[2].active)], state.fastMovesPending)
     else
-        @inbounds next_state = @set next_state.teams[other_agent].mons[next_state.teams[other_agent].active].hp = max(
-            Int16(0),
-            next_state.teams[other_agent].mons[next_state.teams[other_agent].active].hp - calculate_damage(
-                static_state.teams[cmp].mons[next_state.teams[cmp].active],
-                get_atk(next_state.teams[cmp].buffs),
-                static_state.teams[other_agent].mons[next_state.teams[other_agent].active],
-                get_def(next_state.teams[other_agent].buffs),
-                move,
-                charge,
-            ),
-        )
+        DynamicState(@SVector[
+            DynamicTeam((sheilding ? state.teams[1].mon ? @SVector[Int8(1) == state.teams[1].active ? DynamicPokemon(max(
+                Int16(0),
+                state.teams[1].mons[1].hp -
+                calculate_damage(
+                    static_state.teams[2].mons[state.teams[2].active],
+                    get_atk(state.teams[2].buffs),
+                    static_state.teams[1].mons[1],
+                    get_def(state.teams[1].buffs),
+                    static_state.teams[2].mons[state.teams[2].active].chargedMoves[move_id],
+                    Int8(100),
+                ),
+            ), state.teams[1].mons[1].energy) : state.teams[1].mons[1],
+            Int8(2) == state.teams[1].active ? DynamicPokemon(max(
+                Int16(0),
+                state.teams[1].mons[2].hp -
+                calculate_damage(
+                    static_state.teams[2].mons[state.teams[2].active],
+                    get_atk(state.teams[2].buffs),
+                    static_state.teams[1].mons[2],
+                    get_def(state.teams[1].buffs),
+                    static_state.teams[2].mons[state.teams[2].active].chargedMoves[move_id],
+                    Int8(100),
+                ),
+            ), state.teams[1].mons[2].energy) : state.teams[1].mons[2],
+            Int8(3) == state.teams[1].active ? DynamicPokemon(max(
+                Int16(0),
+                state.teams[1].mons[3].hp -
+                calculate_damage(
+                    static_state.teams[2].mons[state.teams[2].active],
+                    get_atk(state.teams[2].buffs),
+                    static_state.teams[1].mons[3],
+                    get_def(state.teams[1].buffs),
+                    static_state.teams[2].mons[state.teams[2].active].chargedMoves[move_id],
+                    Int8(100),
+                ),
+            ), state.teams[1].mons[3].energy) : state.teams[1].mons[3]]),
+            buffs_applied ? state.teams[1].buffs + static_state.teams[2].mons[state.teams[2].active].chargedMoves[move_id].opp_buffs : state.teams[1].buffs,
+            max(Int8(0), state.teams[1].switchCooldown - Int8(20)), (shielding ? state.teams[1].shields - Int8(1) : state.teams[1].shields),
+            state.teams[1].active), DynamicTeam(@SVector[
+                (Int8(1) == state.teams[2].active ? DynamicPokemon(state.teams[2].mons[1].hp,
+                min(state.teams[2].mons[1].energy - static_state.teams[2].mons[1].chargedMoves[move_id].energy,
+                Int8(100))) : state.teams[2].mons[1]),
+                (Int8(2) == state.teams[2].active ? DynamicPokemon(state.teams[2].mons[2].hp,
+                min(state.teams[2].mons[2].energy - static_state.teams[2].mons[2].chargedMoves[move_id].energy,
+                Int8(100))) : state.teams[2].mons[2]),
+                (Int8(3) == state.teams[2].active ? DynamicPokemon(state.teams[2].mons[3].hp,
+                min(state.teams[2].mons[3].energy - static_state.teams[2].mons[3].chargedMoves[move_id].energy,
+                Int8(100))) : state.teams[2].mons[3]),
+                ], buffs_applied ? state.teams[2].buffs + static_state.teams[1].mons[state.teams[1].active].chargedMoves[move_id].self_buffs : state.teams[2].buffs,
+                max(Int8(0), state.teams[2].switchCooldown - Int8(20)), state.teams[2].shields, state.teams[2].active)], state.fastMovesPending)
     end
-    next_state = apply_buffs(next_state, static_state, cmp, move_id)
-    if next_state.fastMovesPending[other_agent] != Int8(-1)
-        next_state = evaluate_fast_moves(next_state, static_state, cmp)
-    end
-    @inbounds next_state = @set next_state.teams[1].switchCooldown = max(Int8(0), next_state.teams[1].switchCooldown - Int8(20))
-    @inbounds next_state = @set next_state.teams[2].switchCooldown = max(Int8(0), next_state.teams[2].switchCooldown - Int8(20))
-    return next_state
 end
 
 function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
