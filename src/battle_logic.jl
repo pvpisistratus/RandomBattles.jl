@@ -1,6 +1,6 @@
 using Distributions, StaticArrays
 
-function get_possible_decisions(state::DynamicState, static_state::StaticState, agent::Int64; allow_nothing = false)
+function get_possible_decisions(state::DynamicState, static_state::StaticState, agent::Int64; allow_nothing::Bool = false)
     @inbounds activeTeam = state.teams[agent]
     @inbounds activeMon = activeTeam.mons[activeTeam.active]
     @inbounds activeStaticTeam = static_state.teams[agent]
@@ -31,14 +31,9 @@ end
 
 function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{Int64,Int64})
     dec = Decision(decision)
-    next_state = state
-
-    @inbounds if next_state.fastMovesPending[1] == Int8(0)
-        next_state = evaluate_fast_moves(next_state, static_state, Int8(1))
-    end
-    @inbounds if next_state.fastMovesPending[2] == Int8(0)
-        next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
-    end
+    next_state = next_state.fastMovesPending[2] == Int8(0) ? evaluate_fast_moves(next_state.fastMovesPending[1] == Int8(0) ?
+        evaluate_fast_moves(next_state, static_state, Int8(1)) : next_state, static_state, Int8(2)) :
+        next_state.fastMovesPending[1] == Int8(0) ? evaluate_fast_moves(next_state, static_state, Int8(1)) : next_state
 
     @inbounds next_state = step_timers(next_state,
         3 <= decision[1] <= 4 ? static_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : Int8(0),
