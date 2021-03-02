@@ -31,9 +31,14 @@ end
 
 function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{Int64,Int64})
     dec = Decision(decision)
-    next_state = state.fastMovesPending[2] == Int8(0) ? evaluate_fast_moves(state.fastMovesPending[1] == Int8(0) ?
-        evaluate_fast_moves(state, static_state, Int8(1)) : state, static_state, Int8(2)) :
-        state.fastMovesPending[1] == Int8(0) ? evaluate_fast_moves(state, static_state, Int8(1)) : state
+    next_state = state
+
+    @inbounds if next_state.fastMovesPending[1] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, static_state, Int8(1))
+    end
+    @inbounds if next_state.fastMovesPending[2] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
+    end
 
     @inbounds next_state = step_timers(next_state,
         3 <= decision[1] <= 4 ? static_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : Int8(0),
