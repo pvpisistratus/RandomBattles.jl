@@ -77,7 +77,8 @@ function play_battle(starting_state::DynamicState, static_state::StaticState)
     while true
         weights1, weights2 = get_possible_decisions(state, static_state, 1), get_possible_decisions(state, static_state, 2)
         (sum(weights1) * sum(weights2) == 0) && return get_battle_score(state, static_state)
-        state = play_turn(state, static_state, (rand(Categorical(weights1 / sum(weights1))), rand(Categorical(weights2 / sum(weights2)))))
+        decision1, decision2 = rand(Categorical(Float64, weights1 / sum(weights1), check_args = false)), rand(Categorical(Float64, weights2 / sum(weights2), check_args = false))
+        state = play_turn(state, static_state, (decision1, decision2))
     end
 end
 
