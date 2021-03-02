@@ -33,39 +33,39 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
     dec = Decision(decision)
     next_state = state
 
-    if next_state.fastMovesPending[1] == Int8(0)
+    @inbounds if next_state.fastMovesPending[1] == Int8(0)
         next_state = evaluate_fast_moves(next_state, static_state, Int8(1))
     end
-    if next_state.fastMovesPending[2] == Int8(0)
+    @inbounds if next_state.fastMovesPending[2] == Int8(0)
         next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
     end
 
-    next_state = step_timers(next_state,
+    @inbounds next_state = step_timers(next_state,
         3 <= decision[1] <= 4 ? static_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : Int8(0),
         3 <= decision[2] <= 4 ? static_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown : Int8(0))
 
-    if dec.switchesPending[1].pokemon != Int8(0)
+    @inbounds if dec.switchesPending[1].pokemon != Int8(0)
         next_state = evaluate_switch(next_state, Int8(1), dec.switchesPending[1].pokemon, dec.switchesPending[1].time)
     end
-    if dec.switchesPending[2].pokemon != Int8(0)
+    @inbounds if dec.switchesPending[2].pokemon != Int8(0)
         next_state = evaluate_switch(next_state, Int8(2), dec.switchesPending[2].pokemon, dec.switchesPending[2].time)
     end
 
     cmp = get_cmp(next_state, static_state, dec::Decision)
-    if cmp[1] != Int8(0)
-        next_state = evaluate_charged_moves(next_state, static_state, cmp[1],
+    @inbounds if cmp[1] != Int8(0)
+        @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[1],
             dec.chargedMovesPending[cmp[1]].move, dec.chargedMovesPending[cmp[1]].charge, dec.shielding[get_other_agent(cmp[1])],
             rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].mons[next_state.teams[cmp[1]].active].chargedMoves[dec.chargedMovesPending[cmp[1]].move].buffChance)
-        if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
-            next_state = evaluate_fast_moves(next_state, static_state, cmp[1])
+        @inbounds if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
+            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1])
         end
     end
-    if cmp[2] != Int8(0)
-        next_state = evaluate_charged_moves(next_state, static_state, cmp[2],
+    @inbounds if cmp[2] != Int8(0)
+        @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[2],
             dec.chargedMovesPending[cmp[2]].move, dec.chargedMovesPending[cmp[2]].charge, dec.shielding[get_other_agent(cmp[2])],
             rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mons[next_state.teams[cmp[2]].active].chargedMoves[dec.chargedMovesPending[cmp[2]].move].buffChance)
-        if next_state.fastMovesPending[get_other_agent(cmp[2])] != Int8(-1)
-            next_state = evaluate_fast_moves(next_state, static_state, cmp[2])
+        @inbounds if next_state.fastMovesPending[get_other_agent(cmp[2])] != Int8(-1)
+            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[2])
         end
     end
 
