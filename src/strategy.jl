@@ -9,7 +9,7 @@ end
 
 function plot_strategy(strat::Strategy, s::DynamicState, static_s::StaticState)
     gr()
-    plt1 = plot(1:length(strat.scores), scores, width = 2, label = "possible battle scores",
+    plt1 = plot(1:length(strat.scores), strat.scores, width = 2, label = "possible battle scores",
         ylims = [0, 1], ylabel = "Battle Score", xlabel = "Decisions", size = (950, 400))
     hline!(plt1, [0.5], label = "win/loss")
     plt2 = plot(xlims = [0, length(strat.scores)], ylims = [-3, 0], legend = false, size = (950, 200), axis = nothing)
