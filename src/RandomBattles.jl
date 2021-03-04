@@ -14,7 +14,7 @@ include("mechanics_individual.jl")
 include("battle_logic.jl")
 include("battle_logic_individual.jl")
 #include("pokemon_meta.jl")
-#include("strategy.jl")
+include("strategy.jl")
 #include("rankings.jl")
 #include("learning.jl")
 
