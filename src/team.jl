@@ -13,13 +13,6 @@ struct DynamicTeam
     active::Int8            #Initially 1 (the lead)
 end
 
-#function vectorize(team::Team)
-#    @inbounds return vcat(vectorize(team.mons[1]), vcat(vectorize(team.mons[2]),
-#        vcat(vectorize(team.mons[3]), [team.buffs.atk, team.buffs.def,
-#        team.switchCooldown, team.shields, Int8(1) == team.active,
-#        Int8(2) == team.active, Int8(3) == team.active])))
-#end
-
 StaticTeam(mons::Array{Int64}; league::String = "great", cup::String = "open") =
     StaticTeam(StaticPokemon.(mons, league = league, cup = cup))
 

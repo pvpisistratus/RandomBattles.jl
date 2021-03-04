@@ -60,7 +60,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
             @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1])
         end
     end
-    @inbounds if cmp[2] != Int8(0)
+    @inbounds if cmp[2] != Int8(0) && next_state.teams[cmp[2]].mons[next_state.teams[cmp[2]].active].hp > Int16(0)
         @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[2],
             dec.chargedMovesPending[cmp[2]].move, dec.chargedMovesPending[cmp[2]].charge, dec.shielding[get_other_agent(cmp[2])],
             rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mons[next_state.teams[cmp[2]].active].chargedMoves[dec.chargedMovesPending[cmp[2]].move].buffChance)
