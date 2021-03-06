@@ -2,7 +2,6 @@ using Setfield, Match
 
 get_other_agent(agent::Int8) = agent == Int8(1) ? Int8(2) : Int8(1)
 
-switch_agent(state::State) = @set state.agent = get_other_agent(state.agent)
 switch_agent(state::IndividualBattleState) = @set state.agent = get_other_agent(state.agent)
 
 function get_gamemaster_mon_id(name::String)
@@ -74,24 +73,24 @@ function silph_to_pvpoke(name::String)
     return name
 end;
 
-function get_min_score(state::State)
-    return 0.5 * (state.teams[2].mons[1].stats.hitpoints -
+function get_min_score(state::DynamicState, static_state::StaticState)
+    return 0.5 * (static_state.teams[2].mons[1].stats.hitpoints -
       state.teams[2].mons[1].hp +
-      state.teams[2].mons[2].stats.hitpoints -
+      static_state.teams[2].mons[2].stats.hitpoints -
       state.teams[2].mons[2].hp +
-      state.teams[2].mons[3].stats.hitpoints -
+      static_state.teams[2].mons[3].stats.hitpoints -
       state.teams[2].mons[3].hp) /
-     (state.teams[2].mons[1].stats.hitpoints +
-      state.teams[2].mons[2].stats.hitpoints +
-      state.teams[2].mons[3].stats.hitpoints)
+     (static_state.teams[2].mons[1].stats.hitpoints +
+      static_state.teams[2].mons[2].stats.hitpoints +
+      static_state.teams[2].mons[3].stats.hitpoints)
 end
 
-function get_max_score(state::State)
+function get_max_score(state::DynamicState, static_state::StaticState)
     return 0.5 + (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
          state.teams[1].mons[3].hp) /
-        (state.teams[1].mons[1].stats.hitpoints +
-         state.teams[1].mons[2].stats.hitpoints +
-         state.teams[1].mons[3].stats.hitpoints))
+        (static_state.teams[1].mons[1].stats.hitpoints +
+         static_state.teams[1].mons[2].stats.hitpoints +
+         static_state.teams[1].mons[3].stats.hitpoints))
 end
 
 function get_battle_score(state::IndividualBattleState)
@@ -100,6 +99,6 @@ function get_battle_score(state::IndividualBattleState)
         (state.teams[2].mon.stats.hitpoints))
 end
 
-function get_battle_score(state::State)
-    return get_min_score(state) + get_max_score(state) - 0.5
+function get_battle_score(state::DynamicState, static_state::StaticState)
+    return get_min_score(state, static_state) + get_max_score(state, static_state) - 0.5
 end

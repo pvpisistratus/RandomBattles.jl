@@ -9,8 +9,7 @@ struct IndividualBattleState
 end
 
 function vectorize(state::IndividualBattleState)
-    return vcat(vcat(vectorize(state.teams[1]), vectorize(state.teams[2])),
-        [state.agent])
+    return vcat(vectorize(state.teams[1]), vectorize(state.teams[2]))
 end
 
 IndividualBattleState(team1::Individual, team2::Individual) = IndividualBattleState(
