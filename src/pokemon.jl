@@ -93,10 +93,10 @@ end
 # leaving this in for now so as to not break individuals
 struct Pokemon
     #These values are determined on initialization, and do not change in battle
-    types::SVector{2,Int8}
+    typing::Int8
     stats::Stats
-    fastMove::FastMove
-    chargedMoves::SVector{2,ChargedMove}
+    fastMove::UInt8
+    chargedMoves::SVector{2,UInt8}
 
     #These values are initialized, but change throughout the battle
     hp::Int16                 #Initially hp stat of mon
@@ -154,7 +154,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open", custom_
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
-    types = get_type_id.(convert(Array{String}, gm["types"]))
+    typing = Int8(findfirst(x -> x == sort(get_type_id.(convert(Array{String}, gm["types"]))), typings))
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
         level, atk, def, hp = parse.(Int8, custom_stats)
@@ -184,8 +184,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open", custom_
         moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
         fastMovesAvailable = gm["fastMoves"]
         sort!(fastMovesAvailable)
-        fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(fastMovesAvailable[moves[1]+1],)]
-        fastMove = Move(fastMoveGm, types)
+        fastMove = get_fast_move_id(fastMovesAvailable[moves[1]+1])
         chargedMovesAvailable = gm["chargedMoves"]
         if haskey(gm, "tags") &&
            "shadoweligible" in gm["tags"] && gm["level25CP"] < cp_limit
@@ -196,13 +195,13 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open", custom_
             defense *= gamemaster["settings"]["shadowDefMult"]
         end
         sort!(chargedMovesAvailable)
-        chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
-        chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[3]],)]
-        chargedMoves = [Move(chargedMove1Gm, types), Move(chargedMove2Gm, types)]
+        chargedMove1Gm = get_charged_move_id(chargedMovesAvailable[moves[2]])
+        chargedMove2Gm = get_charged_move_id(chargedMovesAvailable[moves[3]])
+        chargedMoves = [chargedMove1Gm, chargedMove2Gm]
     else
         moveset = custom_moveset == ["none"] ? rankings[i]["moveset"] : custom_moveset
-        fastMove = FastMove(moveset[1]::String, types)
-        chargedMoves = [ChargedMove(moveset[2]::String, types), ChargedMove(moveset[3]::String, types)]
+        fastMove = get_fast_move_id(moveset[1]::String)
+        chargedMoves = [get_charged_move_id(moveset[2]::String), get_charged_move_id(moveset[3]::String)]
     end
     return StaticPokemon(
         types,

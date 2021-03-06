@@ -1,10 +1,5 @@
 using StaticArrays
 
-function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
-    @inbounds return type_effectiveness[defenderTypes[1], moveType] *
-            type_effectiveness[defenderTypes[2], moveType]
-end
-
 function get_buff_modifier(buff::Int8)
     return buff == Int8(0) ? Int8(12) : (buff > Int8(0) ? Int8(12) + Int8(3) * buff : Int8(48) ÷ (Int8(4) - buff))
 end

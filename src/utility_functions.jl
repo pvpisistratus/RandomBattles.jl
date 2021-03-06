@@ -15,34 +15,28 @@ end
 function get_gamemaster_move_id(name::String)
     for i = 1:length(gamemaster["moves"])
         if gamemaster["moves"][i]["moveId"] == name
-            return i
+            return Int8(i)
         end
     end
 end
 
-function get_type_id(typeName::String)
-    type_id = @match typeName begin
-        "normal"   => Int8(1)
-        "fighting" => Int8(2)
-        "flying"   => Int8(3)
-        "poison"   => Int8(4)
-        "ground"   => Int8(5)
-        "rock"     => Int8(6)
-        "bug"      => Int8(7)
-        "ghost"    => Int8(8)
-        "steel"    => Int8(9)
-        "fire"     => Int8(10)
-        "water"    => Int8(11)
-        "grass"    => Int8(12)
-        "electric" => Int8(13)
-        "psychic"  => Int8(14)
-        "ice"      => Int8(15)
-        "dragon"   => Int8(16)
-        "dark"     => Int8(17)
-        "fairy"    => Int8(18)
-        _          => Int8(19)
+function get_fast_move_id(name::String)
+    j = 1
+    for i = 1:length(gamemaster["moves"])
+        gamemaster["moves"][i]["moveId"] == name && return UInt8(j)
+        j += gamemaster["moves"][i]["energy"] == 0 ? 1 : 0
     end
-    return type_id
+    return UInt8(0)
+end
+
+function get_charged_move_id(name::String)
+    name == "NONE" && return UInt8(0)
+    j = 1
+    for i = 1:length(gamemaster["moves"])
+        gamemaster["moves"][i]["moveId"] == name && return UInt8(j)
+        j += gamemaster["moves"][i]["energy"] != 0 ? 1 : 0
+    end
+    return UInt8(0)
 end
 
 function convert_indices(

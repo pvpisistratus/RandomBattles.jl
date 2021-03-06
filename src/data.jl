@@ -1,4 +1,4 @@
-using JSON, StaticArrays, Colors, Memoize
+using JSON, StaticArrays, Colors, Memoize, Setfield, Match
 
 const gamemaster = JSON.parsefile(joinpath(@__DIR__, "../data/gamemaster.json"))
 const greatRankings = JSON.parsefile(joinpath(@__DIR__, "../data/rankings-1500.json"))
@@ -17,6 +17,31 @@ const masterRankings = JSON.parsefile(joinpath(@__DIR__, "../data/rankings-10000
 end
 
 get_cp_limit(league::String) = league == "master" ? 10_000 : league == "ultra" ? 2_500 : 1_500
+
+function get_type_id(typeName::String)
+    type_id = @match typeName begin
+        "normal"   => Int8(1)
+        "fighting" => Int8(2)
+        "flying"   => Int8(3)
+        "poison"   => Int8(4)
+        "ground"   => Int8(5)
+        "rock"     => Int8(6)
+        "bug"      => Int8(7)
+        "ghost"    => Int8(8)
+        "steel"    => Int8(9)
+        "fire"     => Int8(10)
+        "water"    => Int8(11)
+        "grass"    => Int8(12)
+        "electric" => Int8(13)
+        "psychic"  => Int8(14)
+        "ice"      => Int8(15)
+        "dragon"   => Int8(16)
+        "dark"     => Int8(17)
+        "fairy"    => Int8(18)
+        _          => Int8(19)
+    end
+    return type_id
+end
 
 𛲜 = 1.6      # weakness
 Θ = 1 / 𛲜    # resistance
@@ -115,3 +140,64 @@ const colors = [RGBA(153/255, 159/255, 161/255, 1.0),
                 RGBA(240/255, 152/255, 228/255, 1.0)]
 
 const shieldColor = RGBA(235/255,13/255,199/255, 1.0)
+
+const typings = @SVector [t for t in unique(map(x -> sort(get_type_id.(x["types"])), gamemaster["pokemon"]))[1:137]]
+
+function get_effectiveness(defenderTypes::Vector{Int8}, moveType::Int8)
+    return round(UInt16, 12_800 * type_effectiveness[defenderTypes[1], moveType] *
+        type_effectiveness[defenderTypes[2], moveType])
+end
+
+store_eff(e::UInt16) = return @match e begin
+     0x3200 => Int8(4)
+     0x1f40 => Int8(3)
+     0x1388 => Int8(2)
+     0x0c35 => Int8(1)
+     0x5000 => Int8(5)
+     0x8000 => Int8(6)
+end
+
+const eff = @SVector [3125, 5000, 8000, 12800, 20480, 32768]
+
+const effectiveness = @SMatrix [store_eff(get_effectiveness(i, j)) for i in typings, j = Int8(1):Int8(18)]
+
+const fast_moves = @SMatrix [vcat(reshape(map(x -> Int8(x["power"]), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> Int8(x["energyGain"]), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> get_type_id(x["type"]), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> Int8(x["cooldown"] ÷ 500), filter(x -> x["energy"] == 0, gamemaster["moves"])), 1, :))[i, j] for i = 1:4, j = 1:85]
+
+function get_buff_chance(c)
+    return @match c begin
+         "1" => Int8(1)
+         ".125" => Int8(8)
+         ".1" => Int8(10)
+         ".3" => Int8(3) # yeah, I know (will be fixed in apply_buffs)
+         ".5" => Int8(2)
+         "0.5" => Int8(2)
+         ".2" => Int8(5)
+    end
+end
+
+const charged_moves = @SMatrix [vcat(reshape(map(x -> get_type_id(x["type"]), filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> Int8(x["power"] ÷ 5), filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :),reshape(map(x -> Int8(x["energy"]), filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> haskey(x, "buffApplyChance") ? get_buff_chance(x["buffApplyChance"]) : Int8(0), filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :))[i, j] for i = 1:4, j = 1:165]
+
+struct StatBuffs
+    val::UInt8
+end
+
+function StatBuffs(atk::Int8, def::Int8)
+    StatBuffs((clamp(atk, Int8(-4), Int8(4)) + Int8(8)) + (clamp(def, Int8(-4), Int8(4)) + Int16(8))<<Int16(4))
+end
+
+get_atk(x::StatBuffs) = Int8(x.val & 0x0F) - Int8(8)
+get_def(x::StatBuffs) = Int8(x.val >> 4) - Int8(8)
+
+Base.:+(x::StatBuffs, y::StatBuffs) = StatBuffs(get_atk(x) + get_atk(y), get_def(x) + get_def(y))
+
+const defaultBuff = StatBuffs(Int8(0), Int8(0))
+
+const charged_moves_buffs = @SMatrix [vcat(reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "opponent" ?
+    StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : defaultBuff, filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :),
+    reshape(map(x -> haskey(x, "buffs") && x["buffTarget"] == "self" ? StatBuffs(Int8(x["buffs"][1]), Int8(x["buffs"][2])) : defaultBuff,
+    filter(x -> x["energy"] != 0, gamemaster["moves"])), 1, :))[i, j] for i = 1:2, j = 1:165]
