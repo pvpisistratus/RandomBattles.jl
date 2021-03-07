@@ -1,7 +1,7 @@
 using StaticArrays
 
 struct ChargedAction
-    move::UInt8
+    move::Int8
     charge::Int8
 end
 
@@ -9,7 +9,7 @@ function Setfield.:setindex(arr::StaticArrays.SVector{2, ChargedAction}, c::Char
     return setindex(arr, c, Int64(i))
 end
 
-const defaultCharge = ChargedAction(UInt8(0), Int8(0))
+const defaultCharge = ChargedAction(Int8(0), Int8(0))
 
 function Setfield.:setindex!(arr::StaticArrays.SVector{2, ChargedAction}, c::ChargedAction, i::Int8)
     return setindex(arr, c, Int64(i))
