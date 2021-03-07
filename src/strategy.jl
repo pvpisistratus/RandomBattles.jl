@@ -7,13 +7,13 @@ mutable struct Strategy
     activeMons::Array{Tuple{Int8, Int8}}
 end
 
-function plot_strategy(strat::Strategy, s::DynamicState, static_s::StaticState)
+function plot_strategy(strat::Strategy, static_s::StaticState)
     gr()
     plt1 = plot(1:length(strat.scores), strat.scores, width = 2, label = "possible battle scores",
         ylims = [0, 1], ylabel = "Battle Score", xlabel = "Decisions", size = (950, 400))
     hline!(plt1, [0.5], label = "win/loss")
     plt2 = plot(xlims = [0, length(strat.scores)], ylims = [-3, 0], legend = false, size = (950, 200), axis = nothing)
-    shields = [s.teams[1].shields, s.teams[2].shields]
+    shields = [Int8(2), Int8(2)]
     for i = 1:length(strat.scores), j = Int8(1):Int8(2)
         @match strat.decisions[i][j] begin
             3  || 4  => begin
