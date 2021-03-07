@@ -1,26 +1,35 @@
-using Distributions, StaticArrays
+using Distributions, Setfield, Match, StaticArrays
 
-function get_possible_decisions(state::DynamicState, static_state::StaticState, agent::Int64; allow_nothing::Bool = false)
-    @inbounds activeTeam = state.teams[agent]
+function get_possible_decisions(state::IndividualBattleState; allow_nothing = false)
+    @inbounds activeTeam = state.teams[state.agent]
+    @inbounds activeMon = state.teams[state.agent].mon
+    @inbounds return @SVector [((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[1]] && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[1]] && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[2]] && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[2]] && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0]
+end
+
+function get_possible_decisions(state::State; allow_nothing = false)
+    @inbounds activeTeam = state.teams[state.agent]
     @inbounds activeMon = activeTeam.mons[activeTeam.active]
-    @inbounds activeStaticTeam = static_state.teams[agent]
-    @inbounds activeStaticMon = activeStaticTeam.mons[activeTeam.active]
-    state.fastMovesPending[agent] != Int8(0) && state.fastMovesPending[agent] != Int8(-1) && activeMon.hp != Int16(0) && return @SVector [1.0,
-        1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    @inbounds return @SVector [((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeMon.hp > 0) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.shields > Int8(0) && activeMon.hp > 0) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeMon.energy >= activeStaticMon.chargedMoves[1].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeMon.energy >= activeStaticMon.chargedMoves[1].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeMon.energy >= activeStaticMon.chargedMoves[2].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeMon.energy >= activeStaticMon.chargedMoves[2].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(1) && activeTeam.mons[1].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(1) && activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(2) && activeTeam.mons[2].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(2) && activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(3) && activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
+    @inbounds return @SVector [((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((allow_nothing || state.fastMovesPending[state.agent] > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.hp > 0) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeTeam.shields > Int8(0) && activeMon.hp > 0) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[1]] && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[1]] && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[2]] && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[state.agent] == Int8(0) || state.fastMovesPending[state.agent] == Int8(-1)) && activeMon.energy >= charged_moves[3, activeMon.chargedMoves[2]] && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(1) && activeTeam.mons[1].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(1) && activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(2) && activeTeam.mons[2].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(2) && activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == 0 && activeTeam.active != Int8(3) && activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0) && activeMon.hp > Int16(0)) ? 0.5 : 0.0,
         (activeMon.hp == Int16(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
         (activeMon.hp == Int16(0) && activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
         (activeMon.hp == Int16(0) && activeTeam.mons[2].hp > Int16(0)) ? 1.0 : 0.0,
@@ -29,59 +38,147 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
         (activeMon.hp == Int16(0) && activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0]
 end
 
-function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{Int64,Int64})
-    dec = Decision(decision)
+function play_decision(state::IndividualBattleState, decision::Int64)
     next_state = state
+    if iseven(decision)
+        @inbounds next_state = @set state.teams[state.agent].shielding = true
+    end
+    next_state = @match decision begin
+        5  || 6  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(state.teams[state.agent].mon.chargedMoves[1], Int8(100))
+        7  || 8  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(state.teams[state.agent].mon.chargedMoves[2], Int8(100))
+        _        => next_state
+    end
+    return next_state
+end
 
-    @inbounds if next_state.fastMovesPending[1] == Int8(0)
-        next_state = evaluate_fast_moves(next_state, static_state, Int8(1))
+function play_decision(state::State, decision::Int64)
+    next_state = state
+    if iseven(decision)
+        @inbounds next_state = @set state.teams[state.agent].shielding = true
     end
-    @inbounds if next_state.fastMovesPending[2] == Int8(0)
-        next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
-    end
-
-    @inbounds next_state = step_timers(next_state,
-        3 <= decision[1] <= 4 ? static_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : Int8(0),
-        3 <= decision[2] <= 4 ? static_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown : Int8(0))
-
-    @inbounds if dec.switchesPending[1].pokemon != Int8(0)
-        next_state = evaluate_switch(next_state, Int8(1), dec.switchesPending[1].pokemon, dec.switchesPending[1].time)
-    end
-    @inbounds if dec.switchesPending[2].pokemon != Int8(0)
-        next_state = evaluate_switch(next_state, Int8(2), dec.switchesPending[2].pokemon, dec.switchesPending[2].time)
-    end
-
-    cmp = get_cmp(next_state, static_state, dec::Decision)
-    @inbounds if cmp[1] != Int8(0)
-        @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[1],
-            dec.chargedMovesPending[cmp[1]].move, dec.chargedMovesPending[cmp[1]].charge, dec.shielding[get_other_agent(cmp[1])],
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].mons[next_state.teams[cmp[1]].active].chargedMoves[dec.chargedMovesPending[cmp[1]].move].buffChance)
-        @inbounds if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1])
-        end
-    end
-    @inbounds if cmp[2] != Int8(0) && next_state.teams[cmp[2]].mons[next_state.teams[cmp[2]].active].hp > Int16(0)
-        @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[2],
-            dec.chargedMovesPending[cmp[2]].move, dec.chargedMovesPending[cmp[2]].charge, dec.shielding[get_other_agent(cmp[2])],
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mons[next_state.teams[cmp[2]].active].chargedMoves[dec.chargedMovesPending[cmp[2]].move].buffChance)
-        @inbounds if next_state.fastMovesPending[get_other_agent(cmp[2])] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[2])
-        end
+    next_state = @match decision begin
+        5  || 6  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(state.teams[state.agent].mons[state.teams[state.agent].active].chargedMoves[1], Int8(100))
+        7  || 8  => @inbounds @set next_state.chargedMovesPending[next_state.agent] = ChargedAction(state.teams[state.agent].mons[state.teams[state.agent].active].chargedMoves[2], Int8(100))
+        9  || 10 => queue_switch(next_state, Int8(1))
+        11 || 12 => queue_switch(next_state, Int8(2))
+        13 || 14 => queue_switch(next_state, Int8(3))
+        15 || 16 => queue_switch(next_state, Int8(1), time = Int8(24))
+        17 || 18 => queue_switch(next_state, Int8(2), time = Int8(24))
+        19 || 20 => queue_switch(next_state, Int8(3), time = Int8(24))
+        _        => next_state
     end
 
     return next_state
 end
 
-function play_battle(starting_state::DynamicState, static_state::StaticState)
-    state = starting_state
+function play_turn(state::IndividualBattleState, decision::Tuple{Int64,Int64})
+    @inbounds next_state = play_decision(state, decision[1])
+    @inbounds next_state = play_decision((@set next_state.agent = Int8(2)), decision[2])
+    next_state = @set next_state.agent = Int8(1)
+
+    if next_state.fastMovesPending[1] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, 1)
+    end
+    if next_state.fastMovesPending[2] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, 2)
+    end
+    if decision[1] == 3 || decision[1] == 4
+        next_state = queue_fast_move(next_state, 1)
+    end
+    if decision[2] == 3 || decision[2] == 4
+        next_state = queue_fast_move(next_state, 2)
+    end
+    if next_state.chargedMovesPending[1].charge != Int8(0) ||
+        next_state.chargedMovesPending[2].charge != Int8(0)
+        next_state = evaluate_charged_moves(next_state)
+    end
+    if next_state.chargedMovesPending[1].charge != Int8(0) ||
+        next_state.chargedMovesPending[2].charge != Int8(0)
+        next_state = evaluate_charged_moves(next_state)
+    end
+    next_state = step_timers(next_state)
+    if next_state.teams[1].shielding
+        @inbounds next_state = @set next_state.teams[1].shielding = false
+    end
+    if next_state.teams[2].shielding
+        @inbounds next_state = @set next_state.teams[2].shielding = false
+    end
+    return next_state
+end
+
+function play_turn(state::State, decision::Tuple{Int64,Int64})
+    @inbounds next_state = play_decision(state, decision[1])
+    @inbounds next_state = play_decision((@set next_state.agent = Int8(2)), decision[2])
+    next_state = @set next_state.agent = Int8(1)
+
+    if next_state.fastMovesPending[1] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, 1)
+    end
+    if next_state.fastMovesPending[2] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, 2)
+    end
+    if decision[1] == 3 || decision[1] == 4
+        next_state = queue_fast_move(next_state, 1)
+    end
+    if decision[2] == 3 || decision[2] == 4
+        next_state = queue_fast_move(next_state, 2)
+    end
+    if next_state.switchesPending[1].pokemon != Int8(0) ||
+        next_state.switchesPending[2].pokemon != Int8(0)
+        next_state = evaluate_switches(next_state)
+    end
+    if next_state.chargedMovesPending[1].charge != Int8(0) ||
+        next_state.chargedMovesPending[2].charge != Int8(0)
+        next_state = evaluate_charged_moves(next_state)
+    end
+    if next_state.chargedMovesPending[1].charge != Int8(0) ||
+        next_state.chargedMovesPending[2].charge != Int8(0)
+        next_state = evaluate_charged_moves(next_state)
+    end
+    next_state = step_timers(next_state)
+    if next_state.teams[1].shielding
+        @inbounds next_state = @set next_state.teams[1].shielding = false
+    end
+    if next_state.teams[2].shielding
+        @inbounds next_state = @set next_state.teams[2].shielding = false
+    end
+    return next_state
+end
+
+function play_battle(initial_state::IndividualBattleState)
+    state = initial_state
     while true
-        weights1, weights2 = get_possible_decisions(state, static_state, 1), get_possible_decisions(state, static_state, 2)
-        (sum(weights1) * sum(weights2) == 0) && return get_battle_score(state, static_state)
-        decision1, decision2 = rand(Categorical(weights1 / sum(weights1), check_args = false)), rand(Categorical(weights2 / sum(weights2), check_args = false))
-        state = play_turn(state, static_state, (decision1, decision2))
+        weights1 = get_possible_decisions(state)
+        weights2 = get_possible_decisions(@set state.agent = Int8(2))
+        (iszero(sum(weights1)) || iszero(sum(weights2))) &&
+            return get_battle_score(state)
+
+        decision1 = rand(Categorical(weights1 / sum(weights1)))
+        decision2 = rand(Categorical(weights2 / sum(weights2)))
+
+        state = play_turn(state, (decision1, decision2))
     end
 end
 
-function get_battle_scores(starting_state::DynamicState, static_state::StaticState, N::Int64)
-    return map(x -> play_battle(starting_state, static_state), 1:N)
+function play_battle(initial_state::State)
+    state = initial_state
+    while true
+        weights1 = get_possible_decisions(state)
+        weights2 = get_possible_decisions(@set state.agent = Int8(2))
+        (iszero(sum(weights1)) || iszero(sum(weights2))) &&
+            return get_battle_score(state)
+
+        decision1 = rand(Categorical(weights1 / sum(weights1)))
+        decision2 = rand(Categorical(weights2 / sum(weights2)))
+
+        state = play_turn(state, (decision1, decision2))
+    end
+end
+
+function get_battle_scores(initial_state::IndividualBattleState, N::Int64)
+    return map(x -> play_battle(initial_state), 1:N)
+end
+
+function get_battle_scores(initial_state::State, N::Int64)
+    return map(x -> play_battle(initial_state), 1:N)
 end
