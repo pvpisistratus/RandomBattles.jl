@@ -17,5 +17,5 @@ StaticIndividual(mon::String; league::String = "great", cup::String = "open") =
 StaticIndividual(mon::Int64; league::String = "great", cup::String = "open") =
     StaticIndividual(StaticPokemon(mon, league = league, cup = cup))
 
-DynamicIndividual(ind::StaticIndividual; shields = Int8(2)) = DynamicIndividual(DynamicPokemon(ind.mon),
+DynamicIndividual(ind::StaticIndividual; shields::Int8 = Int8(2)) = DynamicIndividual(DynamicPokemon(ind.mon),
     defaultBuff, shields)
