@@ -12,7 +12,7 @@ end
 StaticIndividualState(teams::Array{Int64}; league = "great", cup = "open") =
     StaticIndividualState(StaticIndividual(teams[1:3]), StaticIndividual(teams[4:6]))
 
-StaticState(teams::Array{String}; league = "great", cup = "open") = StaticIndividualState(
+StaticIndividualState(teams::Array{String}; league = "great", cup = "open") = StaticIndividualState(
     [StaticIndividual(teams[1:3], league = league, cup = cup), StaticIndividual(teams[4:6], league = league, cup = cup)]
 )
 
