@@ -16,7 +16,7 @@ StaticIndividualState(teams::Array{String}; league = "great", cup = "open") = St
     [StaticIndividual(teams[1], league = league, cup = cup), StaticIndividual(teams[2], league = league, cup = cup)]
 )
 
-DynamicIndividualState(state::StaticIndividualState) = DynamicIndividualState(
-    DynamicIndividual.(state.teams),
+DynamicIndividualState(state::StaticIndividualState; shields::Int64 = 2) = DynamicIndividualState(
+    DynamicIndividual.(state.teams, shields = shields),
     [Int8(-1), Int8(-1)],
 )
