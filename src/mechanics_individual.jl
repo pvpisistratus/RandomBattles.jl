@@ -25,7 +25,7 @@ function evaluate_fast_moves(state::DynamicIndividualState, static_state::Static
                     static_state.teams[1].mon.fastMove,
                     Int8(100),
                 ),
-            ), state.teams[2].mon.energy)], state.teams[2].buffs,
+            ), state.teams[2].mon.energy), state.teams[2].buffs,
             state.teams[2].shields)], state.fastMovesPending)
     else
         @inbounds return DynamicIndividualState(@SVector[
