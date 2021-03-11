@@ -48,7 +48,7 @@ function evaluate_fast_moves(state::DynamicIndividualState, static_state::Static
     end
 end
 
-function evaluate_charged_moves(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool, buffs_applied::Bool)
+function evaluate_charged_moves(state::DynamicIndividualState, static_state::StaticIndividualState, cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool, buffs_applied::Bool)
     if cmp == Int8(1)
         @inbounds return DynamicIndividualState(@SVector[
             DynamicIndividual(DynamicPokemon(state.teams[1].mon.hp,
@@ -64,7 +64,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
                     static_state.teams[2].mon,
                     get_def(state.teams[2].buffs),
                     static_state.teams[1].mon.chargedMoves[move_id],
-                    Int8(100),
+                    charge,
                 ),
             ), state.teams[2].mon.energy),
             buffs_applied ? (state.teams[2].buffs + static_state.teams[1].mon.chargedMoves[move_id].opp_buffs) : state.teams[2].buffs,
@@ -80,7 +80,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
                     static_state.teams[1].mon,
                     get_def(state.teams[1].buffs),
                     static_state.teams[2].mon.chargedMoves[move_id],
-                    Int8(100),
+                    sharge,
                 ),
             ), state.teams[1].mon.energy),
             buffs_applied ? (state.teams[1].buffs + static_state.teams[2].mon.chargedMoves[move_id].opp_buffs) : state.teams[1].buffs,
