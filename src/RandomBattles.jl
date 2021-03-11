@@ -18,8 +18,8 @@ include("strategy.jl")
 #include("rankings.jl")
 #include("learning.jl")
 
-export DynamicState, StaticState, IndividualBattleState,
-       DynamicTeam, StaticTeam, Individual,
+export DynamicState, StaticState, DynamicIndividualState, StaticIndividualState
+       DynamicTeam, StaticTeam, DynamicIndividual, StaticIndividual,
        DynamicPokemon, StaticPokemon,
        Strategy, plot_strategy,
        get_possible_decisions,
