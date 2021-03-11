@@ -3,14 +3,15 @@ using Distributions, StaticArrays
 function get_possible_decisions(state::DynamicIndividualState, static_state::StaticIndividualState, agent::Int64; allow_nothing::Bool = false)
     @inbounds activeTeam = state.teams[agent]
     @inbounds activeMon = state.teams[agent].mon
+    @inbounds activeStaticMon = static_state.teams[agent].mon
     @inbounds return @SVector [((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
         ((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
         ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
         ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[1].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[2].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeMon.chargedMoves[2].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0]
+        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeStaticMon.chargedMoves[1].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeStaticMon.chargedMoves[1].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeStaticMon.chargedMoves[2].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeStaticMon.chargedMoves[2].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0]
 end
 
 function play_turn(state::DynamicIndividualState, static_state::StaticIndividualState, decision::Tuple{Int64,Int64})
