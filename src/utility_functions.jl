@@ -97,10 +97,10 @@ function get_max_score(state::DynamicState, static_state::StaticState)
          static_state.teams[1].mons[3].stats.hitpoints))
 end
 
-function get_battle_score(state::DynamicIndividualState)
-    return (0.5 * (state.teams[1].mon.hp) / (state.teams[1].mon.stats.hitpoints)) +
-        (0.5 * (state.teams[2].mon.stats.hitpoints - state.teams[2].mon.hp) /
-        (state.teams[2].mon.stats.hitpoints))
+function get_battle_score(state::DynamicIndividualState, static_state::StaticIndividualState)
+    return (0.5 * (state.teams[1].mon.hp) / (static_state.teams[1].mon.stats.hitpoints)) +
+        (0.5 * (static_state.teams[2].mon.stats.hitpoints - state.teams[2].mon.hp) /
+        (static_state.teams[2].mon.stats.hitpoints))
 end
 
 function get_battle_score(state::DynamicState, static_state::StaticState)
