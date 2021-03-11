@@ -1,7 +1,7 @@
 using StaticArrays
 
 struct DynamicIndividualState
-    teams::SVector{2,Individual}
+    teams::SVector{2,DynamicIndividual}
     fastMovesPending::SVector{2,Int8}
 end
 
