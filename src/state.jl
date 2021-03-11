@@ -5,30 +5,14 @@ struct ChargedAction
     charge::Int8
 end
 
-function Setfield.:setindex(arr::StaticArrays.SVector{2, ChargedAction}, c::ChargedAction, i::Int8)
-    return setindex(arr, c, Int64(i))
-end
-
 const defaultCharge = ChargedAction(Int8(0), Int8(0))
-
-function Setfield.:setindex!(arr::StaticArrays.SVector{2, ChargedAction}, c::ChargedAction, i::Int8)
-    return setindex(arr, c, Int64(i))
-end
 
 struct SwitchAction
     pokemon::Int8
     time::Int8
 end
 
-function Setfield.:setindex(arr::StaticArrays.SVector{2, SwitchAction}, s::SwitchAction, i::Int8)
-    return setindex(arr, s, Int64(i))
-end
-
 const defaultSwitch = SwitchAction(Int8(0), Int8(0))
-
-function Setfield.:setindex(arr::StaticArrays.SVector{2, Int8}, n::Int8, i::Int8)
-    return setindex(arr, n, Int64(i))
-end
 
 struct StaticState
     teams::SVector{2,StaticTeam}
@@ -38,11 +22,6 @@ struct DynamicState
     teams::SVector{2,DynamicTeam}
     fastMovesPending::SVector{2,Int8}
 end
-
-#function vectorize(state::State)
-#    return vcat(vectorize(state.teams[1]), vcat(vectorize(state.teams[2]),
-#        [Int8(1) == state.agent, Int8(2) == state.agent]))
-#end
 
 StaticState(teams::Array{Int64}; league = "great", cup = "open") =
     StaticState(Team(teams[1:(length(teams)÷2)]), Team(teams[(length(teams)÷2+1):length(teams)]))

@@ -1,8 +1,6 @@
-using Setfield, Match
+using Match
 
 get_other_agent(agent::Int8) = agent == Int8(1) ? Int8(2) : Int8(1)
-
-switch_agent(state::IndividualBattleState) = @set state.agent = get_other_agent(state.agent)
 
 function get_gamemaster_mon_id(name::String)
     for i = 1:length(gamemaster["pokemon"])

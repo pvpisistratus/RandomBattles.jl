@@ -1,50 +1,22 @@
 using StaticArrays
 
-struct IndividualBattleState
+struct DynamicIndividualState
     teams::SVector{2,Individual}
-    agent::Int8
     fastMovesPending::SVector{2,Int8}
-    chargedMovesPending::SVector{2,ChargedAction}
-    switchesPending::SVector{2,SwitchAction}
 end
 
-function vectorize(state::IndividualBattleState)
-    return vcat(vectorize(state.teams[1]), vectorize(state.teams[2]))
+struct StaticIndividualState
+    teams::SVector{2,StaticIndividual}
 end
 
-IndividualBattleState(team1::Individual, team2::Individual) = IndividualBattleState(
-    [team1, team2],
-    Int8(1),
-    [Int8(-1), Int8(-1)],
-    [defaultCharge, defaultCharge],
-    [defaultSwitch, defaultSwitch],
+StaticIndividualState(teams::Array{Int64}; league = "great", cup = "open") =
+    StaticIndividualState(StaticIndividual(teams[1:3]), StaticIndividual(teams[4:6]))
+
+StaticState(teams::Array{String}; league = "great", cup = "open") = StaticIndividualState(
+    [StaticIndividual(teams[1:3], league = league, cup = cup), StaticIndividual(teams[4:6], league = league, cup = cup)]
 )
 
-IndividualBattleState(teams::Array{Int64}; league = "great", cup = "open", shields = 2) = IndividualBattleState(
-    [
-     Individual(
-        Pokemon(teams[1], league = league, cup = cup),
-        defaultBuff,
-        shields,
-        rand(Bool),
-     ),
-     Individual(
-        Pokemon(teams[2], league = league, cup = cup),
-        defaultBuff,
-        shields,
-        rand(Bool),
-     ),
-    ],
-    Int8(1),
+DynamicIndividualState(state::StaticIndividualState) = DynamicIndividualState(
+    DynamicIndividual.(state.teams),
     [Int8(-1), Int8(-1)],
-    [defaultCharge, defaultCharge],
-    [defaultSwitch, defaultSwitch],
-)
-
-IndividualBattleState(teams::Array{String}; league = "great", cup = "open", shields = 2) = IndividualBattleState(
-    [Individual(teams[1], league = league, cup = cup, shields = shields), Individual(teams[2], league = league, cup = cup, shields = shields)],
-    Int8(1),
-    [Int8(-1), Int8(-1)],
-    [defaultCharge, defaultCharge],
-    [defaultSwitch, defaultSwitch],
 )

@@ -1,4 +1,4 @@
-using StaticArrays, Setfield
+using StaticArrays
 
 struct StaticTeam
     mons::SVector{3,StaticPokemon}
@@ -21,11 +21,3 @@ StaticTeam(mons::Array{String}; league::String = "great", cup::String = "open") 
 
 DynamicTeam(team::StaticTeam) = DynamicTeam(DynamicPokemon.(team.mons),
     defaultBuff, Int8(0), Int8(2), Int8(1))
-
-function Setfield.:setindex(arr::StaticArrays.SVector{2, StaticTeam}, t::StaticTeam, i::Int8)
-    return setindex(arr, t, Int64(i))
-end
-
-function Setfield.:setindex(arr::StaticArrays.SVector{2, DynamicTeam}, t::DynamicTeam, i::Int8)
-    return setindex(arr, t, Int64(i))
-end

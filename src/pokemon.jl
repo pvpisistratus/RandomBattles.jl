@@ -1,4 +1,4 @@
-using StaticArrays, Setfield
+using StaticArrays
 
 struct Stats
     attack::UInt16
@@ -90,66 +90,6 @@ struct DynamicPokemon
     energy::Int8              #Initially 0
 end
 
-# leaving this in for now so as to not break individuals
-struct Pokemon
-    #These values are determined on initialization, and do not change in battle
-    types::SVector{2,Int8}
-    stats::Stats
-    fastMove::FastMove
-    chargedMoves::SVector{2,ChargedMove}
-
-    #These values are initialized, but change throughout the battle
-    hp::Int16                 #Initially hp stat of mon
-    energy::Int8              #Initially 0
-end
-
-#function vectorize(mon::Pokemon)
-#    @inbounds return [Int8(1) in mon.types, Int8(2) in mon.types, Int8(3) in mon.types, Int8(4) in mon.types,
-#        Int8(5) in mon.types, Int8(6) in mon.types, Int8(7) in mon.types, Int8(8) in mon.types,
-#        Int8(9) in mon.types, Int8(10) in mon.types, Int8(11) in mon.types, Int8(12) in mon.types,
-#        Int8(13) in mon.types, Int8(14) in mon.types, Int8(15) in mon.types, Int8(16) in mon.types,
-#        Int8(17) in mon.types, Int8(18) in mon.types, mon.stats.attack, mon.stats.defense,
-#        mon.stats.hitpoints, Int8(1) == mon.fastMove.moveType,
-#        Int8(2) == mon.fastMove.moveType, Int8(3) == mon.fastMove.moveType,
-#        Int8(4) == mon.fastMove.moveType, Int8(5) == mon.fastMove.moveType,
-#        Int8(6) == mon.fastMove.moveType, Int8(7) == mon.fastMove.moveType,
-#        Int8(8) == mon.fastMove.moveType, Int8(9) == mon.fastMove.moveType,
-#        Int8(10) == mon.fastMove.moveType, Int8(11) == mon.fastMove.moveType,
-#        Int8(12) == mon.fastMove.moveType, Int8(13) == mon.fastMove.moveType,
-#        Int8(14) == mon.fastMove.moveType, Int8(15) == mon.fastMove.moveType,
-#        Int8(16) == mon.fastMove.moveType, Int8(17) == mon.fastMove.moveType,
-#        Int8(18) == mon.fastMove.moveType, mon.fastMove.stab,
-#        mon.fastMove.power, mon.fastMove.energy, mon.fastMove.cooldown,
-#        Int8(1) == mon.chargedMoves[1].moveType, Int8(2) == mon.chargedMoves[1].moveType,
-#        Int8(3) == mon.chargedMoves[1].moveType, Int8(4) == mon.chargedMoves[1].moveType,
-#        Int8(5) == mon.chargedMoves[1].moveType, Int8(6) == mon.chargedMoves[1].moveType,
-#        Int8(7) == mon.chargedMoves[1].moveType, Int8(8) == mon.chargedMoves[1].moveType,
-#        Int8(9) == mon.chargedMoves[1].moveType, Int8(10) == mon.chargedMoves[1].moveType,
-#        Int8(11) == mon.chargedMoves[1].moveType, Int8(12) == mon.chargedMoves[1].moveType,
-#        Int8(13) == mon.chargedMoves[1].moveType, Int8(14) == mon.chargedMoves[1].moveType,
-#        Int8(15) == mon.chargedMoves[1].moveType, Int8(16) == mon.chargedMoves[1].moveType,
-#        Int8(17) == mon.chargedMoves[1].moveType, Int8(18) == mon.chargedMoves[1].moveType,
-#        mon.chargedMoves[1].stab, mon.chargedMoves[1].power,
-#        mon.chargedMoves[1].energy, mon.chargedMoves[1].buffChance,
-#        mon.chargedMoves[1].oppAtkModifier, mon.chargedMoves[1].oppDefModifier,
-#        mon.chargedMoves[1].selfAtkModifier,
-#        mon.chargedMoves[1].selfDefModifier, Int8(1) == mon.chargedMoves[2].moveType,
-#        Int8(2) == mon.chargedMoves[2].moveType, Int8(3) == mon.chargedMoves[2].moveType,
-#        Int8(4) == mon.chargedMoves[2].moveType, Int8(5) == mon.chargedMoves[2].moveType,
-#        Int8(6) == mon.chargedMoves[2].moveType, Int8(7) == mon.chargedMoves[2].moveType,
-#        Int8(8) == mon.chargedMoves[2].moveType, Int8(9) == mon.chargedMoves[2].moveType,
-#        Int8(10) == mon.chargedMoves[2].moveType, Int8(11) == mon.chargedMoves[2].moveType,
-#        Int8(12) == mon.chargedMoves[2].moveType, Int8(13) == mon.chargedMoves[2].moveType,
-#        Int8(14) == mon.chargedMoves[2].moveType, Int8(15) == mon.chargedMoves[2].moveType,
-#        Int8(16) == mon.chargedMoves[2].moveType, Int8(17) == mon.chargedMoves[2].moveType,
-#        Int8(18) == mon.chargedMoves[2].moveType, mon.chargedMoves[2].stab,
-#        mon.chargedMoves[2].power, mon.chargedMoves[2].energy,
-#        mon.chargedMoves[2].buffChance, mon.chargedMoves[2].oppAtkModifier,
-#        mon.chargedMoves[2].oppDefModifier, mon.chargedMoves[2].selfAtkModifier,
-#        mon.chargedMoves[2].selfDefModifier, mon.hp, mon.energy]
-#end
-
-
 function StaticPokemon(i::Int64; league::String = "great", cup = "open", custom_moveset = ["none"], custom_stats = ())
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
@@ -235,12 +175,4 @@ end
 
 function DynamicPokemon(mon::StaticPokemon)
     return DynamicPokemon(mon.stats.hitpoints, Int8(0))
-end
-
-function Setfield.:setindex(arr::StaticArrays.SVector{3, StaticPokemon}, p::StaticPokemon, i::Int8)
-    return setindex(arr, p, Int64(i))
-end
-
-function Setfield.:setindex(arr::StaticArrays.SVector{3, DynamicPokemon}, p::DynamicPokemon, i::Int8)
-    return setindex(arr, p, Int64(i))
 end

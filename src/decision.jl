@@ -8,10 +8,6 @@ end
 
 const defaultDecision = Decision([defaultCharge, defaultCharge], [false, false], [defaultSwitch, defaultSwitch])
 
-function Setfield.:setindex(arr::StaticArrays.SVector{2, Bool}, n::Bool, i::Int8)
-    return setindex(arr, n, Int64(i))
-end
-
 function Decision(decision::Tuple{Int64,Int64})
     return Decision(
         @SVector[5 <= decision[1] <= 6 ? ChargedAction(Int8(1), Int8(100)) :
