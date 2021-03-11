@@ -40,7 +40,7 @@ function evaluate_fast_moves(state::DynamicIndividualState, static_state::Static
                     static_state.teams[2].mon.fastMove,
                     Int8(100),
                 ),
-            ), state.teams[1].mon.energy)], state.teams[1].buffs,
+            ), state.teams[1].mon.energy), state.teams[1].buffs,
             state.teams[1].shields), DynamicIndividual(
             DynamicPokemon(state.teams[2].mon.hp,
             min(state.teams[2].mon.energy + static_state.teams[2].mon.fastMove.energy,
