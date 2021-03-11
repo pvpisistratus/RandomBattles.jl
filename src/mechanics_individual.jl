@@ -80,7 +80,7 @@ function evaluate_charged_moves(state::DynamicIndividualState, static_state::Sta
                     static_state.teams[1].mon,
                     get_def(state.teams[1].buffs),
                     static_state.teams[2].mon.chargedMoves[move_id],
-                    sharge,
+                    charge,
                 ),
             ), state.teams[1].mon.energy),
             buffs_applied ? (state.teams[1].buffs + static_state.teams[2].mon.chargedMoves[move_id].opp_buffs) : state.teams[1].buffs,
