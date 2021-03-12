@@ -37,7 +37,7 @@ function evaluate_fast_moves(state::DynamicIndividualState, static_state::Static
                 Int8(100),
             ),
         ) : state.teams[2].mon.hp,
-        agent1 ? min(state.teams[2].mon.energy + static_state.teams[2].mon.fastMove.energy, Int8(100)) : state.teams[2].mon.energy),
+        agent2 ? min(state.teams[2].mon.energy + static_state.teams[2].mon.fastMove.energy, Int8(100)) : state.teams[2].mon.energy),
         state.teams[2].buffs, state.teams[2].shields)], state.fastMovesPending)
 end
 
