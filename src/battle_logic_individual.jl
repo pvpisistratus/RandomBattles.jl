@@ -17,12 +17,8 @@ end
 function play_turn(state::DynamicIndividualState, static_state::StaticIndividualState, decision::Tuple{Int64,Int64})
     dec = Decision(decision)
     next_state = state
-
-    @inbounds if next_state.fastMovesPending[1] == Int8(0)
-        next_state = evaluate_fast_moves(next_state, static_state, Int8(1))
-    end
-    @inbounds if next_state.fastMovesPending[2] == Int8(0)
-        next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
+    @inbounds if next_state.fastMovesPending[1] == Int8(0) || next_state.fastMovesPending[2] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, static_state, next_state.fastMovesPending[1] == Int8(0), next_state.fastMovesPending[2] == Int8(0))
     end
 
     @inbounds next_state = step_timers(next_state,
