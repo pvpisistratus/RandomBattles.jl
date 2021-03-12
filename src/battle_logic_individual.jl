@@ -31,7 +31,7 @@ function play_turn(state::DynamicIndividualState, static_state::StaticIndividual
             dec.chargedMovesPending[cmp[1]].move, dec.chargedMovesPending[cmp[1]].charge, dec.shielding[get_other_agent(cmp[1])],
             rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].mon.chargedMoves[dec.chargedMovesPending[cmp[1]].move].buffChance)
         @inbounds if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1])
+            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1] == Int8(1), cmp[1] == Int8(2))
         end
     end
     @inbounds if cmp[2] != Int8(0) && next_state.teams[cmp[2]].mon.hp > Int16(0)
@@ -39,7 +39,7 @@ function play_turn(state::DynamicIndividualState, static_state::StaticIndividual
             dec.chargedMovesPending[cmp[2]].move, dec.chargedMovesPending[cmp[2]].charge, dec.shielding[get_other_agent(cmp[2])],
             rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mon.chargedMoves[dec.chargedMovesPending[cmp[2]].move].buffChance)
         @inbounds if next_state.fastMovesPending[get_other_agent(cmp[2])] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[2])
+            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[2] == Int8(1), cmp[2] == Int8(2))
         end
     end
 
