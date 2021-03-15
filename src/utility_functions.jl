@@ -43,19 +43,12 @@ function get_type_id(typeName::String)
     return type_id
 end
 
-function convert_indices(
-    name::String;
-    league::String = "great",
-    cup = "open"
-)
+function convert_indices(name::String; league::String = "great", cup::String = "open")
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
-    ranking = 0
     for i = 1:length(rankings)
-        if rankings[i]["speciesId"] == name
-            ranking = i
-        end
+        rankings[i]["speciesId"] == name && return i
     end
-    return ranking
+    return 0
 end;
 
 function silph_to_pvpoke(name::String)

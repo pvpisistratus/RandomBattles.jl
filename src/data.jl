@@ -8,16 +8,16 @@ const masterRankings = JSON.parsefile(download("https://raw.githubusercontent.co
 get_cp_limit(league::String) = league == "master" ? 10_000 : league == "ultra" ? 2_500 : 1_500
 
 @memoize function get_rankings(cup::String; league = "great")
-    rankings == "great" && return greatRankings
-    rankings == "ultra" && return ultraRankings
-    rankings == "master" && return masterRankings
+    cup == "great" && return greatRankings
+    cup == "ultra" && return ultraRankings
+    cup == "master" && return masterRankings
     return JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/$(cup)/overall/rankings-$(get_cp_limit(league)).json"))
 end
 
 @memoize function get_overrides(cup::String; league = "great")
-    rankings == "great" && return get_overrides("overall", league = "great")
-    rankings == "ultra" && return get_overrides("overall", league = "ultra")
-    rankings == "master" && return get_overrides("overall", league = "master")
+    cup == "great" && return get_overrides("overall", league = "great")
+    cup == "ultra" && return get_overrides("overall", league = "ultra")
+    cup == "master" && return get_overrides("overall", league = "master")
     return JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/overrides/$(cup)/overall/$(get_cp_limit(league)).json"))
 end
 
