@@ -20,7 +20,7 @@ function PokemonMeta(
         return PokemonMeta(Pokemon.(mons, cup = cup),
             Categorical(meta_weights ./ sum(meta_weights)))
     elseif source == "pvpoke"
-        overrides = get_rankings("$(cup)_rankingoverrides")
+        overrides = get_overrides(cup, league = league)
         rankings = get_rankings(cup, league = league)
         mons = Pokemon.(map(x -> x["speciesId"],
             rankings), cup = cup, league = league)

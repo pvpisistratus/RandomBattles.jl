@@ -1,22 +1,25 @@
 using JSON, StaticArrays, Colors, Memoize
 
-const gamemaster = JSON.parsefile(joinpath(@__DIR__, "../data/gamemaster.json"))
-const greatRankings = JSON.parsefile(joinpath(@__DIR__, "../data/rankings-1500.json"))
-const ultraRankings = JSON.parsefile(joinpath(@__DIR__, "../data/rankings-2500.json"))
-const masterRankings = JSON.parsefile(joinpath(@__DIR__, "../data/rankings-10000.json"))
+const gamemaster = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.json"))
+const greatRankings = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"))
+const ultraRankings = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"))
+const masterRankings = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-10000.json"))
 
-@memoize function get_rankings(rankings::String; league = "great")
+get_cp_limit(league::String) = league == "master" ? 10_000 : league == "ultra" ? 2_500 : 1_500
+
+@memoize function get_rankings(cup::String; league = "great")
     rankings == "great" && return greatRankings
     rankings == "ultra" && return ultraRankings
     rankings == "master" && return masterRankings
-    try
-        return JSON.parsefile(joinpath(@__DIR__, "../data/$(rankings).json"))
-    catch
-        return JSON.parsefile(joinpath(@__DIR__, "../data/$(rankings)-$(league).json"))
-    end
+    return JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/$(cup)/overall/rankings-$(get_cp_limit(league)).json"))
 end
 
-get_cp_limit(league::String) = league == "master" ? 10_000 : league == "ultra" ? 2_500 : 1_500
+@memoize function get_overrides(cup::String; league = "great")
+    rankings == "great" && return get_overrides("overall", league = "great")
+    rankings == "ultra" && return get_overrides("overall", league = "ultra")
+    rankings == "master" && return get_overrides("overall", league = "master")
+    return JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/overrides/$(cup)/overall/$(get_cp_limit(league)).json"))
+end
 
 𛲜 = 1.6      # weakness
 Θ = 1 / 𛲜    # resistance
