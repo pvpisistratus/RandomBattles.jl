@@ -2,16 +2,20 @@ module RandomBattles
 
 include("data.jl")
 include("pokemon.jl")
+
 include("team/team.jl")
-include("individual/individual.jl")
 include("team/state.jl")
-include("decision.jl")
-include("individual/state.jl")
-include("diff.jl")
 include("team/mechanics.jl")
-include("individual/mechanics.jl")
 include("team/battle_logic.jl")
+include("team/diff.jl")
+
+include("individual/individual.jl")
+include("individual/state.jl")
+include("individual/mechanics.jl")
 include("individual/battle_logic.jl")
+include("individual/diff.jl")
+
+include("decision.jl")
 #include("pokemon_meta.jl")
 include("strategy.jl")
 #include("rankings.jl")
