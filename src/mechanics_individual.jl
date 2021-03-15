@@ -75,3 +75,9 @@ function step_timers(state::DynamicIndividualState, fmCooldown1::Int8, fmCooldow
         @SVector[fmCooldown1 == Int8(0) ? max(Int8(-1), state.fastMovesPending[1] - Int8(1)) : fmCooldown1 - Int8(1),
             fmCooldown2 == Int8(0) ? max(Int8(-1), state.fastMovesPending[2] - Int8(1)) : fmCooldown2 - Int8(1)])
 end
+
+function get_battle_score(state::DynamicIndividualState, static_state::StaticIndividualState)
+    return (0.5 * (state.teams[1].mon.hp) / (static_state.teams[1].mon.stats.hitpoints)) +
+        (0.5 * (static_state.teams[2].mon.stats.hitpoints - state.teams[2].mon.hp) /
+        (static_state.teams[2].mon.stats.hitpoints))
+end

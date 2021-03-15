@@ -285,3 +285,27 @@ function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
         @SVector[fmCooldown1 == Int8(0) ? max(Int8(-1), state.fastMovesPending[1] - Int8(1)) : fmCooldown1 - Int8(1),
             fmCooldown2 == Int8(0) ? max(Int8(-1), state.fastMovesPending[2] - Int8(1)) : fmCooldown2 - Int8(1)])
 end
+
+function get_min_score(state::DynamicState, static_state::StaticState)
+    return 0.5 * (static_state.teams[2].mons[1].stats.hitpoints -
+      state.teams[2].mons[1].hp +
+      static_state.teams[2].mons[2].stats.hitpoints -
+      state.teams[2].mons[2].hp +
+      static_state.teams[2].mons[3].stats.hitpoints -
+      state.teams[2].mons[3].hp) /
+     (static_state.teams[2].mons[1].stats.hitpoints +
+      static_state.teams[2].mons[2].stats.hitpoints +
+      static_state.teams[2].mons[3].stats.hitpoints)
+end
+
+function get_max_score(state::DynamicState, static_state::StaticState)
+    return 0.5 + (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
+         state.teams[1].mons[3].hp) /
+        (static_state.teams[1].mons[1].stats.hitpoints +
+         static_state.teams[1].mons[2].stats.hitpoints +
+         static_state.teams[1].mons[3].stats.hitpoints))
+end
+
+function get_battle_score(state::DynamicState, static_state::StaticState)
+    return get_min_score(state, static_state) + get_max_score(state, static_state) - 0.5
+end

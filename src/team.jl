@@ -21,3 +21,5 @@ StaticTeam(mons::Array{String}; league::String = "great", cup::String = "open") 
 
 DynamicTeam(team::StaticTeam) = DynamicTeam(DynamicPokemon.(team.mons),
     defaultBuff, Int8(0), Int8(2), Int8(1))
+
+get_other_agent(agent::Int8) = agent == Int8(1) ? Int8(2) : Int8(1)

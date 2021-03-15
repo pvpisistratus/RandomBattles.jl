@@ -38,8 +38,8 @@ end
 
 function FastMove(gm_move::Dict{String,Any}, types)
     return FastMove(
-            get_type_id(gm_move["type"]),
-            (get_type_id(gm_move["type"]) in types) ? Int8(12) : Int8(1),
+            typings[gm_move["type"]],
+            (typings[gm_move["type"]] in types) ? Int8(12) : Int8(1),
             UInt8(gm_move["power"]),
             Int8(gm_move["energyGain"]),
             Int8(gm_move["cooldown"] ÷ 500)
@@ -68,8 +68,8 @@ end
 
 function ChargedMove(gm_move::Dict{String,Any}, types)
     return ChargedMove(
-        get_type_id(gm_move["type"]),
-        (get_type_id(gm_move["type"]) in types) ? Int8(12) : Int8(10),
+        typings[gm_move["type"]],
+        (typings[gm_move["type"]] in types) ? Int8(12) : Int8(10),
         UInt8(gm_move["power"]),
         Int8(gm_move["energy"]),
         haskey(gm_move, "buffs") ? floor(Int8, parse(Float64, gm_move["buffApplyChance"]) * 100) : Int8(0),
@@ -94,7 +94,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open", custom_
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
-    types = get_type_id.(convert(Array{String}, gm["types"]))
+    types = typings[convert(Array{String}, gm["types"])[1]], typings[convert(Array{String}, gm["types"])[2]]
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
         level, atk, def, hp = parse.(Int8, custom_stats)
