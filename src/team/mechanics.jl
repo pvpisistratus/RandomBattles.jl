@@ -1,5 +1,16 @@
 using StaticArrays
 
+"""
+    get_effectiveness(defenderTypes, moveType)
+
+Compute the effectiveness of a particular move against a type combination.
+In the example below, flying is super-effective against a pure fighting type.
+
+# Examples
+```jldoctest
+julia> using StaticArrays; RandomBattles.get_effectiveness(@SVector[Int8(2), Int8(19)], Int8(3))
+1.6
+"""
 function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
     @inbounds return type_effectiveness[defenderTypes[1], moveType] *
             type_effectiveness[defenderTypes[2], moveType]
