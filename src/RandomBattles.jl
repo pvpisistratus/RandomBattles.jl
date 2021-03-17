@@ -16,14 +16,13 @@ include("individual/battle_logic.jl")
 include("individual/diff.jl")
 
 include("strategy.jl")
-#include("pokemon_meta.jl")
+include("pokemon_meta.jl")
 #include("rankings.jl")
-#include("learning.jl")
 
 export DynamicState, StaticState, DynamicTeam, StaticTeam, DynamicPokemon, StaticPokemon,
       DynamicIndividualState, StaticIndividualState, DynamicIndividual, StaticIndividual,
       get_possible_decisions, get_battle_score, get_battle_scores, play_turn, play_battle,
       gamemaster, greatRankings, ultraRankings, masterRankings, diff, Strategy, plot_strategy
-      #rank, PokemonMeta, vectorize, crossover_and_mutate, play_nn_battle, play_nn_random_battle, testing_best
+      rank, PokemonMeta
 
 end # module

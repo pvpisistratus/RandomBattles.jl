@@ -5,12 +5,12 @@ function get_empirical_teams(filename::String; league = "great")
     numEmpiricalTeams = nrow(data)
     data = hcat(silph_to_pvpoke.(data[:, 1:3]), data[:, 4])
     rankings = get_rankings(league)
-    empiricalTeams = Array{Team}(undef, numEmpiricalTeams)
+    empiricalTeams = Array{StaticTeam}(undef, numEmpiricalTeams)
     for i = 1:numEmpiricalTeams
         if convert_indices(data[i, 1], league = league) != 0 &&
            convert_indices(data[i, 2], league = league) != 0 &&
            convert_indices(data[i, 3], league = league) != 0
-            empiricalTeams[i] = Team(
+            empiricalTeams[i] = StaticTeam(
                 [data[i, 1] data[i, 2] data[i, 3]],
                 league = league,
             )
@@ -64,7 +64,7 @@ function get_theoretical_teams(numMons::Int64; league = "great")
         end
     end
     numTheoreticalTeams = index
-    theoreticalTeams = Array{Team}(undef, numTheoreticalTeams)
+    theoreticalTeams = Array{StaticTeam}(undef, numTheoreticalTeams)
     index = 1
     dexes(x) = dexDict[dexKeys[x]]
     for i = 1:length(dexKeys)
@@ -74,7 +74,7 @@ function get_theoretical_teams(numMons::Int64; league = "great")
                     @inbounds @fastmath toAdd = length(dexDict[dexKeys[i]]) *
                                                 length(dexDict[dexKeys[j]]) *
                                                 length(dexDict[dexKeys[k]])
-                    @inbounds @fastmath theoreticalTeams[index:(index+toAdd-1)] = [Team(
+                    @inbounds @fastmath theoreticalTeams[index:(index+toAdd-1)] = [StaticTeam(
                         [l, m, n],
                         league = league,
                     ) for l in dexes(i), m in dexes(j), n in dexes(k)]
@@ -88,15 +88,17 @@ end;
 
 function run_empirical_teams(
     theoreticalTeam::Team,
-    empiricalTeams::Array{Team},
+    empiricalTeams::Array{StaticTeam},
     weights::Array{Int64},
 )
     histogram = Hist(0.0:0.025:1.0)
     @simd for i = 1:length(empiricalTeams)
         @simd for j = 1:weights[i]
+            static_state = StaticState(theoreticalTeam, empiricalTeams[i])
+            dynamic_state = DynamicState(static_state)
             fit!(
                 histogram,
-                play_battle(State(theoreticalTeam, empiricalTeams[i])),
+                play_battle(dynamic_state, static_state),
             )
         end
     end
@@ -104,8 +106,8 @@ function run_empirical_teams(
 end;
 
 function run_theoretical_teams(
-    theoreticalTeams::Array{Team},
-    empiricalTeams::Array{Team},
+    theoreticalTeams::Array{StaticTeam},
+    empiricalTeams::Array{StaticTeam},
     weights,
 )
     histograms = Array{Hist}(undef, length(theoreticalTeams))
