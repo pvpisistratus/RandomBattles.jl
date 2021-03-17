@@ -8,9 +8,9 @@ const masterRankings = JSON.parsefile(download("https://raw.githubusercontent.co
 get_cp_limit(league::String) = league == "master" ? 10_000 : league == "ultra" ? 2_500 : 1_500
 
 @memoize function get_rankings(cup::String; league = "great")
-    cup == "great" || (cup == "all" && league == "great") && return greatRankings
-    cup == "ultra" || (cup == "all" && league == "ultra") && return ultraRankings
-    cup == "master" || (cup == "all" && league == "master") && return masterRankings
+    cup == "great" && return greatRankings
+    cup == "ultra" && return ultraRankings
+    cup == "master" && return masterRankings
     return JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/$(cup)/overall/rankings-$(get_cp_limit(league)).json"))
 end
 
