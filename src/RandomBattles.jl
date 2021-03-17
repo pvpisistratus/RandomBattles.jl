@@ -17,7 +17,7 @@ include("individual/diff.jl")
 
 include("strategy.jl")
 include("pokemon_meta.jl")
-#include("rankings.jl")
+include("rankings.jl")
 
 export DynamicState, StaticState, DynamicTeam, StaticTeam, DynamicPokemon, StaticPokemon,
       DynamicIndividualState, StaticIndividualState, DynamicIndividual, StaticIndividual,
