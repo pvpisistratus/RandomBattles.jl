@@ -5,7 +5,6 @@ include("pokemon.jl")
 
 include("team/team.jl")
 include("team/state.jl")
-include("decision.jl")
 include("team/mechanics.jl")
 include("team/battle_logic.jl")
 include("team/diff.jl")
