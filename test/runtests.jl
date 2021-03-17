@@ -1,5 +1,5 @@
 using RandomBattles
-using Test
+using Test, BenchmarkTools
 
 @testset "RandomBattles.jl" begin
     static_state1 = StaticState(["lanturn" "dragonair" "froslass" "azumarill" "sableye" "marowak_alolan"])

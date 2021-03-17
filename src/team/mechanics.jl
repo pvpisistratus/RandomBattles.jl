@@ -8,7 +8,7 @@ In the example below, flying is super-effective against a pure fighting type.
 
 # Examples
 ```jldoctest
-julia> using StaticArrays; RandomBattles.get_effectiveness(@SVector[Int8(2), Int8(19)], Int8(3))
+julia> using StaticArrays; get_effectiveness(@SVector[Int8(2), Int8(19)], Int8(3))
 1.6
 """
 function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
@@ -16,6 +16,17 @@ function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
             type_effectiveness[defenderTypes[2], moveType]
 end
 
+"""
+    get_buff_modifier(buff)
+
+Compute the mulitplier associated with stat buffs (multiplied by 12 to return an integer).
+As a result, the multiplier for no buff effect is 0. Inputs should be between -4 and 4.
+
+# Examples
+```jldoctest
+julia> get_buff_modifier(Int8(0))
+12
+"""
 function get_buff_modifier(buff::Int8)
     return buff == Int8(0) ? Int8(12) : (buff > Int8(0) ? Int8(12) + Int8(3) * buff : Int8(48) ÷ (Int8(4) - buff))
 end
@@ -50,6 +61,12 @@ function calculate_damage(
         Int64(get_buff_modifier(defBuff)) * 1_280_000_000) + 1)
 end
 
+"""
+    evaluate_fast_moves(state, static_state, agent)
+
+Takes in the dynamic state, the static state, and the attacking agent and returns
+the dynamic state after the fast move has occurred, with precisely one copy
+"""
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState, agent::Int8)
     if agent == Int8(1)
         @inbounds return DynamicState(@SVector[DynamicTeam(@SVector[
@@ -167,6 +184,14 @@ function get_cmp(state::DynamicState, static_state::StaticState, team1throwing::
     return cmp, (cmp == Int8(1) ? Int8(2) : Int8(1))
 end
 
+"""
+    evaluate_charged_moves(state, static_state, cmp, move_id, charge, shielding, buffs_applied)
+
+Takes in the dynamic state, the static state, the attacking agent, the move,
+the charge, whether or not the opponent shields, and whether or not buffs are
+applied (say in the case of a random buff move) and returns
+the dynamic state after the charged move has occurred, with precisely one copy
+"""
 function evaluate_charged_moves(state::DynamicState, static_state::StaticState, cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool, buffs_applied::Bool)
     if cmp == Int8(1)
         @inbounds return DynamicState(@SVector[DynamicTeam(@SVector[
@@ -275,6 +300,13 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
     end
 end
 
+"""
+    evaluate_switch(state, agent, to_switch, time)
+
+Takes in the dynamic state, the switching agent, which team member they switch to,
+and the time in the switch (only applies in switches after a faint) and returns
+the dynamic state after the switch has occurred, with precisely one copy
+"""
 function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time::Int8)
     @inbounds return agent == Int8(1) ? DynamicState(
         @SVector[DynamicTeam(state.teams[1].mons, defaultBuff, Int8(120), state.teams[1].shields, to_switch),
