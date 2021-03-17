@@ -10,8 +10,7 @@ using Test, BenchmarkTools
     @test isbits(static_state1)
     @test sizeof(dynamic_state1) == 34
     @test isbits(dynamic_state1)
-    to_benchmark() = play_battle(dynamic_state1, static_state1)
-    res = @benchmark to_benchmark()
+    res = @benchmark play_battle($dynamic_state1, $static_state1)
     @test res.allocs == 0
     N = 10000
     @test sum(get_battle_scores(dynamic_state1, static_state1, N)) +
