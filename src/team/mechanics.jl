@@ -31,6 +31,19 @@ function get_buff_modifier(buff::Int8)
     return buff == Int8(0) ? Int8(12) : (buff > Int8(0) ? Int8(12) + Int8(3) * buff : Int8(48) ÷ (Int8(4) - buff))
 end
 
+"""
+    calculate_damage(
+        attacker::StaticPokemon,
+        atkBuff::Int8,
+        defender::StaticPokemon,
+        defBuff::Int8,
+        move::FastMove,
+        charge::Int8,
+    )
+
+Calculate the damage a particular pokemon does against another using its fast move
+
+"""
 function calculate_damage(
     attacker::StaticPokemon,
     atkBuff::Int8,
@@ -46,6 +59,19 @@ function calculate_damage(
         Int64(get_buff_modifier(defBuff)) * 1_280_000_000) + 1)
 end
 
+"""
+    calculate_damage(
+        attacker::StaticPokemon,
+        atkBuff::Int8,
+        defender::StaticPokemon,
+        defBuff::Int8,
+        move::ChargedMove,
+        charge::Int8,
+    )
+
+Calculate the damage a particular pokemon does against another using a charged move
+
+"""
 function calculate_damage(
     attacker::StaticPokemon,
     atkBuff::Int8,
@@ -319,7 +345,13 @@ function evaluate_switch(state::DynamicState, agent::Int8, to_switch::Int8, time
             @SVector[state.fastMovesPending[1], Int8(-1)])
 end
 
+"""
+    step_timers(state, fmCooldown1, fmCooldown2)
 
+Given the dynamic state and the fast move cooldowns, adjust the times so that
+one turn has elapsed, and reset fast move cooldowns as needed. This returns a
+new DynamicState using precisely one copy
+"""
 function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
     @inbounds return DynamicState(
         @SVector[DynamicTeam(state.teams[1].mons, state.teams[1].buffs, max(Int8(0), state.teams[1].switchCooldown - Int8(1)),
@@ -329,6 +361,14 @@ function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
             fmCooldown2 == Int8(0) ? max(Int8(-1), state.fastMovesPending[2] - Int8(1)) : fmCooldown2 - Int8(1)])
 end
 
+"""
+    get_min_score(state, static_state)
+
+Given the state and the static state (here just for starting hp values), compute
+the PvPoke-like score that would occur if the first agent stopped attacking
+altogether. This is currently only used in computing the final score, but it
+could be used as strict bounds for α/β pruning, for example.
+"""
 function get_min_score(state::DynamicState, static_state::StaticState)
     return 0.5 * (static_state.teams[2].mons[1].stats.hitpoints -
       state.teams[2].mons[1].hp +
@@ -341,6 +381,14 @@ function get_min_score(state::DynamicState, static_state::StaticState)
       static_state.teams[2].mons[3].stats.hitpoints)
 end
 
+"""
+    get_max_score(state, static_state)
+
+Given the state and the static state (here just for starting hp values), compute
+the PvPoke-like score that would occur if the second agent stopped attacking
+altogether. This is currently only used in computing the final score, but it
+could be used as strict bounds for α/β pruning, for example.
+"""
 function get_max_score(state::DynamicState, static_state::StaticState)
     return 0.5 + (0.5 * (state.teams[1].mons[1].hp + state.teams[1].mons[2].hp +
          state.teams[1].mons[3].hp) /
@@ -349,6 +397,13 @@ function get_max_score(state::DynamicState, static_state::StaticState)
          static_state.teams[1].mons[3].stats.hitpoints))
 end
 
+"""
+    get_battle_score(state, static_state)
+
+Given the state and the static state (here just for starting hp values), compute
+the PvPoke-like score for the battle. Note that this can also be computed for
+battles in progress, and thus differs from PvPoke's use cases
+"""
 function get_battle_score(state::DynamicState, static_state::StaticState)
     return get_min_score(state, static_state) + get_max_score(state, static_state) - 0.5
 end
