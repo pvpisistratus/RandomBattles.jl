@@ -42,7 +42,7 @@ function get_theoretical_teams(numMons::Int64; league = "great")
     end
     dexDict = Dict{Int16,Array{Int64,1}}()
     for i = 1:numMons
-        @inbounds dex = gamemaster["pokemon"][get_gamemaster_mon_id(theoreticalMons[i],)]["dex"]
+        @inbounds dex = gamemaster["pokemon"][get_gamemaster_mon_id(theoreticalMons[i])]["dex"]
         if haskey(dexDict, dex)
             push!(dexDict[dex], i)
         else
@@ -83,11 +83,11 @@ function get_theoretical_teams(numMons::Int64; league = "great")
             end
         end
     end
-    return theoreticalTeams
+    return theoreticalTeams, theoreticalMons
 end;
 
 function run_empirical_teams(
-    theoreticalTeam::Team,
+    theoreticalTeam::StaticTeam,
     empiricalTeams::Array{StaticTeam},
     weights::Array{Int64},
 )
@@ -127,28 +127,30 @@ function get_expected_win(histogram::Hist, numEmpiricalTeams::Int64)
     sum(histogram.counts[21:40]) / (numEmpiricalTeams / 5)
 end;
 
+function get_mon_name(mon::StaticPokemon, mon_list::Array{String})
+    i = mon_list[findfirst(x -> StaticPokemon(x) == mon, mon_list)]
+end
+
 function get_summary_stats(
     histograms,
     expected_wins,
     expected_battle_score,
     theoreticalTeams,
+    theoreticalMons,
 )
-    println("Sorry, this is broken")
-    #summaryStats = Array{Any}(undef, length(theoreticalTeams), 5)
-    #for i = 1:length(theoreticalTeams)
-    #    @inbounds summaryStats[
-    #        i,
-    #        :,
-    #    ] = [expected_wins[i] expected_battle_score[i] theoreticalTeams[i].mons[1].toString theoreticalTeams[i].mons[2].toString theoreticalTeams[i].mons[3].toString]
-    #end
-    #return summaryStats
+    summaryStats = Array{Any}(undef, length(theoreticalTeams), 5)
+
+    for i = 1:length(theoreticalTeams)
+        @inbounds summaryStats[i, :] = [expected_wins[i] expected_battle_score[i] get_mon_name(theoreticalTeams[i].mons[1], theoreticalMons) get_mon_name(theoreticalTeams[i].mons[2], theoreticalMons) get_mon_name(theoreticalTeams[i].mons[3], theoreticalMons)]
+    end
+    return summaryStats
 end;
 
 function rank(numMons, indigo_file, outfile; league = "great")
     println("Constructing Empirical Teams...")
     empiricalTeams, weights = get_empirical_teams(indigo_file, league = league)
     println("Constructing Theoretical Teams...")
-    theoreticalTeams = get_theoretical_teams(numMons, league = league)
+    theoreticalTeams, theoreticalMons = get_theoretical_teams(numMons, league = league)
     println("Running Battles...")
     histograms, expected_wins, expected_battle_score = run_theoretical_teams(
         theoreticalTeams,
@@ -161,6 +163,7 @@ function rank(numMons, indigo_file, outfile; league = "great")
         expected_wins,
         expected_battle_score,
         theoreticalTeams,
+        theoreticalMons,
     )
     summaryStats = sortslices(
         summaryStats,
