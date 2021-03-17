@@ -144,10 +144,10 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
     end
 end
 
-function get_cmp(state::DynamicState, static_state::StaticState, dec::Decision)
-    @inbounds dec.chargedMovesPending[1].charge + dec.chargedMovesPending[2].charge == Int8(0) && return Int8(0), Int8(0)
-    @inbounds dec.chargedMovesPending[2].charge == Int8(0) && return Int8(1), Int8(0)
-    @inbounds dec.chargedMovesPending[1].charge == Int8(0) && return Int8(2), Int8(0)
+function get_cmp(state::DynamicState, static_state::StaticState, team1throwing::Bool, team2throwing::Bool)
+    !team1throwing && !team2throwing && return Int8(0), Int8(0)
+    !team2throwing && return Int8(1), Int8(0)
+    !team1throwing && return Int8(2), Int8(0)
     @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack > static_state.teams[2].mons[
         state.teams[2].active].stats.attack && return Int8(1), Int8(2)
     @inbounds static_state.teams[1].mons[state.teams[1].active].stats.attack < static_state.teams[2].mons[

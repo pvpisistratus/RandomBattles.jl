@@ -21,15 +21,10 @@ include("strategy.jl")
 #include("rankings.jl")
 #include("learning.jl")
 
-export DynamicState, StaticState, DynamicIndividualState, StaticIndividualState,
-       DynamicTeam, StaticTeam, DynamicIndividual, StaticIndividual,
-       DynamicPokemon, StaticPokemon,
-       Strategy, plot_strategy,
-       get_possible_decisions,
-       get_battle_score, get_battle_scores,
-       gamemaster, greatRankings, ultraRankings, masterRankings,
-       play_turn, play_battle, diff
-       #rank, PokemonMeta, vectorize,
-       #crossover_and_mutate, play_nn_battle, play_nn_random_battle, testing_best
+export DynamicState, StaticState, DynamicTeam, StaticTeam, DynamicPokemon, StaticPokemon,
+      DynamicIndividualState, StaticIndividualState, DynamicIndividual, StaticIndividual,
+      get_possible_decisions, get_battle_score, get_battle_scores, play_turn, play_battle,
+      gamemaster, greatRankings, ultraRankings, masterRankings, diff, Strategy, plot_strategy
+      #rank, PokemonMeta, vectorize, crossover_and_mutate, play_nn_battle, play_nn_random_battle, testing_best
 
 end # module

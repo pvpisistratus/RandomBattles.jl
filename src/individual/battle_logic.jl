@@ -15,8 +15,8 @@ function get_possible_decisions(state::DynamicIndividualState, static_state::Sta
 end
 
 function play_turn(state::DynamicIndividualState, static_state::StaticIndividualState, decision::Tuple{Int64,Int64})
-    dec = Decision(decision)
     next_state = state
+
     @inbounds if next_state.fastMovesPending[1] == Int8(0) || next_state.fastMovesPending[2] == Int8(0)
         next_state = evaluate_fast_moves(next_state, static_state, next_state.fastMovesPending[1] == Int8(0), next_state.fastMovesPending[2] == Int8(0))
     end
@@ -25,21 +25,21 @@ function play_turn(state::DynamicIndividualState, static_state::StaticIndividual
         3 <= decision[1] <= 4 ? static_state.teams[1].mon.fastMove.cooldown : Int8(0),
         3 <= decision[2] <= 4 ? static_state.teams[2].mon.fastMove.cooldown : Int8(0))
 
-    cmp = get_cmp(next_state, static_state, dec)
+    cmp = get_cmp(static_state, 5 <= decision[1], 5 <= decision[2])
     @inbounds if cmp[1] != Int8(0)
         @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[1],
-            dec.chargedMovesPending[cmp[1]].move, dec.chargedMovesPending[cmp[1]].charge, dec.shielding[get_other_agent(cmp[1])],
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].mon.chargedMoves[dec.chargedMovesPending[cmp[1]].move].buffChance)
+            5 <= decision[cmp[1]] <= 6 ? Int8(1) : Int8(2), Int8(100), iseven(decision[get_other_agent(cmp[1])]),
+            rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].mon.chargedMoves[5 <= decision[cmp[1]] <= 6 ? Int8(1) : Int8(2)].buffChance)
         @inbounds if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
             @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1] == Int8(1), cmp[1] == Int8(2))
         end
     end
-    @inbounds if cmp[2] != Int8(0) && next_state.teams[cmp[2]].mon.hp > Int16(0)
+    @inbounds if cmp[2] != Int8(0)
         @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[2],
-            dec.chargedMovesPending[cmp[2]].move, dec.chargedMovesPending[cmp[2]].charge, dec.shielding[get_other_agent(cmp[2])],
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mon.chargedMoves[dec.chargedMovesPending[cmp[2]].move].buffChance)
-        @inbounds if next_state.fastMovesPending[get_other_agent(cmp[2])] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[2] == Int8(1), cmp[2] == Int8(2))
+            5 <= decision[cmp[2]] <= 6 ? Int8(1) : Int8(2), Int8(100), iseven(decision[cmp[1]]),
+            rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mon.chargedMoves[5 <= decision[cmp[2]] <= 6 ? Int8(1) : Int8(2)].buffChance)
+        @inbounds if next_state.fastMovesPending[cmp[1]] != Int8(-1)
+            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1] == Int8(1), cmp[1] == Int8(2))
         end
     end
 
