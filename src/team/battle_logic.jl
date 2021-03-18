@@ -39,9 +39,9 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
         next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
     end
 
-    next_state = step_timers(next_state,
-        @inbounds 2 < decision[1] < 5 ? static_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : Int8(0),
-        @inbounds 2 < decision[2] < 5 ? static_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown : Int8(0))
+    next_state = @inbounds step_timers(next_state,
+        2 < decision[1] < 5 ? static_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : Int8(0),
+        2 < decision[2] < 5 ? static_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown : Int8(0))
 
     if @inbounds 8 < decision[1]
         next_state = evaluate_switch(next_state, Int8(1),
