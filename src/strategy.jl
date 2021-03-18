@@ -1,5 +1,13 @@
 using Distributions, Plots
 
+"""
+    Strategy(decisions, scores, energies, activeMons)
+
+Struct for information about an entire match and the strategy used throughout.
+This includes the decisions made, the scores at each point along the battle,
+the energies of the mons (to determine fast and charged move applications), and
+the active mons used by each team.
+"""
 mutable struct Strategy
     decisions::Array{Tuple{Int64,Int64}}
     scores::Array{Float64}
@@ -7,6 +15,12 @@ mutable struct Strategy
     activeMons::Array{Tuple{Int8, Int8}}
 end
 
+"""
+    plot_strategy(strat, static_s)
+
+Given the Strategy and the StaticState, plot the battle using a PvPoke-like
+notation. 
+"""
 function plot_strategy(strat::Strategy, static_s::StaticState)
     gr()
     plt1 = plot(1:length(strat.scores), strat.scores, width = 2, label = "possible battle scores",

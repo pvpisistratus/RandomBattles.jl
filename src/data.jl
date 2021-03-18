@@ -1,12 +1,32 @@
 using JSON, StaticArrays, Colors, Memoize
 
+# Grabbing the open league rankings from PvPoke. These are common enough that
+# automatically downloading these and making them constant makes sense.
 const gamemaster = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.json"))
 const greatRankings = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"))
 const ultraRankings = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"))
 const masterRankings = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-10000.json"))
 
+"""
+    get_cp_limit(league)
+
+Given a league ("great", "ultra", "master") return its cp limit (1500, 2500, 10000).
+Masters has no cp limit but is signified in PvPoke with the arbitrarily large 10000.
+
+# Examples
+```jldoctest
+julia> get_cp_limit("great")
+1500
+"""
 get_cp_limit(league::String) = league == "master" ? 10_000 : league == "ultra" ? 2_500 : 1_500
 
+"""
+    get_rankings(cup; league = "great")
+
+Download the PvPoke rankings for a particular meta, optionally within a league
+that is not great league. This function is memoized to avoid downloading the
+same file multiple times.
+"""
 @memoize function get_rankings(cup::String; league = "great")
     cup == "great" && return greatRankings
     cup == "ultra" && return ultraRankings
@@ -14,6 +34,13 @@ get_cp_limit(league::String) = league == "master" ? 10_000 : league == "ultra" ?
     return JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/$(cup)/overall/rankings-$(get_cp_limit(league)).json"))
 end
 
+"""
+    get_overrides(cup; league = "great")
+
+Download the PvPoke overrides used to generate rankings for a particular meta,
+optionally within a league that is not great league. This function is memoized
+to avoid downloading the same file multiple times.
+"""
 @memoize function get_overrides(cup::String; league = "great")
     cup == "great" && return get_overrides("overall", league = "great")
     cup == "ultra" && return get_overrides("overall", league = "ultra")
@@ -21,19 +48,34 @@ end
     return JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/overrides/$(cup)/overall/$(get_cp_limit(league)).json"))
 end
 
+"""
+    get_gamemaster_mon_id(name)
+
+Given a mon's PvPoke id, get its location within the gamemaster JSON file.
+"""
 function get_gamemaster_mon_id(name::String)
     for i = 1:length(gamemaster["pokemon"])
         gamemaster["pokemon"][i]["speciesId"] == name && return i
     end
 end
 
+"""
+    get_gamemaster_move_id(name)
+
+Given a move's PvPoke id, get its location within the gamemaster JSON file.
+"""
 function get_gamemaster_move_id(name::String)
     for i = 1:length(gamemaster["moves"])
         gamemaster["moves"][i]["moveId"] == name && return i
     end
 end
 
-function convert_indices(name::String; league::String = "great", cup::String = "open")
+"""
+    get_rankings_mon_id(name; league = "great", cup = "open")
+
+Given a mon's PvPoke id, find its location within a particular meta's rankings
+"""
+function get_rankings_mon_id(name::String; league::String = "great", cup::String = "open")
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
     for i = 1:length(rankings)
         rankings[i]["speciesId"] == name && return i
@@ -41,27 +83,19 @@ function convert_indices(name::String; league::String = "great", cup::String = "
     return 0
 end
 
+# types of pokemon matching the Silph Arena graphic in order
 const typings = Dict{String, Int8}(
-    "normal"   => Int8(1),
-    "fighting" => Int8(2),
-    "flying"   => Int8(3),
-    "poison"   => Int8(4),
-    "ground"   => Int8(5),
-    "rock"     => Int8(6),
-    "bug"      => Int8(7),
-    "ghost"    => Int8(8),
-    "steel"    => Int8(9),
-    "fire"     => Int8(10),
-    "water"    => Int8(11),
-    "grass"    => Int8(12),
-    "electric" => Int8(13),
-    "psychic"  => Int8(14),
-    "ice"      => Int8(15),
-    "dragon"   => Int8(16),
-    "dark"     => Int8(17),
-    "fairy"    => Int8(18),
+    "normal"   => Int8(1),  "fighting" => Int8(2),  "flying"   => Int8(3),
+    "poison"   => Int8(4),  "ground"   => Int8(5),  "rock"     => Int8(6),
+    "bug"      => Int8(7),  "ghost"    => Int8(8),  "steel"    => Int8(9),
+    "fire"     => Int8(10), "water"    => Int8(11), "grass"    => Int8(12),
+    "electric" => Int8(13), "psychic"  => Int8(14), "ice"      => Int8(15),
+    "dragon"   => Int8(16), "dark"     => Int8(17), "fairy"    => Int8(18),
     "none"     => Int8(19))
 
+
+# Type effectiveness array ripped straight from Silph Arena graphic
+# https://storage.googleapis.com/silphroad-publishing/silph-wp/3d94d185-type-chart_v4.png
 𛲜 = 1.6      # weakness
 Θ = 1 / 𛲜    # resistance
 ✗ = Θ^2      # "immunity"
@@ -86,6 +120,7 @@ const type_effectiveness = (@SMatrix [
     1 𛲜 1 Θ 1 1 1 1 Θ Θ 1 1 1 1 1 𛲜 𛲜 1 1                  # fairy
 ])'
 
+# CP multipliers from PvPoke
 const cpm = Dict(
     1.0 => 0.0939999967813492, 1.5 => 0.135137432089339,
     2.0 => 0.166397869586945, 2.5 => 0.192650913155325,
@@ -139,27 +174,30 @@ const cpm = Dict(
     50.0 => 0.840300023555755
 )
 
-const colors = [RGBA(153/255, 159/255, 161/255, 1.0),
-                RGBA(213/255,  63/255,  91/255, 1.0),
-                RGBA(148/255, 171/255, 225/255, 1.0),
-                RGBA(193/255,  98/255, 212/255, 1.0),
-                RGBA(212/255, 141/255,  91/255, 1.0),
-                RGBA(208/255, 196/255, 142/255, 1.0),
-                RGBA(158/255, 195/255,  49/255, 1.0),
-                RGBA( 89/255, 107/255, 181/255, 1.0),
-                RGBA( 82/255, 142/255, 160/255, 1.0),
-                RGBA(254/255, 163/255,  84/255, 1.0),
-                RGBA( 86/255, 158/255, 222/255, 1.0),
-                RGBA( 94/255, 189/255,  91/255, 1.0),
-                RGBA(246/255, 215/255,  75/255, 1.0),
-                RGBA(245/255, 126/255, 121/255, 1.0),
-                RGBA(120/255, 212/255, 192/255, 1.0),
-                RGBA( 14/255, 104/255, 184/255, 1.0),
-                RGBA( 86/255,  86/255,  99/255, 1.0),
-                RGBA(240/255, 152/255, 228/255, 1.0)]
+# Color scheme to match PvPoke
+const colors = [RGBA(153/255, 159/255, 161/255, 1.0), RGBA(213/255,  63/255,  91/255, 1.0),
+                RGBA(148/255, 171/255, 225/255, 1.0), RGBA(193/255,  98/255, 212/255, 1.0),
+                RGBA(212/255, 141/255,  91/255, 1.0), RGBA(208/255, 196/255, 142/255, 1.0),
+                RGBA(158/255, 195/255,  49/255, 1.0), RGBA( 89/255, 107/255, 181/255, 1.0),
+                RGBA( 82/255, 142/255, 160/255, 1.0), RGBA(254/255, 163/255,  84/255, 1.0),
+                RGBA( 86/255, 158/255, 222/255, 1.0), RGBA( 94/255, 189/255,  91/255, 1.0),
+                RGBA(246/255, 215/255,  75/255, 1.0), RGBA(245/255, 126/255, 121/255, 1.0),
+                RGBA(120/255, 212/255, 192/255, 1.0), RGBA( 14/255, 104/255, 184/255, 1.0),
+                RGBA( 86/255,  86/255,  99/255, 1.0), RGBA(240/255, 152/255, 228/255, 1.0)]
 
+# Purple-ish shield color to match game
 const shieldColor = RGBA(235/255,13/255,199/255, 1.0)
 
+"""
+    silph_to_pvpoke(name)
+
+Given the name of a pokemon from the Silph API, return the pvpoke id
+
+# Examples
+```jldoctest
+julia> silph_to_pvpoke("Mr. Mime")
+mr_mime
+"""
 function silph_to_pvpoke(name::String)
     name = lowercase(name)
     name = replace(name, "-" => "_")

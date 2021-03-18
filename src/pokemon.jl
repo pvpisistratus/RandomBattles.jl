@@ -1,83 +1,12 @@
 using StaticArrays
 
-struct Stats
-    attack::UInt16
-    defense::UInt16
-    hitpoints::Int16
-end
+"""
+    StaticPokemon(types, stats, fastMove, chargedMoves)
 
-struct StatBuffs
-    val::UInt8
-end
-
-function StatBuffs(atk::Int8, def::Int8)
-    StatBuffs((clamp(atk, Int8(-4), Int8(4)) + Int8(8)) + (clamp(def, Int8(-4), Int8(4)) + Int16(8))<<Int16(4))
-end
-
-get_atk(x::StatBuffs) = Int8(x.val & 0x0F) - Int8(8)
-get_def(x::StatBuffs) = Int8(x.val >> 4) - Int8(8)
-
-Base.:+(x::StatBuffs, y::StatBuffs) = StatBuffs(get_atk(x) + get_atk(y), get_def(x) + get_def(y))
-
-const defaultBuff = StatBuffs(Int8(0), Int8(0))
-
-struct FastMove
-    moveType::Int8
-    stab::Int8
-    power::UInt8
-    energy::Int8
-    cooldown::Int8
-end
-
-function FastMove(move_name::String, types)
-    move_index = findfirst(isequal(move_name), map(x ->
-        gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))
-    gm_move = gamemaster["moves"][move_index]
-    return FastMove(gm_move, types)
-end
-
-function FastMove(gm_move::Dict{String,Any}, types)
-    return FastMove(
-            typings[gm_move["type"]],
-            (typings[gm_move["type"]] in types) ? Int8(12) : Int8(1),
-            UInt8(gm_move["power"]),
-            Int8(gm_move["energyGain"]),
-            Int8(gm_move["cooldown"] ÷ 500)
-        )
-end
-
-struct ChargedMove
-    moveType::Int8
-    stab::Int8
-    power::UInt8
-    energy::Int8
-    buffChance::Int8
-    opp_buffs::StatBuffs
-    self_buffs::StatBuffs
-end
-
-function ChargedMove(move_name::String, types)
-    if move_name == "NONE"
-        return ChargedMove(Int8(0), Int8(0), UInt8(0), Int8(0), Int8(0), defaultBuff, defaultBuff)
-    end
-    move_index = findfirst(isequal(move_name), map(x ->
-        gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))
-    gm_move = gamemaster["moves"][move_index]
-    return ChargedMove(gm_move, types)
-end
-
-function ChargedMove(gm_move::Dict{String,Any}, types)
-    return ChargedMove(
-        typings[gm_move["type"]],
-        (typings[gm_move["type"]] in types) ? Int8(12) : Int8(10),
-        UInt8(gm_move["power"]),
-        Int8(gm_move["energy"]),
-        haskey(gm_move, "buffs") ? floor(Int8, parse(Float64, gm_move["buffApplyChance"]) * 100) : Int8(0),
-        StatBuffs(haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][2]) : Int8(0)),
-        StatBuffs(haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][2]) : Int8(0))
-    )
-end
-
+Struct for holding the values associated with the mons that do not change
+throughout the battle: types, stats, and moves. Note that like moves, this
+struct is agnostic to the actual identity/dex/species of the mon.
+"""
 struct StaticPokemon
     types::SVector{2,Int8}
     stats::Stats
@@ -85,11 +14,12 @@ struct StaticPokemon
     chargedMoves::SVector{2,ChargedMove}
 end
 
-struct DynamicPokemon
-    hp::Int16                 #Initially hp stat of mon
-    energy::Int8              #Initially 0
-end
+"""
+    StaticPokemon(i; league = "great", cup = "open", custom_moveset = ["none"], custom_stats = ())
 
+Construct a StaticPokemon from the index of a mon within its rankings
+(optionally specified). Other optional inputs are a custom moveset or IVs.
+"""
 function StaticPokemon(i::Int64; league::String = "great", cup = "open", custom_moveset = ["none"], custom_stats = ())
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
@@ -152,27 +82,52 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open", custom_
     )
 end
 
+"""
+    StaticPokemon(mon; league = "great", cup = "open")
+
+Construct a StaticPokemon from the name of the pokemon, and the meta it is
+within. Movesets and IVs can also be specified by comma-separating the string
+being passed in.
+"""
 function StaticPokemon(mon::String; league = "great", cup = "open")
     if occursin(",", mon)
         mon_arr = split(mon, ",")
         if length(mon_arr) == 4
-            return StaticPokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
+            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]))
         elseif length(mon_arr) == 7
-            return StaticPokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
+            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
                 custom_stats = ("0", mon_arr[5], mon_arr[6], mon_arr[7]))
         elseif length(mon_arr) == 8
-            return StaticPokemon(convert_indices(convert(String, mon_arr[1]), league = league, cup = cup),
+            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
                 custom_stats = (mon_arr[5], mon_arr[6], mon_arr[7], mon_arr[8]))
         end
     else
-        return StaticPokemon(convert_indices(mon, league = league, cup = cup),
+        return StaticPokemon(get_rankings_mon_id(mon, league = league, cup = cup),
             league = league, cup = cup)
     end
 end
 
+"""
+    DynamicPokemon(hp, energy)
+
+Struct for holding the values associated with the mons that change throughout
+the battle: current hp and energy. Note that like moves, this struct is
+agnostic to the actual identity/dex/species of the mon.
+"""
+struct DynamicPokemon
+    hp::Int16                 #Initially hp stat of mon
+    energy::Int8              #Initially 0
+end
+
+"""
+    DynamicPokemon(mon)
+
+Construct a starting DynamicPokemon from a StaticPokemon. This is just setting
+the starting hp of the mon to the stat value, and the energy to zero.
+"""
 function DynamicPokemon(mon::StaticPokemon)
     return DynamicPokemon(mon.stats.hitpoints, Int8(0))
 end

@@ -1,11 +1,25 @@
-using JSON, HTTP, Distributions
+using JSON, HTTP, Distributions, Memoize
 
+"""
+    PokemonMeta(pokemon, weights)
+
+Struct for holding an array of StaticPokemon, and a Distribution
+(usually Categorical) associated with either weights or frequency of the mons.
+"""
 struct PokemonMeta
     pokemon::Array{StaticPokemon}
     weights::Distribution
 end
 
-function PokemonMeta(
+"""
+    PokemonMeta(cup; data_key = "all", source = "silph", league = "great")
+
+Construct a PokemonMeta for a particular meta using either Silph Arena
+frequency data, or PvPoke weights as the distribution. This function is
+memoized to avoid downloading multiple times and approaching Silph Arena API
+limits.
+"""
+@memoize function PokemonMeta(
     cup::String;
     data_key::String = "all",
     source::String = "silph",
@@ -44,5 +58,3 @@ function PokemonMeta(
         PokemonMeta(mons, Categorical(ones(length(mons)) ./ length(mons)))
     end
 end
-
-PokemonMeta() = PokemonMeta([], Categorical([1.0]))
