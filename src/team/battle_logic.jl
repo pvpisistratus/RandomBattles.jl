@@ -100,7 +100,6 @@ function play_battle(starting_state::DynamicState, static_state::StaticState)
                 break
             end
         end
-        println("$(decision1), $(decision2)")
         #decision1, decision2 = rand(Categorical(weights1 / sum(weights1), check_args = false)), rand(Categorical(weights2 / sum(weights2), check_args = false))
         state = play_turn(state, static_state, (decision1, decision2))
     end
