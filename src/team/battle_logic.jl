@@ -81,7 +81,7 @@ function play_battle(starting_state::DynamicState, static_state::StaticState)
     state = starting_state
     while true
         weights1, weights2 = get_possible_decisions(state, static_state, 1), get_possible_decisions(state, static_state, 2)
-        (sum(weights1) == 0 || sum(weights2) == 0) && return get_battle_score(state, static_state)
+        (sum(weights1) == 0.0 || sum(weights2) == 0.0) && return get_battle_score(state, static_state)
         d1, d2 = rand() * sum(weights1), rand() * sum(weights2)
         j = 0.0
         decision1, decision2 = 20, 20
