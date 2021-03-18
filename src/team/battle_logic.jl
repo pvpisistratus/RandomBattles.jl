@@ -83,23 +83,7 @@ function play_battle(starting_state::DynamicState, static_state::StaticState)
         weights1, weights2 = get_possible_decisions(state, static_state, 1), get_possible_decisions(state, static_state, 2)
         (sum(weights1) == 0 || sum(weights2) == 0) && return get_battle_score(state, static_state)
         d1, d2 = rand() * sum(weights1), rand() * sum(weights2)
-        j = 0
-        decision1, decision2 = 20, 20
-        for i = 1:19
-            @inbounds j += weights1[i]
-            if d1 < j
-                decision1 = i
-                break
-            end
-        end
-        j = 0
-        for i = 1:19
-            @inbounds j += weights2[i]
-            if d2 < j
-                decision2 = i
-                break
-            end
-        end
+        decision1, decision2 = findfirst(x -> d1 < x, cumsum(weights1)), findfirst(x -> d2 < x, cumsum(weights2))
         #decision1, decision2 = rand(Categorical(weights1 / sum(weights1), check_args = false)), rand(Categorical(weights2 / sum(weights2), check_args = false))
         state = play_turn(state, static_state, (decision1, decision2))
     end
