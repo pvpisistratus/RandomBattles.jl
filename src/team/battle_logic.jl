@@ -89,6 +89,7 @@ function play_battle(starting_state::DynamicState, static_state::StaticState)
             @inbounds j += weights1[i]
             if d1 < j
                 decision1 = i
+                break
             end
         end
         j = 0
@@ -96,6 +97,7 @@ function play_battle(starting_state::DynamicState, static_state::StaticState)
             @inbounds j += weights2[i]
             if d2 < j
                 decision2 = i
+                break
             end
         end
         println("$(decision1), $(decision2)")
