@@ -60,6 +60,7 @@ jobs:
             Pkg.instantiate()'
       - run: |
           julia --project=docs -e '
+            using Pkg; Pkg.add("Documenter")
             using Documenter: doctest
             using RandomBattles
             doctest(RandomBattles)'
