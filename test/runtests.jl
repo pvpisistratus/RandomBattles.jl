@@ -1,7 +1,7 @@
 using RandomBattles
-using Test, BenchmarkTools
 using Pkg; Pkg.add(PackageSpec(url="https://github.com/aviatesk/JET.jl", rev="master"))
 using JET
+using Test, BenchmarkTools
 
 @testset "RandomBattles.jl" begin
     static_state1 = StaticState(["lanturn" "dragonair" "froslass" "azumarill" "sableye" "marowak_alolan"])
