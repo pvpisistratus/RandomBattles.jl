@@ -7,7 +7,7 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
     @inbounds activeStaticMon = activeStaticTeam.mons[activeTeam.active]
     state.fastMovesPending[agent] != Int8(0) && state.fastMovesPending[agent] != Int8(-1) && activeMon.hp != Int16(0) && return @SVector [1.0,
         1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    @propogate_inbounds return @SVector [((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
+    @propagate_inbounds return @SVector [((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
         ((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
         (state.fastMovesPending[agent] <= Int8(0) && activeMon.hp > 0) ? 1.0 : 0.0,
         (state.fastMovesPending[agent] <= Int8(0) && activeTeam.shields > Int8(0) && activeMon.hp > 0) ? 1.0 : 0.0,
