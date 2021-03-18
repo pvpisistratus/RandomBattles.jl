@@ -80,7 +80,7 @@ end
 function play_battle(starting_state::DynamicState, static_state::StaticState)
     state = starting_state
     while true
-        weights1, weights2 = get_possible_decisions(state, static_state, 1), get_possible_decisions(state, static_state, 2)
+        weights1, weights2 = get_possible_decisions(state, static_state, 1)::SVector{20, Float64}, get_possible_decisions(state, static_state, 2)::SVector{20, Float64}
         (sum(weights1) == 0 || sum(weights2) == 0) && return get_battle_score(state, static_state)
         d1, d2 = rand() * sum(weights1), rand() * sum(weights2)
         decision1, decision2 = findfirst(x -> d1 < x, cumsum(weights1)), findfirst(x -> d2 < x, cumsum(weights2))
