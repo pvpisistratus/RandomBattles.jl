@@ -43,20 +43,6 @@ function diff(t1::DynamicTeam, t2::DynamicTeam)
     end
 end
 
-function diff(s1::IndividualBattleState, s2::IndividualBattleState)
-    if s1.agent != s2.agent
-        println("Agent changed from $(s1.agent) to $(s2.agent)")
-    end
-    if s1.teams[1] != s2.teams[1]
-        println("Team 1: ")
-        diff(s1.teams[1], s2.teams[1])
-    end
-    if s1.teams[2] != s2.teams[2]
-        println("Team 2: ")
-        diff(s1.teams[2], s2.teams[2])
-    end
-end
-
 function diff(s1::DynamicState, s2::DynamicState)
     if s1.teams[1] != s2.teams[1]
         println("Team 1: ")
