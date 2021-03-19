@@ -83,14 +83,22 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
             (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0)) ? 0.5 : 0.0,
             0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     else
-        @inbounds return @SVector [allow_nothing ? 1.0 : 0.0,
-            allow_nothing ? 1.0 : 0.0, 1.0, 0.0,
-            (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy) ? 1.0 : 0.0, 0.0,
-            (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy) ? 1.0 : 0.0, 0.0,
-            (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(1) && activeTeam.mons[1].hp > Int16(0)) ? 0.5 : 0.0, 0.0,
-            (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(2) && activeTeam.mons[2].hp > Int16(0)) ? 0.5 : 0.0, 0.0,
-            (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0)) ? 0.5 : 0.0,
-            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        if activeTeam.switchCooldown == Int8(0)
+            @inbounds return @SVector [allow_nothing ? 1.0 : 0.0,
+                allow_nothing ? 1.0 : 0.0, 1.0, 0.0,
+                (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy) ? 1.0 : 0.0, 0.0,
+                (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy) ? 1.0 : 0.0, 0.0,
+                (activeTeam.active != Int8(1) && activeTeam.mons[1].hp > Int16(0)) ? 0.5 : 0.0, 0.0,
+                (activeTeam.active != Int8(2) && activeTeam.mons[2].hp > Int16(0)) ? 0.5 : 0.0, 0.0,
+                (activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0)) ? 0.5 : 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        else
+            @inbounds return @SVector [allow_nothing ? 1.0 : 0.0,
+                allow_nothing ? 1.0 : 0.0, 1.0, 0.0,
+                (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy) ? 1.0 : 0.0, 0.0,
+                (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy) ? 1.0 : 0.0,
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        end
     end
 end
 
