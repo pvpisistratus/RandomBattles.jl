@@ -10,6 +10,36 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
             activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0, 0.0,
             activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0, 0.0,
             activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0, 0.0]
+        @inbounds if activeTeam.mons[1].hp != Int16(0)
+            @inbounds if activeTeam.mons[2].hp != Int16(0)
+                @inbounds if activeTeam.mons[3].hp != Int16(0)
+                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+                else
+                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0]
+                end
+            else
+                @inbounds if activeTeam.mons[3].hp != Int16(0)
+                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0]
+                else
+                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+                end
+            end
+        else
+            @inbounds if activeTeam.mons[2].hp != Int16(0)
+                @inbounds if activeTeam.mons[3].hp != Int16(0)
+                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0]
+                else
+                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]
+                end
+            else
+                @inbounds if activeTeam.mons[3].hp != Int16(0)
+                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]
+                else
+                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                end
+            end
+        end
+        (activeTeam.mons[1].hp != Int16(0) && activeTeam.mons[2].hp != Int16(0) && activeTeam.mons[3].hp != Int16(0))
         @inbounds return @SVector [0.0,
             0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
             activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
