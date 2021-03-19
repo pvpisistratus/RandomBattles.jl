@@ -20,11 +20,11 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
         0.0,
         0.0,
         activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
-        activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0)) ? 1.0 : 0.0,
+        activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
         activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0,
-        activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0)) ? 1.0 : 0.0,
+        activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0,
         activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0,
-        activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0)) ? 1.0 : 0.0]
+        activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0]
 
     state.fastMovesPending[agent] != Int8(0) && state.fastMovesPending[agent] != Int8(-1) && return @SVector [1.0,
         1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
