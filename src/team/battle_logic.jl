@@ -104,15 +104,29 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
                 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         else
             if allow_nothing
-                @inbounds return @SVector [1.0, 1.0, 1.0, 0.0,
-                    (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy) ? 1.0 : 0.0, 0.0,
-                    (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy) ? 1.0 : 0.0,
-                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy)
+                    if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy)
+                        return @SVector [1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                    else
+                        return @SVector [1.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                    end
+                elseif (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy)
+                    return @SVector [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                else
+                    return @SVector [1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                end
             else
-                @inbounds return @SVector [0.0, 0.0, 1.0, 0.0,
-                    (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy) ? 1.0 : 0.0, 0.0,
-                    (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy) ? 1.0 : 0.0,
-                    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy)
+                    if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy)
+                        return @SVector [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                    else
+                        return @SVector [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                    end
+                elseif (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy)
+                    return @SVector [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                else
+                    return @SVector [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                end
             end
         end
     end
