@@ -5,66 +5,83 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
     @inbounds activeStaticTeam = static_state.teams[agent]
     @inbounds activeStaticMon = activeStaticTeam.mons[activeTeam.active]
     @inbounds if activeTeam.mons[activeTeam.active].hp == Int16(0)
-        @inbounds activeTeam.shields == Int8(0) && return @SVector [0.0,
-            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-            activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0, 0.0,
-            activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0, 0.0,
-            activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0, 0.0]
-        @inbounds if activeTeam.mons[1].hp != Int16(0)
-            @inbounds if activeTeam.mons[2].hp != Int16(0)
-                @inbounds if activeTeam.mons[3].hp != Int16(0)
-                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+        if @inbounds activeTeam.shields == Int8(0)
+            @inbounds if activeTeam.mons[1].hp != Int16(0)
+                @inbounds if activeTeam.mons[2].hp != Int16(0)
+                    @inbounds if activeTeam.mons[3].hp != Int16(0)
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0]
+                    else
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+                    end
                 else
-                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0]
+                    @inbounds if activeTeam.mons[3].hp != Int16(0)
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+                    else
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                    end
                 end
             else
-                @inbounds if activeTeam.mons[3].hp != Int16(0)
-                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0]
+                @inbounds if activeTeam.mons[2].hp != Int16(0)
+                    @inbounds if activeTeam.mons[3].hp != Int16(0)
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0]
+                    else
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+                    end
                 else
-                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+                    @inbounds if activeTeam.mons[3].hp != Int16(0)
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+                    else
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                    end
                 end
             end
         else
-            @inbounds if activeTeam.mons[2].hp != Int16(0)
-                @inbounds if activeTeam.mons[3].hp != Int16(0)
-                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0]
+            @inbounds if activeTeam.mons[1].hp != Int16(0)
+                @inbounds if activeTeam.mons[2].hp != Int16(0)
+                    @inbounds if activeTeam.mons[3].hp != Int16(0)
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+                    else
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0]
+                    end
                 else
-                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]
+                    @inbounds if activeTeam.mons[3].hp != Int16(0)
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0]
+                    else
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+                    end
                 end
             else
-                @inbounds if activeTeam.mons[3].hp != Int16(0)
-                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]
+                @inbounds if activeTeam.mons[2].hp != Int16(0)
+                    @inbounds if activeTeam.mons[3].hp != Int16(0)
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0]
+                    else
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]
+                    end
                 else
-                    return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                    @inbounds if activeTeam.mons[3].hp != Int16(0)
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]
+                    else
+                        return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                    end
                 end
             end
         end
-        (activeTeam.mons[1].hp != Int16(0) && activeTeam.mons[2].hp != Int16(0) && activeTeam.mons[3].hp != Int16(0))
-        @inbounds return @SVector [0.0,
-            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-            activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
-            activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
-            activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0,
-            activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0,
-            activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0,
-            activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0]
-    end
-    @inbounds state.fastMovesPending[agent] != Int8(0) && state.fastMovesPending[agent] != Int8(-1) && return @SVector [1.0,
-        1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    @inbounds return @SVector [((allow_nothing || state.fastMovesPending[agent] > Int8(0))) ? 1.0 : 0.0,
-        ((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(1) && activeTeam.mons[1].hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(1) && activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(2) && activeTeam.mons[2].hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(2) && activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0)) ? 0.5 : 0.0,
-        (state.fastMovesPending[agent] <= Int8(0) && activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(3) && activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0)) ? 0.5 : 0.0,
+     @inbounds elseif state.fastMovesPending[agent] != Int8(0) && state.fastMovesPending[agent] != Int8(-1)
+        return @SVector [1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    @inbounds return @SVector [allow_nothing ? 1.0 : 0.0,
+        allow_nothing ? 1.0 : 0.0,
+        1.0,
+        activeTeam.shields > Int8(0) ? 1.0 : 0.0,
+        (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy) ? 1.0 : 0.0,
+        (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
+        (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy) ? 1.0 : 0.0,
+        (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy && activeTeam.shields > Int8(0)) ? 1.0 : 0.0,
+        (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(1) && activeTeam.mons[1].hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(1) && activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(2) && activeTeam.mons[2].hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(2) && activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(3) && activeTeam.mons[3].hp > Int16(0)) ? 0.5 : 0.0,
+        (activeTeam.switchCooldown == Int8(0) && activeTeam.active != Int8(3) && activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0)) ? 0.5 : 0.0,
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 end
 
