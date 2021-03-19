@@ -4,14 +4,21 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
     @inbounds activeTeam = state.teams[agent]
     @inbounds activeStaticTeam = static_state.teams[agent]
     @inbounds activeStaticMon = activeStaticTeam.mons[activeTeam.active]
-    @inbounds activeTeam.mons[activeTeam.active].hp == Int16(0) && return @SVector [0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
-        activeTeam.shields > Int8(0) && activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
-        activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0,
-        activeTeam.shields > Int8(0) && activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0,
-        activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0,
-        activeTeam.shields > Int8(0) && activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0]
+    @inbounds if activeTeam.mons[activeTeam.active].hp == Int16(0)
+        @inbounds activeTeam.shields == Int8(0) && return @SVector [0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0, 0.0,
+            activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0, 0.0,
+            activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0, 0.0]
+        @inbounds return @SVector [0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
+            activeTeam.mons[1].hp > Int16(0) ? 1.0 : 0.0,
+            activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0,
+            activeTeam.mons[2].hp > Int16(0) ? 1.0 : 0.0,
+            activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0,
+            activeTeam.mons[3].hp > Int16(0) ? 1.0 : 0.0]
+    end
     @inbounds state.fastMovesPending[agent] != Int8(0) && state.fastMovesPending[agent] != Int8(-1) && return @SVector [1.0,
         1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     @inbounds return @SVector [((allow_nothing || state.fastMovesPending[agent] > Int8(0))) ? 1.0 : 0.0,
