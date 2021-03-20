@@ -58,7 +58,7 @@ function get_possible_decisions(state::DynamicIndividualState, static_state::Sta
                     else
                         return @SVector [0.0, 0.0, 1/4, 1/4, 1/4, 1/4, 0.0, 0.0]
                     end
-                @inbounds elseif activeMon.energy >= activeStaticMon.chargedMoves[2].energy
+                elseif @inbounds activeMon.energy >= activeStaticMon.chargedMoves[2].energy
                     return @SVector [0.0, 0.0, 1/4, 1/4, 0.0, 0.0, 1/4, 1/4]
                 else
                     return @SVector [0.0, 0.0, 1/2, 1/2, 0.0, 0.0, 0.0, 0.0]
