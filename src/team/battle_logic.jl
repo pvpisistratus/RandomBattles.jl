@@ -2,8 +2,6 @@ using StaticArrays
 
 function get_possible_decisions(state::DynamicState, static_state::StaticState, agent::Int64; allow_nothing::Bool = false)
     @inbounds activeTeam = state.teams[agent]
-    @inbounds activeStaticTeam = static_state.teams[agent]
-    @inbounds activeStaticMon = activeStaticTeam.mons[activeTeam.active]
     @inbounds if activeTeam.mons[activeTeam.active].hp == Int16(0)
         if activeTeam.shields == Int8(0)
             @inbounds if activeTeam.mons[1].hp != Int16(0)
@@ -69,6 +67,7 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
     elseif @inbounds state.fastMovesPending[agent] != Int8(0) && state.fastMovesPending[agent] != Int8(-1)
         return @SVector [1/2, 1/2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     elseif activeTeam.shields != Int8(0)
+        @inbounds activeStaticMon = static_state.teams[agent].mons[activeTeam.active]
         if activeTeam.switchCooldown == Int8(0)
             if allow_nothing
                 @inbounds if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy)
@@ -256,6 +255,7 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
                 end
             end
         else
+            @inbounds activeStaticMon = static_state.teams[agent].mons[activeTeam.active]
             if allow_nothing
                 @inbounds if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy)
                     @inbounds if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy)
