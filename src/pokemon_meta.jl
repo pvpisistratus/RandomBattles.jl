@@ -1,4 +1,4 @@
-using JSON, HTTP, Memoize
+using JSON, Memoize
 
 """
     PokemonMeta(pokemon, weights)
@@ -26,13 +26,12 @@ limits.
     league::String = "great",
 )
     if source == "silph"
-        resp = HTTP.get("https://silph.gg/api/cup/" * cup * "/stats/.json")
-        data = JSON.parse(String(resp.body))
+        data = JSON.parsefile(download("https://silph.gg/api/cup/" * cup * "/stats/.json"))
         silph_keys = collect(keys(data[data_key]))
         mons = silph_to_pvpoke.(silph_keys)
         meta_weights = map(x -> data[data_key][x]["percent"], silph_keys)
         return PokemonMeta(StaticPokemon.(mons, cup = cup),
-            Categorical(meta_weights ./ sum(meta_weights)))
+            meta_weights ./ sum(meta_weights))
     elseif source == "pvpoke"
         overrides = get_overrides(cup, league = league)
         rankings = get_rankings(cup, league = league)
