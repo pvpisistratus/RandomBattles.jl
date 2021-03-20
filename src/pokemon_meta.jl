@@ -1,4 +1,4 @@
-using JSON, HTTP, Distributions, Memoize
+using JSON, HTTP, Memoize
 
 """
     PokemonMeta(pokemon, weights)
@@ -8,7 +8,7 @@ Struct for holding an array of StaticPokemon, and a Distribution
 """
 struct PokemonMeta
     pokemon::Array{StaticPokemon}
-    weights::Distribution
+    weights::Array{Float64}
 end
 
 """
@@ -50,11 +50,11 @@ limits.
                 end
             end
         end
-        return PokemonMeta(mons, Categorical(weights ./ sum(weights)))
+        return PokemonMeta(mons, weights ./ sum(weights))
     else
         rankings = get_rankings(cup, league = league)
         mons = map(x -> StaticPokemon(x["speciesId"], cup = cup, league = league),
             rankings)
-        PokemonMeta(mons, Categorical(ones(length(mons)) ./ length(mons)))
+        PokemonMeta(mons, ones(length(mons)) ./ length(mons))
     end
 end

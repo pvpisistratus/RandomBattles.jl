@@ -1,4 +1,4 @@
-using Distributions, Plots
+using Plots
 
 """
     Strategy(decisions, scores, energies, activeMons)
