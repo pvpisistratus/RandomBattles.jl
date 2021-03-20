@@ -1,5 +1,9 @@
 module RandomBattles
 
+if isdefined(Base, :Experimental) && isdefined(Base.Experimental, Symbol("@optlevel"))
+      @eval Base.Experimental.@optlevel 3
+end
+
 # grab data and Pokemon structs so that it can be used
 include("data.jl")
 include("stats.jl")
