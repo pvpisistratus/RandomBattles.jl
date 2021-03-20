@@ -1,11 +1,25 @@
-using JSON, HTTP, Distributions
+using JSON, HTTP, Distributions, Memoize
 
+"""
+    PokemonMeta(pokemon, weights)
+
+Struct for holding an array of StaticPokemon, and a Distribution
+(usually Categorical) associated with either weights or frequency of the mons.
+"""
 struct PokemonMeta
-    pokemon::Array{Pokemon}
+    pokemon::Array{StaticPokemon}
     weights::Distribution
 end
 
-function PokemonMeta(
+"""
+    PokemonMeta(cup; data_key = "all", source = "silph", league = "great")
+
+Construct a PokemonMeta for a particular meta using either Silph Arena
+frequency data, or PvPoke weights as the distribution. This function is
+memoized to avoid downloading multiple times and approaching Silph Arena API
+limits.
+"""
+@memoize function PokemonMeta(
     cup::String;
     data_key::String = "all",
     source::String = "silph",
@@ -17,10 +31,10 @@ function PokemonMeta(
         silph_keys = collect(keys(data[data_key]))
         mons = silph_to_pvpoke.(silph_keys)
         meta_weights = map(x -> data[data_key][x]["percent"], silph_keys)
-        return PokemonMeta(Pokemon.(mons, cup = cup),
+        return PokemonMeta(StaticPokemon.(mons, cup = cup),
             Categorical(meta_weights ./ sum(meta_weights)))
     elseif source == "pvpoke"
-        overrides = get_rankings("$(cup)_rankingoverrides")
+        overrides = get_overrides(cup, league = league)
         rankings = get_rankings(cup, league = league)
         mons = Pokemon.(map(x -> x["speciesId"],
             rankings), cup = cup, league = league)
@@ -39,10 +53,8 @@ function PokemonMeta(
         return PokemonMeta(mons, Categorical(weights ./ sum(weights)))
     else
         rankings = get_rankings(cup, league = league)
-        mons = map(x -> Pokemon(x["speciesId"], cup = cup, league = league),
+        mons = map(x -> StaticPokemon(x["speciesId"], cup = cup, league = league),
             rankings)
         PokemonMeta(mons, Categorical(ones(length(mons)) ./ length(mons)))
     end
 end
-
-PokemonMeta() = PokemonMeta([], Categorical([1.0]))
