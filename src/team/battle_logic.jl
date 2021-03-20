@@ -255,7 +255,6 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
                 end
             end
         else
-            @inbounds activeStaticMon = static_state.teams[agent].mons[activeTeam.active]
             if allow_nothing
                 @inbounds if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy)
                     @inbounds if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[2].energy)
@@ -283,6 +282,7 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState, 
             end
         end
     else
+        @inbounds activeStaticMon = static_state.teams[agent].mons[activeTeam.active]
         if activeTeam.switchCooldown == Int8(0)
             if allow_nothing
                 @inbounds if (activeTeam.mons[activeTeam.active].energy >= activeStaticMon.chargedMoves[1].energy)
