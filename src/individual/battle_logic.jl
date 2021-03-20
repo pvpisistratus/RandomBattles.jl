@@ -1,17 +1,71 @@
-using Distributions, StaticArrays
+using StaticArrays
 
 function get_possible_decisions(state::DynamicIndividualState, static_state::StaticIndividualState, agent::Int64; allow_nothing::Bool = false)
     @inbounds activeTeam = state.teams[agent]
     @inbounds activeMon = state.teams[agent].mon
-    @inbounds activeStaticMon = static_state.teams[agent].mon
-    @inbounds return @SVector [((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((allow_nothing || state.fastMovesPending[agent] > Int8(0)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeStaticMon.chargedMoves[1].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeStaticMon.chargedMoves[1].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeStaticMon.chargedMoves[2].energy && activeMon.hp > Int16(0)) ? 1.0 : 0.0,
-        ((state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1)) && activeMon.energy >= activeStaticMon.chargedMoves[2].energy && activeTeam.shields > Int8(0) && activeMon.hp > Int16(0)) ? 1.0 : 0.0]
+    activeMon.hp == Int16(0) && return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    if !(state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1))
+        if activeTeam.shields == Int8(0)
+            return  @SVector [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        else
+            return @SVector [1/2, 1/2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        end
+    else
+        @inbounds activeStaticMon = static_state.teams[agent].mon
+        if allow_nothing
+            if activeTeam.shields == Int8(0)
+                @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[1].energy
+                    @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[2].energy
+                        return @SVector [1/4, 0.0, 1/4, 0.0, 1/4, 0.0, 1/4, 0.0]
+                    else
+                        return @SVector [1/3, 0.0, 1/3, 0.0, 1/3, 0.0, 0.0, 0.0]
+                    end
+                elseif @inbounds activeMon.energy >= activeStaticMon.chargedMoves[2].energy
+                    return @SVector [1/3, 0.0, 1/3, 0.0, 0.0, 0.0, 1/3, 0.0]
+                else
+                    return @SVector [1/2, 0.0, 1/2, 0.0, 0.0, 0.0, 0.0, 0.0]
+                end
+            else
+                @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[1].energy
+                    @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[2].energy
+                        return @SVector [1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8]
+                    else
+                        return @SVector [1/6, 1/6, 1/6, 1/6, 1/6, 1/6, 0.0, 0.0]
+                    end
+                elseif @inbounds activeMon.energy >= activeStaticMon.chargedMoves[2].energy
+                    return @SVector [1/6, 1/6, 1/6, 1/6, 0.0, 0.0, 1/6, 1/6]
+                else
+                    return @SVector [1/4, 1/4, 1/4, 1/4, 0.0, 0.0, 0.0, 0.0]
+                end
+            end
+        else
+            if activeTeam.shields == Int8(0)
+                @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[1].energy
+                    @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[2].energy
+                        return @SVector [0.0, 0.0, 1/3, 0.0, 1/3, 0.0, 1/3, 0.0]
+                    else
+                        return @SVector [0.0, 0.0, 1/2, 0.0, 1/2, 0.0, 0.0, 0.0]
+                    end
+                elseif @inbounds activeMon.energy >= activeStaticMon.chargedMoves[2].energy
+                    return @SVector [0.0, 0.0, 1/2, 0.0, 0.0, 0.0, 1/2, 0.0]
+                else
+                    return @SVector [0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+                end
+            else
+                @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[1].energy
+                    @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[2].energy
+                        return @SVector [0.0, 0.0, 1/6, 1/6, 1/6, 1/6, 1/6, 1/6]
+                    else
+                        return @SVector [0.0, 0.0, 1/4, 1/4, 1/4, 1/4, 0.0, 0.0]
+                    end
+                @inbounds elseif activeMon.energy >= activeStaticMon.chargedMoves[2].energy
+                    return @SVector [0.0, 0.0, 1/4, 1/4, 0.0, 0.0, 1/4, 1/4]
+                else
+                    return @SVector [0.0, 0.0, 1/2, 1/2, 0.0, 0.0, 0.0, 0.0]
+                end
+            end
+        end
+    end
 end
 
 function play_turn(state::DynamicIndividualState, static_state::StaticIndividualState, decision::Tuple{Int64,Int64})
@@ -50,8 +104,25 @@ function play_battle(starting_state::DynamicIndividualState, static_state::Stati
     state = starting_state
     while true
         weights1, weights2 = get_possible_decisions(state, static_state, 1), get_possible_decisions(state, static_state, 2)
-        (sum(weights1) * sum(weights2) == 0) && return get_battle_score(state, static_state)
-        decision1, decision2 = rand(Categorical(weights1 / sum(weights1), check_args = false)), rand(Categorical(weights2 / sum(weights2), check_args = false))
+        (iszero(weights1) || iszero(weights2)) && return get_battle_score(state, static_state)
+        d1, d2 = rand(), rand()
+        j = 0.0
+        decision1, decision2 = 8, 8
+        for i = 1:7
+            @inbounds j += weights1[i]
+            if d1 < j
+                decision1 = i
+                break
+            end
+        end
+        j = 0.0
+        for i = 1:7
+            @inbounds j += weights2[i]
+            if d2 < j
+                decision2 = i
+                break
+            end
+        end
         state = play_turn(state, static_state, (decision1, decision2))
     end
 end
