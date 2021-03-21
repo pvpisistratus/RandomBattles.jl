@@ -2,10 +2,10 @@ using JuMP, GLPK
 
 function get_simultaneous_decisions(state::DynamicState, static_state::StaticState; 
   allow_waiting::Bool = false)
-    decisions1 = findall(x -> x > 0, get_possible_decisions(state, static_state, 1,
+    decisions1 = findall(x -> x != 0.0, get_possible_decisions(state, static_state, 1,
         allow_nothing = allow_waiting))
     length(decisions1) == 0 && return Array{Int64}(undef, 0), Array{Int64}(undef, 0)
-    decisions2 = findall(x -> x > 0, get_possible_decisions(state, static_state, 2,
+    decisions2 = findall(x -> x != 0.0, get_possible_decisions(state, static_state, 2,
         allow_nothing = allow_waiting))
     length(decisions2) == 0 && return Array{Int64}(undef, 0), Array{Int64}(undef, 0)
     !(5 in decisions1 || 7 in decisions1) && filter!(isodd, decisions2)
@@ -101,8 +101,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
                     break
                 end
             end
-            decision = A[decision1], 
-                B[decision2]
+            decision = A[decision1], B[decision2]
         end
         s = play_turn(s, static_s, decision)
         push!(strat.decisions, decision)
