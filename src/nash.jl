@@ -52,8 +52,8 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
     (length(A) == 0 || depth == 0) && 
         return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5, 
-        (vec([1.0]), vec([1.0]))) : (get_battle_score(state, static_state) - 0.5, 
-        (vec([1.0]), vec([1.0])))
+        vec([1.0]), vec([1.0])) : (get_battle_score(state, static_state) - 0.5, 
+        vec([1.0]), vec([1.0]))
     payoffs = zeros(Float64, length(A), length(B))
     for i in 1:length(A), j in 1:length(B)
         @inbounds if (5 in B || 7 in B) && !(5 <= B[j] <= 8) && iseven(A[i]) && 
