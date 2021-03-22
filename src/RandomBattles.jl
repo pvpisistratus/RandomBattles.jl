@@ -34,7 +34,7 @@ include("nash.jl")
 export DynamicState, StaticState, DynamicTeam, StaticTeam, DynamicPokemon, StaticPokemon,
       DynamicIndividualState, StaticIndividualState, DynamicIndividual, StaticIndividual,
       get_possible_decisions, get_battle_score, get_battle_scores, play_turn, play_battle,
-      gamemaster, greatRankings, ultraRankings, masterRankings, diff, Strategy, plot_strategy
+      gamemaster, greatRankings, ultraRankings, masterRankings, diff, Strategy, plot_strategy,
       rank, PokemonMeta, SM, solve_battle
 
 end # module
