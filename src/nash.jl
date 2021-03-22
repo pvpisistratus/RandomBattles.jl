@@ -50,7 +50,7 @@ end
 function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_waiting = false,
   max_depth = 15, sim_to_end = false)
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
-    (length(A) == 0 || depth == 0) && 
+    (length(A) == 0 || depth == 0) &&
         return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
         vec([1.0]), vec([1.0])) : (get_battle_score(state, static_state) - 0.5,
         vec([1.0]), vec([1.0]))
@@ -79,25 +79,23 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
     while true
         A, B = get_simultaneous_decisions(s, static_s)
         (length(A) == 0 || length(B) == 0) && return value, strat
-        println(A)
-        println(B)
         if length(A) == 1 && length(B) == 1
             decision = A[1], B[1]
         else
-            value, strategy = SM(s, static_s, depth, max_depth = depth, sim_to_end = sim_to_end)
+            value, strategy1, strategy2 = SM(s, static_s, depth, max_depth = depth, sim_to_end = sim_to_end)
             d1, d2 = rand(), rand()
             decision1, decision2 = 0, 0
             j = 0.0
-            for i = 1:length(strategy[1])
-                @inbounds j += strategy[1][i]
+            for i = 1:length(strategy1)
+                @inbounds j += strategy1[i]
                 if d1 < j
                     decision1 = i
                     break
                 end
             end
             j = 0.0
-            for i = 1:length(strategy[2])
-                @inbounds j += strategy[2][i]
+            for i = 1:length(strategy2)
+                @inbounds j += strategy2[i]
                 if d2 < j
                     decision2 = i
                     break
