@@ -50,17 +50,10 @@ end
 function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_waiting = false,
   max_depth = 15, sim_to_end = false)
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
-<<<<<<< HEAD
-    (length(A) == 0 || depth == 0) &&
-        return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
-        (vec([1.0]), vec([1.0]))) : (get_battle_score(state, static_state) - 0.5,
-        (vec([1.0]), vec([1.0])))
-=======
     (length(A) == 0 || depth == 0) && 
-        return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5, 
-        vec([1.0]), vec([1.0])) : (get_battle_score(state, static_state) - 0.5, 
+        return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
+        vec([1.0]), vec([1.0])) : (get_battle_score(state, static_state) - 0.5,
         vec([1.0]), vec([1.0]))
->>>>>>> 747860ad7b82dbfe62777e8e04488794b943590c
     payoffs = zeros(Float64, length(A), length(B))
     for i in 1:length(A), j in 1:length(B)
         @inbounds if (5 in B || 7 in B) && !(5 <= B[j] <= 8) && iseven(A[i]) &&
@@ -110,12 +103,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
                     break
                 end
             end
-<<<<<<< HEAD
-            decision = A[decision1],
-                B[decision2]
-=======
             decision = A[decision1], B[decision2]
->>>>>>> 747860ad7b82dbfe62777e8e04488794b943590c
         end
         s = play_turn(s, static_s, decision)
         push!(strat.decisions, decision)
