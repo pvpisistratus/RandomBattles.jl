@@ -46,8 +46,8 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open", custom_
         def = gm["defaultIVs"]["cp$(cp_limit)"][3]
         hp = gm["defaultIVs"]["cp$(cp_limit)"][4]
     end
-    attack = floor(UInt16, (atk + gm["baseStats"]["atk"]) * cpm[level] * 100)
-    defense = floor(UInt16, (def + gm["baseStats"]["def"]) * cpm[level] * 100)
+    attack = haskey(gm, "tags") && "shadow" in gm["tags"] ? floor(UInt16, (6/5 * atk + gm["baseStats"]["atk"]) * cpm[level] * 100) : floor(UInt16, (atk + gm["baseStats"]["atk"]) * cpm[level] * 100)
+    defense = haskey(gm, "tags") && "shadow" in gm["tags"] ? floor(UInt16, (5/6 * def + gm["baseStats"]["def"]) * cpm[level] * 100) : floor(UInt16, (def + gm["baseStats"]["def"]) * cpm[level] * 100)
     hitpoints = floor(Int16, (hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
     if haskey(rankings[i], "moveStr")
@@ -62,8 +62,6 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open", custom_
             push!(chargedMovesAvailable, "RETURN")
         elseif haskey(gm, "tags") && "shadow" in gm["tags"]
             push!(chargedMovesAvailable, "FRUSTRATION")
-            attack *= gamemaster["settings"]["shadowAtkMult"]
-            defense *= gamemaster["settings"]["shadowDefMult"]
         end
         sort!(chargedMovesAvailable)
         chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
