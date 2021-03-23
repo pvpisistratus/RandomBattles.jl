@@ -44,6 +44,11 @@ function nash(R::Matrix{Float64})
     n == 1 && return minimum(R), vec([1.0]), strat_vec(m, argmin(vec(R)))
     m == 1 && return maximum(R), strat_vec(n, argmin(vec(R))), vec([1.0])
     minmax(R, m) == maxmin(R, n) && return minmax(R, m), findminmax(R, n), findmaxmin(R, m)
+    @inbounds n == 2 && m == 2 && return ((P[1,1] * P[2,2] - P[1,2] * P[2,1]) / (P[1,1] + P[2,2] - P[1,2] - P[2,1])),
+        [(P[2, 2] - P[2, 1])/(P[1, 1] + P[2, 2] - P[1, 2] - P[2, 1]),
+        ((P[1, 1] + P[2, 2]) - P[1, 2] - P[2, 1] - P[2, 2] + P[2, 1])/((P[1, 1] + P[2, 2]) - P[1, 2] - P[2, 1])],
+        [(P[2, 2] - P[1, 2])/(P[1, 1] + P[2, 2] - P[1, 2] - P[2, 1]),
+        ((P[1, 1] + P[2, 2]) - P[1, 2] - P[2, 1] - P[2, 2] + P[1, 2])/(P[1, 1] + P[2, 2]) - P[1, 2] - P[2, 1])]
 
     # Set up model and payoff
     model = direct_model(GLPK.Optimizer())
