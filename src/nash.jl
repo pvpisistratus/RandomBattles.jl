@@ -157,7 +157,7 @@ function solve_battle(s::DynamicIndividualState, static_s::StaticIndividualState
     #strat = Strategy([], [], [], [])
     while true
         A, B = get_simultaneous_decisions(s, static_s)
-        (length(A) == 0 || length(B) == 0) && return value, strat
+        (length(A) == 0 || length(B) == 0) && return value
         if length(A) == 1 && length(B) == 1
             decision = A[1], B[1]
         else
