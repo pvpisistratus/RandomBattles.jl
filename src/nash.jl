@@ -13,6 +13,19 @@ function get_simultaneous_decisions(state::DynamicState, static_state::StaticSta
     return decisions1, decisions2
 end
 
+function get_simultaneous_decisions(state::DynamicIndividualState, static_state::StaticIndividualState;
+        allow_waiting::Bool = false)
+    decisions1 = findall(x -> x > 0, RandomBattles.get_possible_decisions(state, static_state, 1,
+        allow_nothing = allow_waiting))
+    length(decisions1) == 0 && return Array{Int64}(undef, 0), Array{Int64}(undef, 0)
+    decisions2 = findall(x -> x > 0, RandomBattles.get_possible_decisions(state, static_state, 2,
+        allow_nothing = allow_waiting))
+    length(decisions2) == 0 && return Array{Int64}(undef, 0), Array{Int64}(undef, 0)
+    !(5 in decisions1 || 7 in decisions1) && filter!(isodd, decisions2)
+    !(5 in decisions2 || 7 in decisions2) && filter!(isodd, decisions1)
+    return decisions1, decisions2
+end
+
 function strat_vec(l::Int64, i::Int64)
     vec_to_return = vec(zeros(l))
     @inbounds vec_to_return[i] = 1.0
