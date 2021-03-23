@@ -86,8 +86,8 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_
 end
 
 function SM(state::DynamicIndividualState, static_state::StaticIndividualState, depth::Int64; allow_waiting = false,
-    max_depth = 15, sim_to_end = false)
-    A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
+    allow_overfarming = false, max_depth = 15, sim_to_end = false)
+    A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting, allow_overfarming = allow_overfarming)
     (length(A) == 0 || depth == 0) &&
         return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
         vec([1.0]), vec([1.0])) : (get_battle_score(state, static_state) - 0.5,

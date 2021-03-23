@@ -1,6 +1,6 @@
 using StaticArrays
 
-function get_possible_decisions(state::DynamicIndividualState, static_state::StaticIndividualState, agent::Int64; allow_nothing::Bool = false)
+function get_possible_decisions(state::DynamicIndividualState, static_state::StaticIndividualState, agent::Int64; allow_nothing::Bool = false, allow_overfarming::Bool = false)
     @inbounds activeTeam = state.teams[agent]
     @inbounds activeMon = state.teams[agent].mon
     activeMon.hp == Int16(0) && return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -16,7 +16,11 @@ function get_possible_decisions(state::DynamicIndividualState, static_state::Sta
             if activeTeam.shields == Int8(0)
                 @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[1].energy
                     @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[2].energy
-                        return @SVector [1/4, 0.0, 1/4, 0.0, 1/4, 0.0, 1/4, 0.0]
+                        if activeMon.energy >= Int8(100) && !allow_overfarming
+                            return @SVector [1/3, 0.0, 0.0, 0.0, 1/3, 0.0, 1/3, 0.0]
+                        else
+                            return @SVector [1/4, 0.0, 1/4, 0.0, 1/4, 0.0, 1/4, 0.0]
+                        end
                     else
                         return @SVector [1/3, 0.0, 1/3, 0.0, 1/3, 0.0, 0.0, 0.0]
                     end
@@ -28,7 +32,11 @@ function get_possible_decisions(state::DynamicIndividualState, static_state::Sta
             else
                 @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[1].energy
                     @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[2].energy
-                        return @SVector [1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8]
+                        if activeMon.energy >= Int8(100) && !allow_overfarming
+                            return @SVector [1/6, 1/6, 0.0, 0.0, 1/6, 1/6, 1/6, 1/6]
+                        else
+                            return @SVector [1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8, 1/8]
+                        end
                     else
                         return @SVector [1/6, 1/6, 1/6, 1/6, 1/6, 1/6, 0.0, 0.0]
                     end
@@ -42,7 +50,11 @@ function get_possible_decisions(state::DynamicIndividualState, static_state::Sta
             if activeTeam.shields == Int8(0)
                 @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[1].energy
                     @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[2].energy
-                        return @SVector [0.0, 0.0, 1/3, 0.0, 1/3, 0.0, 1/3, 0.0]
+                        if activeMon.energy >= Int8(100) && !allow_overfarming
+                            return @SVector [0.0, 0.0, 0.0, 0.0, 1/2, 0.0, 1/2, 0.0]
+                        else
+                            return @SVector [0.0, 0.0, 1/3, 0.0, 1/3, 0.0, 1/3, 0.0]
+                        end
                     else
                         return @SVector [0.0, 0.0, 1/2, 0.0, 1/2, 0.0, 0.0, 0.0]
                     end
@@ -54,7 +66,11 @@ function get_possible_decisions(state::DynamicIndividualState, static_state::Sta
             else
                 @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[1].energy
                     @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[2].energy
-                        return @SVector [0.0, 0.0, 1/6, 1/6, 1/6, 1/6, 1/6, 1/6]
+                        if activeMon.energy >= Int8(100) && !allow_overfarming
+                            return @SVector [0.0, 0.0, 0.0, 0.0, 1/4, 1/4, 1/4, 1/4]
+                        else
+                            return @SVector [0.0, 0.0, 1/6, 1/6, 1/6, 1/6, 1/6, 1/6]
+                        end
                     else
                         return @SVector [0.0, 0.0, 1/4, 1/4, 1/4, 1/4, 0.0, 0.0]
                     end
