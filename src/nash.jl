@@ -14,9 +14,9 @@ function get_simultaneous_decisions(state::DynamicState, static_state::StaticSta
 end
 
 function get_simultaneous_decisions(state::DynamicIndividualState, static_state::StaticIndividualState;
-        allow_waiting::Bool = false)
+        allow_waiting::Bool = false, allow_overfarming::Bool = false)
     decisions1 = findall(x -> x > 0, RandomBattles.get_possible_decisions(state, static_state, 1,
-        allow_nothing = allow_waiting))
+        allow_nothing = allow_waiting, allow_overfarming = allow_overfarming))
     length(decisions1) == 0 && return Array{Int64}(undef, 0), Array{Int64}(undef, 0)
     decisions2 = findall(x -> x > 0, RandomBattles.get_possible_decisions(state, static_state, 2,
         allow_nothing = allow_waiting))
