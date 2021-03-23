@@ -141,7 +141,7 @@ function solve_battle(s::DynamicIndividualState, static_s::StaticIndividualState
   sim_to_end = false)
     value = 0.0
     decision = 0, 0
-    strat = Strategy([], [], [], [])
+    #strat = Strategy([], [], [], [])
     while true
         A, B = get_simultaneous_decisions(s, static_s)
         (length(A) == 0 || length(B) == 0) && return value, strat
@@ -169,11 +169,12 @@ function solve_battle(s::DynamicIndividualState, static_s::StaticIndividualState
             end
             decision = A[decision1], B[decision2]
         end
+        println("$(value): $(decision)")
         s = play_turn(s, static_s, decision)
-        push!(strat.decisions, decision)
-        push!(strat.scores, value + 0.5)
-        push!(strat.energies, (s.teams[1].mons[s.teams[1].active].energy,
-            s.teams[2].mons[s.teams[2].active].energy))
-        push!(strat.activeMons, (s.teams[1].active, s.teams[2].active))
+        #push!(strat.decisions, decision)
+        #push!(strat.scores, value + 0.5)
+        #push!(strat.energies, (s.teams[1].mons[s.teams[1].active].energy,
+        #    s.teams[2].mons[s.teams[2].active].energy))
+        #push!(strat.activeMons, (s.teams[1].active, s.teams[2].active))
     end
 end
