@@ -93,21 +93,50 @@ end
 Takes in the dynamic state, the static state, and the attacking agent and returns
 the dynamic state after the fast move has occurred, with precisely one copy
 """
-function evaluate_fast_moves(state::DynamicState, static_state::StaticState, agent::Int8)
-    if agent == Int8(1)
-        @inbounds return DynamicState(@SVector[DynamicTeam(@SVector[
-            (Int8(1) == state.teams[1].active ? DynamicPokemon(state.teams[1].mons[1].hp,
-            min(state.teams[1].mons[1].energy + static_state.teams[1].mons[1].fastMove.energy,
-            Int8(100))) : state.teams[1].mons[1]),
-            (Int8(2) == state.teams[1].active ? DynamicPokemon(state.teams[1].mons[2].hp,
-            min(state.teams[1].mons[2].energy + static_state.teams[1].mons[2].fastMove.energy,
-            Int8(100))) : state.teams[1].mons[2]),
-            (Int8(3) == state.teams[1].active ? DynamicPokemon(state.teams[1].mons[3].hp,
-            min(state.teams[1].mons[3].energy + static_state.teams[1].mons[3].fastMove.energy,
-            Int8(100))) : state.teams[1].mons[3]),
-            ], state.teams[1].buffs, state.teams[1].switchCooldown,
-            state.teams[1].shields, state.teams[1].active),
-            DynamicTeam(@SVector[Int8(1) == state.teams[2].active ? DynamicPokemon(max(
+function evaluate_fast_moves(state::DynamicState, static_state::StaticState, team1::Bool, team2::Bool)
+    @inbounds return DynamicState(@SVector[DynamicTeam(@SVector[
+        (Int8(1) == state.teams[1].active ? DynamicPokemon(team2 ? max(
+            Int16(0),
+            state.teams[1].mons[1].hp -
+            calculate_damage(
+                static_state.teams[2].mons[state.teams[2].active],
+                get_atk(state.teams[2].buffs),
+                static_state.teams[1].mons[1],
+                get_def(state.teams[1].buffs),
+                static_state.teams[2].mons[state.teams[2].active].fastMove,
+                Int8(100),
+            )) : state.teams[1].mons[1].hp,
+        team1 ? min(state.teams[1].mons[1].energy + static_state.teams[1].mons[1].fastMove.energy, Int8(100)) : state.teams[1].mons[1].energy
+        ) : state.teams[1].mons[1]),
+        (Int8(2) == state.teams[1].active ? DynamicPokemon(team2 ? max(
+            Int16(0),
+            state.teams[1].mons[2].hp -
+            calculate_damage(
+                static_state.teams[2].mons[state.teams[2].active],
+                get_atk(state.teams[2].buffs),
+                static_state.teams[1].mons[2],
+                get_def(state.teams[1].buffs),
+                static_state.teams[2].mons[state.teams[2].active].fastMove,
+                Int8(100),
+            )) : state.teams[1].mons[2].hp,
+        team1 ? min(state.teams[1].mons[2].energy + static_state.teams[1].mons[2].fastMove.energy, Int8(100)) : state.teams[1].mons[2].energy
+        ) : state.teams[1].mons[2]),
+        (Int8(3) == state.teams[1].active ? DynamicPokemon(team2 ? max(
+            Int16(0),
+            state.teams[1].mons[3].hp -
+            calculate_damage(
+                static_state.teams[2].mons[state.teams[2].active],
+                get_atk(state.teams[2].buffs),
+                static_state.teams[1].mons[3],
+                get_def(state.teams[1].buffs),
+                static_state.teams[2].mons[state.teams[2].active].fastMove,
+                Int8(100),
+            )) : state.teams[1].mons[3].hp,
+        team1 ? min(state.teams[1].mons[3].energy + static_state.teams[1].mons[3].fastMove.energy, Int8(100)) : state.teams[1].mons[3].energy
+        ) : state.teams[1].mons[3])], state.teams[1].buffs, state.teams[1].switchCooldown,
+        state.teams[1].shields, state.teams[1].active),
+        DynamicTeam(@SVector[
+            (Int8(1) == state.teams[2].active ? DynamicPokemon(team1 ? max(
                 Int16(0),
                 state.teams[2].mons[1].hp -
                 calculate_damage(
@@ -117,9 +146,10 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
                     get_def(state.teams[2].buffs),
                     static_state.teams[1].mons[state.teams[1].active].fastMove,
                     Int8(100),
-                ),
-            ), state.teams[2].mons[1].energy) : state.teams[2].mons[1],
-            Int8(2) == state.teams[2].active ? DynamicPokemon(max(
+                )) : state.teams[2].mons[1].hp,
+            team2 ? min(state.teams[2].mons[1].energy + static_state.teams[2].mons[1].fastMove.energy, Int8(100)) : state.teams[2].mons[1].energy
+            ) : state.teams[2].mons[1]),
+            (Int8(2) == state.teams[2].active ? DynamicPokemon(team1 ? max(
                 Int16(0),
                 state.teams[2].mons[2].hp -
                 calculate_damage(
@@ -129,9 +159,10 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
                     get_def(state.teams[2].buffs),
                     static_state.teams[1].mons[state.teams[1].active].fastMove,
                     Int8(100),
-                ),
-            ), state.teams[2].mons[2].energy) : state.teams[2].mons[2],
-            Int8(3) == state.teams[2].active ? DynamicPokemon(max(
+                )) : state.teams[2].mons[2].hp,
+            team2 ? min(state.teams[2].mons[2].energy + static_state.teams[2].mons[2].fastMove.energy, Int8(100)) : state.teams[2].mons[2].energy
+            ) : state.teams[2].mons[2]),
+            (Int8(3) == state.teams[2].active ? DynamicPokemon(team1 ? max(
                 Int16(0),
                 state.teams[2].mons[3].hp -
                 calculate_damage(
@@ -141,61 +172,10 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, age
                     get_def(state.teams[2].buffs),
                     static_state.teams[1].mons[state.teams[1].active].fastMove,
                     Int8(100),
-                ),
-            ), state.teams[2].mons[3].energy) : state.teams[2].mons[3]], state.teams[2].buffs,
-            state.teams[2].switchCooldown, state.teams[2].shields, state.teams[2].active)], state.fastMovesPending)
-    else
-        @inbounds return DynamicState(@SVector[
-            DynamicTeam(@SVector[Int8(1) == state.teams[1].active ? DynamicPokemon(max(
-                Int16(0),
-                state.teams[1].mons[1].hp -
-                calculate_damage(
-                    static_state.teams[2].mons[state.teams[2].active],
-                    get_atk(state.teams[2].buffs),
-                    static_state.teams[1].mons[1],
-                    get_def(state.teams[1].buffs),
-                    static_state.teams[2].mons[state.teams[2].active].fastMove,
-                    Int8(100),
-                ),
-            ), state.teams[1].mons[1].energy) : state.teams[1].mons[1],
-            Int8(2) == state.teams[1].active ? DynamicPokemon(max(
-                Int16(0),
-                state.teams[1].mons[2].hp -
-                calculate_damage(
-                    static_state.teams[2].mons[state.teams[2].active],
-                    get_atk(state.teams[2].buffs),
-                    static_state.teams[1].mons[2],
-                    get_def(state.teams[1].buffs),
-                    static_state.teams[2].mons[state.teams[2].active].fastMove,
-                    Int8(100),
-                ),
-            ), state.teams[1].mons[2].energy) : state.teams[1].mons[2],
-            Int8(3) == state.teams[1].active ? DynamicPokemon(max(
-                Int16(0),
-                state.teams[1].mons[3].hp -
-                calculate_damage(
-                    static_state.teams[2].mons[state.teams[2].active],
-                    get_atk(state.teams[2].buffs),
-                    static_state.teams[1].mons[3],
-                    get_def(state.teams[1].buffs),
-                    static_state.teams[2].mons[state.teams[2].active].fastMove,
-                    Int8(100),
-                ),
-            ), state.teams[1].mons[3].energy) : state.teams[1].mons[3]], state.teams[1].buffs,
-            state.teams[1].switchCooldown, state.teams[1].shields, state.teams[1].active),
-            DynamicTeam(@SVector[
-                (Int8(1) == state.teams[2].active ? DynamicPokemon(state.teams[2].mons[1].hp,
-                min(state.teams[2].mons[1].energy + static_state.teams[2].mons[1].fastMove.energy,
-                Int8(100))) : state.teams[2].mons[1]),
-                (Int8(2) == state.teams[2].active ? DynamicPokemon(state.teams[2].mons[2].hp,
-                min(state.teams[2].mons[2].energy + static_state.teams[2].mons[2].fastMove.energy,
-                Int8(100))) : state.teams[2].mons[2]),
-                (Int8(3) == state.teams[2].active ? DynamicPokemon(state.teams[2].mons[3].hp,
-                min(state.teams[2].mons[3].energy + static_state.teams[2].mons[3].fastMove.energy,
-                Int8(100))) : state.teams[2].mons[3]),
-                ], state.teams[2].buffs, state.teams[2].switchCooldown,
-                state.teams[2].shields, state.teams[2].active)], state.fastMovesPending)
-    end
+                )) : state.teams[2].mons[3].hp,
+            team2 ? min(state.teams[2].mons[3].energy + static_state.teams[2].mons[3].fastMove.energy, Int8(100)) : state.teams[2].mons[3].energy
+            ) : state.teams[2].mons[3])], state.teams[2].buffs, state.teams[2].switchCooldown,
+            state.teams[2].shields, state.teams[2].active)], state.fastMovesPending)
 end
 
 function get_cmp(state::DynamicState, static_state::StaticState, team1throwing::Bool, team2throwing::Bool)

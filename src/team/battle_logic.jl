@@ -502,11 +502,10 @@ end
 function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{Int64,Int64})
     next_state = state
 
-    @inbounds if next_state.fastMovesPending[1] == Int8(0)
-        next_state = evaluate_fast_moves(next_state, static_state, Int8(1))
-    end
-    @inbounds if next_state.fastMovesPending[2] == Int8(0)
-        next_state = evaluate_fast_moves(next_state, static_state, Int8(2))
+    @inbounds if next_state.fastMovesPending[1] == Int8(0) || next_state.fastMovesPending[2] == Int8(0)
+        next_state = evaluate_fast_moves(next_state, static_state,
+            next_state.fastMovesPending[1] == Int8(0),
+            next_state.fastMovesPending[2] == Int8(0))
     end
 
     @inbounds next_state = step_timers(next_state,
@@ -532,7 +531,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
             decision[cmp[1]] < 7 ? Int8(1) : Int8(2), Int8(100), iseven(decision[get_other_agent(cmp[1])]),
             rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].mons[next_state.teams[cmp[1]].active].chargedMoves[decision[cmp[1]] < 7 ? Int8(1) : Int8(2)].buffChance)
         @inbounds if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1])
+            @inbounds next_state = evaluate_fast_moves(next_state, static_state, Int8(1) == cmp[1], Int8(2) == cmp[1])
         end
     end
     @inbounds if cmp[2] != Int8(0)
@@ -540,7 +539,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
             decision[cmp[2]] < 7 ? Int8(1) : Int8(2), Int8(100), iseven(decision[cmp[1]]),
             rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mons[next_state.teams[cmp[2]].active].chargedMoves[decision[cmp[2]] < 7 ? Int8(1) : Int8(2)].buffChance)
         @inbounds if next_state.fastMovesPending[cmp[1]] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[2])
+            @inbounds next_state = evaluate_fast_moves(next_state, static_state, Int8(1) == cmp[2], Int8(2) == cmp[2])
         end
     end
 
