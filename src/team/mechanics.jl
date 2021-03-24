@@ -145,7 +145,8 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                 )) : state.teams[2].mons[1].hp,
             team2 ? min(state.teams[2].mons[1].energy + static_state.teams[2].mons[1].fastMove.energy, Int8(100)) : state.teams[2].mons[1].energy
             ) : state.teams[2].mons[1]),
-            (Int8(2) == state.teams[2].active ? DynamicPokemon(team1 ? abs(
+            (Int8(2) == state.teams[2].active ? DynamicPokemon(team1 ? max(
+                Int16(0),
                 state.teams[2].mons[2].hp -
                 calculate_damage(
                     static_state.teams[1].mons[state.teams[1].active],
@@ -322,9 +323,9 @@ new DynamicState using precisely one copy
 """
 function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
     @inbounds return DynamicState(
-        @SVector[DynamicTeam(state.teams[1].mons, state.teams[1].buffs, abs(state.teams[1].switchCooldown - Int8(1)),
-            state.teams[1].shields, state.teams[1].active), DynamicTeam(state.teams[2].mons, state.teams[2].buffs,
-            abs(state.teams[2].switchCooldown - Int8(1)), state.teams[2].shields, state.teams[2].active)],
+        @SVector[DynamicTeam(state.teams[1].mons, state.teams[1].buffs, max(Int8(0), state.teams[1].switchCooldown - Int8(1)),
+            state.teams[1].shields, state.teams[1].active), DynamicTeam(state.teams[2].mons, state.teams[2].buffs, max(Int8(0),
+            state.teams[2].switchCooldown - Int8(1)), state.teams[2].shields, state.teams[2].active)],
         @SVector[fmCooldown1 == Int8(0) ? max(Int8(-1), state.fastMovesPending[1] - Int8(1)) : fmCooldown1 - Int8(1),
             fmCooldown2 == Int8(0) ? max(Int8(-1), state.fastMovesPending[2] - Int8(1)) : fmCooldown2 - Int8(1)])
 end
