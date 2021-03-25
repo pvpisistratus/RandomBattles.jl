@@ -37,7 +37,7 @@ maxmin(R::Array{Float64, 2}, n::Int64) = @inbounds mapreduce(x -> minimum(R[x, :
 findminmax(R::Array{Float64, 2}, n::Int64) = @inbounds strat_vec(n, argmax(map(x -> minimum(R[x, :]), 1:n)))
 findmaxmin(R::Array{Float64, 2}, m::Int64) = @inbounds strat_vec(m, argmin(map(x -> maximum(R[:, x]), 1:m)))
 
-function nash(R::Array{Float64, 2})
+function nash(R::Matrix{Float64})
     n, m = size(R)
 
     # Check if we have to do linear programming
