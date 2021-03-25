@@ -27,9 +27,9 @@ function get_simultaneous_decisions(state::DynamicIndividualState, static_state:
 end
 
 function strat_vec(l::Int64, i::Int64)
-    vec_to_return = vec(zeros(l))
-    @inbounds vec_to_return[i] = 1.0
-    return vec_to_return
+    to_return = zeros(l)
+    @inbounds to_return[i] = 1.0
+    return to_return
 end
 
 minmax(R::Matrix{Float64}, m::Int64) = @inbounds mapreduce(x -> maximum(R[:, x]), min, 1:m)
