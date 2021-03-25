@@ -32,10 +32,10 @@ function strat_vec(l::Int64, i::Int64)
     return vec_to_return
 end
 
-minmax(R::Array{Float64, 2}, m::Int64) = @inbounds mapreduce(x -> maximum(R[:, x]), min, 1:m)
-maxmin(R::Array{Float64, 2}, n::Int64) = @inbounds mapreduce(x -> minimum(R[x, :]), max, 1:n)
-findminmax(R::Array{Float64, 2}, n::Int64) = @inbounds strat_vec(n, argmax(map(x -> minimum(R[x, :]), 1:n)))
-findmaxmin(R::Array{Float64, 2}, m::Int64) = @inbounds strat_vec(m, argmin(map(x -> maximum(R[:, x]), 1:m)))
+minmax(R::Matrix{Float64}, m::Int64) = @inbounds mapreduce(x -> maximum(R[:, x]), min, 1:m)
+maxmin(R::Matrix{Float64}, n::Int64) = @inbounds mapreduce(x -> minimum(R[x, :]), max, 1:n)
+findminmax(R::Matrix{Float64}, n::Int64) = @inbounds strat_vec(n, argmax(map(x -> minimum(R[x, :]), 1:n)))
+findmaxmin(R::Matrix{Float64}, m::Int64) = @inbounds strat_vec(m, argmin(map(x -> maximum(R[:, x]), 1:m)))
 
 function nash(R::Matrix{Float64})
     n, m = size(R)
