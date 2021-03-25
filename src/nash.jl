@@ -57,7 +57,7 @@ function nash(R::Array{Float64, 2})
 
     optimize!(model)
 
-    return value(z), value.(x), vec(shadow_price.(c1)::Matrix{Float64})
+    return JuMP.value(z), JuMP.value.(x), vec(shadow_price.(c1)::Matrix{Float64})
 end
 
 function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_waiting = false,
