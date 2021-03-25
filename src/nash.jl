@@ -37,7 +37,7 @@ maxmin(R::Array{Float64, 2}, n::Int64) = @inbounds mapreduce(x -> minimum(R[x, :
 findminmax(R::Array{Float64, 2}, n::Int64) = @inbounds strat_vec(n, argmax(map(x -> minimum(R[x, :]), 1:n)))
 findmaxmin(R::Array{Float64, 2}, m::Int64) = @inbounds strat_vec(m, argmin(map(x -> maximum(R[:, x]), 1:m)))
 
-function nash(R::Matrix{Float64})
+function nash(R::Array{Float64, 2})
     n, m = size(R)
 
     # Check if we have to do linear programming
@@ -57,7 +57,7 @@ function nash(R::Matrix{Float64})
 
     optimize!(model)
 
-    return JuMP.value(z), JuMP.value.(x), shadow_price.(c1)
+    return value(z), value.(x), vec(shadow_price.(c1)::Matrix{Float64})
 end
 
 function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_waiting = false,
