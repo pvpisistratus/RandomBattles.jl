@@ -1,11 +1,11 @@
-using JSON, StaticArrays, Colors, Memoize
+using JSON, StaticArrays, Colors, Memoize, Downloads
 
 # Grabbing the open league rankings from PvPoke. These are common enough that
 # automatically downloading these and making them constant makes sense.
-const gamemaster = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.json"))
-const greatRankings = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"))
-const ultraRankings = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"))
-const masterRankings = JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-10000.json"))
+const gamemaster = JSON.parsefile(Downloads.download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.json"))
+const greatRankings = JSON.parsefile(Downloads.download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"))
+const ultraRankings = JSON.parsefile(Downloads.download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"))
+const masterRankings = JSON.parsefile(Downloads.download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-10000.json"))
 
 """
     get_cp_limit(league)
@@ -31,7 +31,7 @@ same file multiple times.
     cup == "great" && return greatRankings
     cup == "ultra" && return ultraRankings
     cup == "master" && return masterRankings
-    return JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/$(cup)/overall/rankings-$(get_cp_limit(league)).json"))
+    return JSON.parsefile(Downloads.download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/$(cup)/overall/rankings-$(get_cp_limit(league)).json"))
 end
 
 """
@@ -45,7 +45,7 @@ to avoid downloading the same file multiple times.
     cup == "great" && return get_overrides("overall", league = "great")
     cup == "ultra" && return get_overrides("overall", league = "ultra")
     cup == "master" && return get_overrides("overall", league = "master")
-    return JSON.parsefile(download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/overrides/$(cup)/overall/$(get_cp_limit(league)).json"))
+    return JSON.parsefile(Downloads.download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/overrides/$(cup)/overall/$(get_cp_limit(league)).json"))
 end
 
 """
