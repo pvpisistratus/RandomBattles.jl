@@ -1,31 +1,5 @@
 using JuMP, GLPK
 
-function get_simultaneous_decisions(state::DynamicState, static_state::StaticState;
-  allow_waiting::Bool = false)
-    decisions1 = findall(x -> x != 0.0, get_possible_decisions(state, static_state, 1,
-        allow_nothing = allow_waiting))
-    length(decisions1) == 0 && return Array{Int64}(undef, 0), Array{Int64}(undef, 0)
-    decisions2 = findall(x -> x != 0.0, get_possible_decisions(state, static_state, 2,
-        allow_nothing = allow_waiting))
-    length(decisions2) == 0 && return Array{Int64}(undef, 0), Array{Int64}(undef, 0)
-    !(5 in decisions1 || 7 in decisions1) && filter!(isodd, decisions2)
-    !(5 in decisions2 || 7 in decisions2) && filter!(isodd, decisions1)
-    return decisions1, decisions2
-end
-
-function get_simultaneous_decisions(state::DynamicIndividualState, static_state::StaticIndividualState;
-        allow_waiting::Bool = false, allow_overfarming::Bool = false)
-    decisions1 = findall(x -> x > 0, RandomBattles.get_possible_decisions(state, static_state, 1,
-        allow_nothing = allow_waiting, allow_overfarming = allow_overfarming))
-    length(decisions1) == 0 && return Array{Int64}(undef, 0), Array{Int64}(undef, 0)
-    decisions2 = findall(x -> x > 0, RandomBattles.get_possible_decisions(state, static_state, 2,
-        allow_nothing = allow_waiting))
-    length(decisions2) == 0 && return Array{Int64}(undef, 0), Array{Int64}(undef, 0)
-    !(5 in decisions1 || 7 in decisions1) && filter!(isodd, decisions2)
-    !(5 in decisions2 || 7 in decisions2) && filter!(isodd, decisions1)
-    return decisions1, decisions2
-end
-
 function strat_vec(l::Int64, i::Int64)
     to_return = zeros(l)
     @inbounds to_return[i] = 1.0
@@ -60,8 +34,8 @@ function nash(R::Matrix{Float64})
     return JuMP.value(z), JuMP.value.(x), shadow_price.(c1)::Matrix{Float64}
 end
 
-function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_waiting = false,
-  max_depth = 15, sim_to_end = false)
+function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_waiting::Bool = false,
+  max_depth::Int64 = 15, sim_to_end::Bool = false)
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
     (length(A) == 0 || depth == 0) &&
         return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
@@ -85,8 +59,8 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_
     return nash(payoffs)
 end
 
-function SM(state::DynamicIndividualState, static_state::StaticIndividualState, depth::Int64; allow_waiting = false,
-    allow_overfarming = false, max_depth = 15, sim_to_end = false)
+function SM(state::DynamicIndividualState, static_state::StaticIndividualState, depth::Int64; allow_waiting::Bool = false,
+    allow_overfarming::Bool = false, max_depth = 15::Int64, sim_to_end::Bool = false)
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting, allow_overfarming = allow_overfarming)
     (length(A) == 0 || depth == 0) &&
         return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
@@ -110,7 +84,7 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState, 
     return nash(payoffs)
 end
 
-function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_to_end = false)
+function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_to_end::Bool = false)
     value = 0.0
     decision = 0, 0
     strat = Strategy([], [], [], [])
@@ -122,9 +96,9 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
         else
             value, strategy1, strategy2 = SM(s, static_s, depth, max_depth = depth, sim_to_end = sim_to_end)
             d1, d2 = rand(), rand()
-            decision1, decision2 = 0, 0
+            decision1, decision2 = length(strategy1), length(strategy2)
             j = 0.0
-            for i = 1:length(strategy1)
+            for i = 1:length(strategy1)-1
                 @inbounds j += strategy1[i]
                 if d1 < j
                     decision1 = i
@@ -132,7 +106,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
                 end
             end
             j = 0.0
-            for i = 1:length(strategy2)
+            for i = 1:length(strategy2)-1
                 @inbounds j += strategy2[i]
                 if d2 < j
                     decision2 = i
@@ -163,9 +137,9 @@ function solve_battle(s::DynamicIndividualState, static_s::StaticIndividualState
         else
             value, strategy1, strategy2 = SM(s, static_s, depth, max_depth = depth, sim_to_end = sim_to_end)
             d1, d2 = rand(), rand()
-            decision1, decision2 = 0, 0
+            decision1, decision2 = length(strategy1), length(strategy2)
             j = 0.0
-            for i = 1:length(strategy1)
+            for i = 1:length(strategy1)-1
                 @inbounds j += strategy1[i]
                 if d1 < j
                     decision1 = i
@@ -173,7 +147,7 @@ function solve_battle(s::DynamicIndividualState, static_s::StaticIndividualState
                 end
             end
             j = 0.0
-            for i = 1:length(strategy2)
+            for i = 1:length(strategy2)-1
                 @inbounds j += strategy2[i]
                 if d2 < j
                     decision2 = i
