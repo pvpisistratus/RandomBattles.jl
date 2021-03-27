@@ -16,11 +16,11 @@ function get_α(P::Matrix{Float64}, e, f)
     model = direct_model(GLPK.Optimizer())
 
     # Solve for row player
-    @variable(model, x[1:n], lower_bound = 0.0)
+    @variable(model, x[1:length(e)], lower_bound = 0.0)
     @constraint(model, sum(x) == 1.0)
-    @constraint(model, x' * P .>= f)
+    @constraint(model, x * P .>= f)
 
-    @objective(model, Max, x' * e)
+    @objective(model, Max, x * e)
     optimize!(model)
     return JuMP.objective_value(model)
 end
@@ -30,7 +30,7 @@ function get_β(O::Matrix{Float64}, e, f)
     model = direct_model(GLPK.Optimizer())
 
     # Solve for row player
-    @variable(model, x[1:n], lower_bound = 0.0)
+    @variable(model, x[1:length(e)], lower_bound = 0.0)
     @constraint(model, sum(x) == 1.0)
     @constraint(model, O * x' .<= f)
 
