@@ -14,15 +14,16 @@ findmaxmin(R::Matrix{Float64}, m::Int64) = @inbounds strat_vec(m, argmin(map(x -
 function get_α(P::Matrix{Float64}, e, f)
     # Set up model and payoff
     model = direct_model(GLPK.Optimizer())
+    @variable(model, z)
+    @objective(model, Max, 1.0 * z)
 
-    # Solve for row player
     @variable(model, x[1:length(e)], lower_bound = 0.0)
     @constraint(model, sum(x) == 1.0)
     @constraint(model, x' * P .>= f)
+    @constraint(model, x' * e .>= z)
 
-    @objective(model, Max, x * e)
     optimize!(model)
-    return JuMP.objective_value(model)
+    return JuMP.value(z)
 end
 
 function get_β(O::Matrix{Float64}, e, f)
