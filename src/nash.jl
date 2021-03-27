@@ -95,8 +95,8 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
         vec([1.0]), vec([1.0]))
 
     Q = [play_turn(state, static_state, (a, b)) for a in A, b in B]
-    P = vcat(map(q -> get_min_score(q, static_state), Q), repeat(α₀, 1, length(B)))
-    O = hcat(map(q -> get_max_score(q, static_state), Q), repeat(β₀, length(A), 1))
+    P = vcat(map(q -> get_min_score(q, static_state), Q), repeat([α₀], 1, length(B)))
+    O = hcat(map(q -> get_max_score(q, static_state), Q), repeat([β₀], length(A), 1))
     non_dominated_rows = trues(length(A) + 1)
     non_dominated_columns = trues(length(B))
     non_dominated_rows[end] = false
