@@ -11,7 +11,7 @@ maxmin(R::Matrix{Float64}, n::Int64) = @inbounds mapreduce(x -> minimum(R[x, :])
 findminmax(R::Matrix{Float64}, n::Int64) = @inbounds strat_vec(n, argmax(map(x -> minimum(R[x, :]), 1:n)))
 findmaxmin(R::Matrix{Float64}, m::Int64) = @inbounds strat_vec(m, argmin(map(x -> maximum(R[:, x]), 1:m)))
 
-function get_α(P::Matrix{Float64}, e, f)
+function get_α(P::Matrix{Float64}, e::Vector{Float64}, f::Vector{Float64})
     # Set up model and payoff
     model = direct_model(GLPK.Optimizer())
     @variable(model, z)
@@ -27,7 +27,7 @@ function get_α(P::Matrix{Float64}, e, f)
     return JuMP.value(z)
 end
 
-function get_β(O::Matrix{Float64}, e, f)
+function get_β(O::Matrix{Float64}, e::Vector{Float64}, f::Vector{Float64})
     # Set up model and payoff
     model = direct_model(GLPK.Optimizer())
     @variable(model, z)
@@ -36,7 +36,7 @@ function get_β(O::Matrix{Float64}, e, f)
     @variable(model, x[1:length(e)], lower_bound = 0.0)
     @constraint(model, sum(x) == 1.0)
     @constraint(model, O * x .<= f)
-    @constraint(model, e * x .<= z)
+    @constraint(model, e * convert(Matrix, x) .<= z)
 
     optimize!(model)
     return JuMP.objective_value(model)
