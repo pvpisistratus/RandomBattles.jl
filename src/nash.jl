@@ -18,7 +18,7 @@ function get_α(P::Matrix{Float64}, e, f)
     # Solve for row player
     @variable(model, x[1:length(e)], lower_bound = 0.0)
     @constraint(model, sum(x) == 1.0)
-    @constraint(model, x * P .>= f)
+    @constraint(model, x' * P .>= f)
 
     @objective(model, Max, x * e)
     optimize!(model)
