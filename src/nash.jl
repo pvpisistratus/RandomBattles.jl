@@ -20,7 +20,6 @@ function get_α(P::Matrix{Float64}, e::Vector{Float64}, f::Vector{Float64})
     @variable(model, x[1:length(e)], lower_bound = 0.0)
     @constraint(model, sum(x) == 1.0)
     @constraint(model, x' * P .>= f)
-    println(typeof(e))
     @constraint(model, x' * e .>= z)
 
     optimize!(model)
@@ -123,9 +122,9 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
                     @inbounds v = SMAB(Q[i, j], static_state, α, β, depth - 1,
                         allow_waiting = allow_waiting, sim_to_end = sim_to_end)[1]
                     if v <= α
-                        @inbounds dominated_rows[i] = false
+                        @inbounds non_dominated_rows[i] = false
                     elseif v >= β
-                        @inbounds dominated_columns[j] = false
+                        @inbounds non_dominated_columns[j] = false
                     else
                         P[i, j] = v
                         O[i, j] = v
@@ -134,9 +133,9 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
                     @inbounds v = SMAB(Q[i, j], static_state, α, α + ϵ, depth - 1,
                         allow_waiting = allow_waiting, sim_to_end = sim_to_end)[1]
                     if v <= α
-                        @inbounds dominated_rows[i] = false
+                        @inbounds non_dominated_rows[i] = false
                     else
-                        @inbounds dominated_columns[j] = false
+                        @inbounds non_dominated_columns[j] = false
                     end
                 end
             end
