@@ -36,7 +36,7 @@ function get_β(O::Matrix{Float64}, e::Vector{Float64}, f::Vector{Float64})
     @variable(model, x[1:length(e)], lower_bound = 0.0)
     @constraint(model, sum(x) == 1.0)
     @constraint(model, O * x .<= f)
-    @constraint(model, e * (x')' .<= z)
+    @constraint(model, e * x' .<= z)
 
     optimize!(model)
     return JuMP.objective_value(model)
