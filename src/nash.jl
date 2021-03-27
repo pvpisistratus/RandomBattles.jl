@@ -29,13 +29,14 @@ end
 function get_β(O::Matrix{Float64}, e, f)
     # Set up model and payoff
     model = direct_model(GLPK.Optimizer())
+    @variable(model, z)
+    @objective(model, Min, 1.0 * z)
 
-    # Solve for row player
     @variable(model, x[1:length(e)], lower_bound = 0.0)
     @constraint(model, sum(x) == 1.0)
-    @constraint(model, O * x' .<= f)
+    @constraint(model, O * x .<= f)
+    @constraint(model, e * x .<= z)
 
-    @objective(model, Min, e * x')
     optimize!(model)
     return JuMP.objective_value(model)
 end
