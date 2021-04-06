@@ -166,16 +166,16 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
         stats,
         fastMove,
         chargedMoves,
-        ismissing(opponents[1]) ?
-        @SMatrix [
+        (ismissing(opponents[1]) ?
+        (@SMatrix [
             Int16(0) Int16(0) Int16(0)
             Int16(0) Int16(0) Int16(0)
             Int16(0) Int16(0) Int16(0)
-        ] : @SMatrix [
+        ]) : (@SMatrix [
             calculate_damage(attack, defaultBuff, opponents[1], defaultBuff, fastMove) calculate_damage(attack, defaultBuff, opponents[2], defaultBuff, fastMove) calculate_damage(attack, defaultBuff, opponents[3], defaultBuff, fastMove)
             calculate_damage(attack, defaultBuff, opponents[1], defaultBuff, chargedMoves[1], Int8(100)) calculate_damage(attack, defaultBuff, opponents[2], defaultBuff, chargedMoves[1], Int8(100)) calculate_damage(attack, defaultBuff, opponents[3], defaultBuff, chargedMoves[1], Int8(100))
             calculate_damage(attack, defaultBuff, opponents[1], defaultBuff, chargedMoves[2], Int8(100)) calculate_damage(attack, defaultBuff, opponents[2], defaultBuff, chargedMoves[2], Int8(100)) calculate_damage(attack, defaultBuff, opponents[3], defaultBuff, chargedMoves[2], Int8(100))
-        ]
+        ]))
     )
 end
 
