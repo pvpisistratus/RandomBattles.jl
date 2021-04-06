@@ -166,8 +166,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
         stats,
         fastMove,
         chargedMoves,
-        (ismissing(opponents[1]) ?
-        (@SMatrix [
+        (ismissing(opponents[1]) ? (@SMatrix [
             Int16(0) Int16(0) Int16(0)
             Int16(0) Int16(0) Int16(0)
             Int16(0) Int16(0) Int16(0)
