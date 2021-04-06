@@ -43,7 +43,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                     Int16(0),
                     state.teams[1].mons[1].hp -
                     calculate_damage(
-                        static_state.teams[2].mons[state.teams[2].active],
+                        static_state.teams[2].mons[state.teams[2].active].stats.attack,
                         get_atk(state.teams[2].buffs),
                         static_state.teams[1].mons[1],
                         get_def(state.teams[1].buffs),
@@ -56,7 +56,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                     Int16(0),
                     state.teams[1].mons[2].hp -
                     calculate_damage(
-                        static_state.teams[2].mons[state.teams[2].active],
+                        static_state.teams[2].mons[state.teams[2].active].stats.attack,
                         get_atk(state.teams[2].buffs),
                         static_state.teams[1].mons[2],
                         get_def(state.teams[1].buffs),
@@ -69,7 +69,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                     Int16(0),
                     state.teams[1].mons[3].hp -
                     calculate_damage(
-                        static_state.teams[2].mons[state.teams[2].active],
+                        static_state.teams[2].mons[state.teams[2].active].stats.attack,
                         get_atk(state.teams[2].buffs),
                         static_state.teams[1].mons[3],
                         get_def(state.teams[1].buffs),
@@ -84,7 +84,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                     Int16(0),
                     state.teams[2].mons[1].hp -
                     calculate_damage(
-                        static_state.teams[1].mons[state.teams[1].active],
+                        static_state.teams[1].mons[state.teams[1].active].stats.attack,
                         get_atk(state.teams[1].buffs),
                         static_state.teams[2].mons[1],
                         get_def(state.teams[2].buffs),
@@ -97,7 +97,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                     Int16(0),
                     state.teams[2].mons[2].hp -
                     calculate_damage(
-                        static_state.teams[1].mons[state.teams[1].active],
+                        static_state.teams[1].mons[state.teams[1].active].stats.attack,
                         get_atk(state.teams[1].buffs),
                         static_state.teams[2].mons[2],
                         get_def(state.teams[2].buffs),
@@ -110,7 +110,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                     Int16(0),
                     state.teams[2].mons[3].hp -
                     calculate_damage(
-                        static_state.teams[1].mons[state.teams[1].active],
+                        static_state.teams[1].mons[state.teams[1].active].stats.attack,
                         get_atk(state.teams[1].buffs),
                         static_state.teams[2].mons[3],
                         get_def(state.teams[2].buffs),
@@ -211,7 +211,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
                     Int16(0),
                     state.teams[2].mons[1].hp -
                     calculate_damage(
-                        static_state.teams[1].mons[state.teams[1].active],
+                        static_state.teams[1].mons[state.teams[1].active].stats.attack,
                         get_atk(state.teams[1].buffs),
                         static_state.teams[2].mons[1],
                         get_def(state.teams[2].buffs),
@@ -223,7 +223,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
                     Int16(0),
                     state.teams[2].mons[2].hp -
                     calculate_damage(
-                        static_state.teams[1].mons[state.teams[1].active],
+                        static_state.teams[1].mons[state.teams[1].active].stats.attack,
                         get_atk(state.teams[1].buffs),
                         static_state.teams[2].mons[2],
                         get_def(state.teams[2].buffs),
@@ -235,7 +235,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
                     Int16(0),
                     state.teams[2].mons[3].hp -
                     calculate_damage(
-                        static_state.teams[1].mons[state.teams[1].active],
+                        static_state.teams[1].mons[state.teams[1].active].stats.attack,
                         get_atk(state.teams[1].buffs),
                         static_state.teams[2].mons[3],
                         get_def(state.teams[2].buffs),
@@ -252,7 +252,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
                     Int16(0),
                     state.teams[1].mons[1].hp -
                     calculate_damage(
-                        static_state.teams[2].mons[state.teams[2].active],
+                        static_state.teams[2].mons[state.teams[2].active].stats.attack,
                         get_atk(state.teams[2].buffs),
                         static_state.teams[1].mons[1],
                         get_def(state.teams[1].buffs),
@@ -264,7 +264,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
                     Int16(0),
                     state.teams[1].mons[2].hp -
                     calculate_damage(
-                        static_state.teams[2].mons[state.teams[2].active],
+                        static_state.teams[2].mons[state.teams[2].active].stats.attack,
                         get_atk(state.teams[2].buffs),
                         static_state.teams[1].mons[2],
                         get_def(state.teams[1].buffs),
@@ -276,7 +276,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState, 
                     Int16(0),
                     state.teams[1].mons[3].hp -
                     calculate_damage(
-                        static_state.teams[2].mons[state.teams[2].active],
+                        static_state.teams[2].mons[state.teams[2].active].stats.attack,
                         get_atk(state.teams[2].buffs),
                         static_state.teams[1].mons[3],
                         get_def(state.teams[1].buffs),
