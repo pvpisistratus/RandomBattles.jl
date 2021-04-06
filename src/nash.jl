@@ -126,8 +126,7 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
                     elseif v >= β
                         @inbounds non_dominated_columns[j] = false
                     else
-                        P[i, j] = v
-                        O[i, j] = v
+                        P[i, j] = O[i, j] = v
                     end
                 else
                     @inbounds v = SMAB(Q[i, j], static_state, α, α + ϵ, depth - 1,
