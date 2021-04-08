@@ -51,8 +51,8 @@ function nash(R::Matrix{Float64})
     n, m = size(R)
 
     # Check if we have to do linear programming
-    n == 1 && return NashResult(minimum(R), vec([1.0]), strat_vec(m, argmin(vec(R))))
-    m == 1 && return NashResult(maximum(R), strat_vec(n, argmin(vec(R))), vec([1.0]))
+    n == 1 && return NashResult(minimum(R), [1.0], strat_vec(m, argmin(vec(R))))
+    m == 1 && return NashResult(maximum(R), strat_vec(n, argmin(vec(R))), [1.0])
     minmax(R, m) == maxmin(R, n) && return NashResult(minmax(R, m), findminmax(R, n), findmaxmin(R, m))
 
     # Set up model and payoff
@@ -75,8 +75,8 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
     (length(A) == 0 || depth == 0) &&
         return sim_to_end ? NashResult(sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
-        vec([1.0]), vec([1.0])) : NashResult(get_battle_score(state, static_state) - 0.5,
-        vec([1.0]), vec([1.0]))
+        [1.0], [1.0]) : NashResult(get_battle_score(state, static_state) - 0.5,
+        [1.0], [1.0])
     payoffs = zeros(Float64, length(A), length(B))
     for i in 1:length(A), j in 1:length(B)
         @inbounds if (5 in B || 7 in B) && !(5 <= B[j] <= 8) && iseven(A[i]) &&
@@ -99,8 +99,8 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
     (length(A) == 0 || depth == 0) &&
         return sim_to_end ? NashResult(sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
-        vec([1.0]), vec([1.0])) : NashResult(get_battle_score(state, static_state) - 0.5,
-        vec([1.0]), vec([1.0]))
+        [1.0], [1.0]) : NashResult(get_battle_score(state, static_state) - 0.5,
+        [1.0], [1.0])
 
     Q = [play_turn(state, static_state, (a, b)) for a in A, b in B]
     P = vcat(map(q -> get_min_score(q, static_state), Q), repeat([α₀], 1, length(B)))
@@ -154,8 +154,8 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState, 
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting, allow_overfarming = allow_overfarming)
     (length(A) == 0 || depth == 0) &&
         return sim_to_end ? NashResult(sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
-        vec([1.0]), vec([1.0])) : NashResult(get_battle_score(state, static_state) - 0.5,
-        vec([1.0]), vec([1.0]))
+        [1.0], [1.0]) : NashResult(get_battle_score(state, static_state) - 0.5,
+        [1.0], [1.0])
     payoffs = zeros(Float64, length(A), length(B))
     for i in 1:length(A), j in 1:length(B)
         if (5 in B || 7 in B) && !(5 <= B[j] <= 8) && iseven(A[i]) &&
