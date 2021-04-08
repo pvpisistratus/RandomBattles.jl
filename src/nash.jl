@@ -41,6 +41,12 @@ function get_β(O::Matrix{Float64}, e::Vector{Float64}, f::Vector{Float64})
     return JuMP.objective_value(model)
 end
 
+struct NashResults
+    z::Float64
+    x::Vector{Float64}
+    y::Vector{Float64}
+end
+
 function nash(R::Matrix{Float64})
     n, m = size(R)
 
@@ -61,15 +67,15 @@ function nash(R::Matrix{Float64})
 
     optimize!(model)
 
-    return JuMP.value(z), JuMP.value.(x), shadow_price.(c1)::Matrix{Float64}
+    return NashResults(JuMP.value(z), JuMP.value.(x), shadow_price.(c1))
 end
 
 function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_waiting::Bool = false,
   sim_to_end::Bool = false)
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
     (length(A) == 0 || depth == 0) &&
-        return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
-        vec([1.0]), vec([1.0])) : (get_battle_score(state, static_state) - 0.5,
+        return sim_to_end ? NashResults(sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
+        vec([1.0]), vec([1.0])) : NashResults(get_battle_score(state, static_state) - 0.5,
         vec([1.0]), vec([1.0]))
     payoffs = zeros(Float64, length(A), length(B))
     for i in 1:length(A), j in 1:length(B)
@@ -82,7 +88,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_
             @inbounds payoffs[i, j] = payoffs[i, j - 1]
         else
             @inbounds payoffs[i, j] = SM(play_turn(state, static_state, (A[i], B[j])),
-                static_state, depth - 1, allow_waiting = allow_waiting, sim_to_end = sim_to_end)[1]
+                static_state, depth - 1, allow_waiting = allow_waiting, sim_to_end = sim_to_end).z
         end
     end
     return nash(payoffs)
@@ -92,8 +98,8 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
   β₀::Float64, depth::Int64; allow_waiting::Bool = false, sim_to_end::Bool = false, ϵ = 0.001)
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
     (length(A) == 0 || depth == 0) &&
-        return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
-        vec([1.0]), vec([1.0])) : (get_battle_score(state, static_state) - 0.5,
+        return sim_to_end ? NashResults(sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
+        vec([1.0]), vec([1.0])) : NashResults(get_battle_score(state, static_state) - 0.5,
         vec([1.0]), vec([1.0]))
 
     Q = [play_turn(state, static_state, (a, b)) for a in A, b in B]
@@ -120,7 +126,7 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
                 β = get_β(O[1:end .!= i, 1:end .!= j], O[i, 1:end .!= j], P[1:end-1 .!= i, j])
                 if α < β
                     @inbounds v = SMAB(Q[i, j], static_state, α, β, depth - 1,
-                        allow_waiting = allow_waiting, sim_to_end = sim_to_end)[1]
+                        allow_waiting = allow_waiting, sim_to_end = sim_to_end).z
                     if v <= α
                         @inbounds non_dominated_rows[i] = false
                     elseif v >= β
@@ -130,7 +136,7 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
                     end
                 else
                     @inbounds v = SMAB(Q[i, j], static_state, α, α + ϵ, depth - 1,
-                        allow_waiting = allow_waiting, sim_to_end = sim_to_end)[1]
+                        allow_waiting = allow_waiting, sim_to_end = sim_to_end).z
                     if v <= α
                         @inbounds non_dominated_rows[i] = false
                     else
@@ -147,8 +153,8 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState, 
     allow_overfarming::Bool = false, max_depth = 15::Int64, sim_to_end::Bool = false)
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting, allow_overfarming = allow_overfarming)
     (length(A) == 0 || depth == 0) &&
-        return sim_to_end ? (sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
-        vec([1.0]), vec([1.0])) : (get_battle_score(state, static_state) - 0.5,
+        return sim_to_end ? NashResults(sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
+        vec([1.0]), vec([1.0])) : NashResults(get_battle_score(state, static_state) - 0.5,
         vec([1.0]), vec([1.0]))
     payoffs = zeros(Float64, length(A), length(B))
     for i in 1:length(A), j in 1:length(B)
@@ -162,7 +168,7 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState, 
         else
             @inbounds payoffs[i, j] = SM(play_turn(state, static_state, (A[i], B[j])),
                 static_state, depth - 1, allow_waiting = allow_waiting, sim_to_end = sim_to_end,
-                max_depth = max_depth)[1]
+                max_depth = max_depth).z
         end
     end
     return nash(payoffs)
@@ -178,20 +184,20 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
         if length(A) == 1 && length(B) == 1
             decision = A[1], B[1]
         else
-            value, strategy1, strategy2 = SM(s, static_s, depth, sim_to_end = sim_to_end)
+            nash_result = SM(s, static_s, depth, sim_to_end = sim_to_end)
             d1, d2 = rand(), rand()
-            decision1, decision2 = length(strategy1), length(strategy2)
+            decision1, decision2 = length(nash_result.x), length(nash_result.y)
             j = 0.0
-            for i = 1:length(strategy1)-1
-                @inbounds j += strategy1[i]
+            for i = 1:length(nash_result.x)-1
+                @inbounds j += nash_result.x[i]
                 if d1 < j
                     decision1 = i
                     break
                 end
             end
             j = 0.0
-            for i = 1:length(strategy2)-1
-                @inbounds j += strategy2[i]
+            for i = 1:length(nash_result.y)-1
+                @inbounds j += nash_result.y[i]
                 if d2 < j
                     decision2 = i
                     break
@@ -201,7 +207,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
         end
         s = play_turn(s, static_s, decision)
         push!(strat.decisions, decision)
-        push!(strat.scores, value + 0.5)
+        push!(strat.scores, nash_result.z + 0.5)
         push!(strat.energies, (s.teams[1].mons[s.teams[1].active].energy,
             s.teams[2].mons[s.teams[2].active].energy))
         push!(strat.activeMons, (s.teams[1].active, s.teams[2].active))
