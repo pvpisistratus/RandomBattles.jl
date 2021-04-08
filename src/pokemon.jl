@@ -171,9 +171,9 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
             Int16(0) Int16(0) Int16(0)
             Int16(0) Int16(0) Int16(0)
         ]) : (@SMatrix [
-            calculate_damage(attack, Int8(0), opponents[1], Int8(0), fastMove) calculate_damage(attack, defaultBuff, opponents[2], defaultBuff, fastMove) calculate_damage(attack, defaultBuff, opponents[3], defaultBuff, fastMove)
-            calculate_damage(attack, Int8(0), opponents[1], Int8(0), chargedMoves[1], Int8(100)) calculate_damage(attack, defaultBuff, opponents[2], defaultBuff, chargedMoves[1], Int8(100)) calculate_damage(attack, defaultBuff, opponents[3], defaultBuff, chargedMoves[1], Int8(100))
-            calculate_damage(attack, Int8(0), opponents[1], Int8(0), chargedMoves[2], Int8(100)) calculate_damage(attack, defaultBuff, opponents[2], defaultBuff, chargedMoves[2], Int8(100)) calculate_damage(attack, defaultBuff, opponents[3], defaultBuff, chargedMoves[2], Int8(100))
+            calculate_damage(attack, Int8(0), opponents[1], Int8(0), fastMove) calculate_damage(attack, Int8(0), opponents[2], Int8(0), fastMove) calculate_damage(attack, Int8(0), opponents[3], Int8(0), fastMove)
+            calculate_damage(attack, Int8(0), opponents[1], Int8(0), chargedMoves[1], Int8(100)) calculate_damage(attack, Int8(0), opponents[2], Int8(0), chargedMoves[1], Int8(100)) calculate_damage(attack, Int8(0), opponents[3], Int8(0), chargedMoves[1], Int8(100))
+            calculate_damage(attack, Int8(0), opponents[1], Int8(0), chargedMoves[2], Int8(100)) calculate_damage(attack, Int8(0), opponents[2], Int8(0), chargedMoves[2], Int8(100)) calculate_damage(attack, Int8(0), opponents[3], Int8(0), chargedMoves[2], Int8(100))
         ]))
     )
 end
