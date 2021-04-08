@@ -53,8 +53,8 @@ function nash(R::Matrix{Float64})
     n, m = size(R)
 
     # Check if we have to do linear programming
-    n == 1 && return NashResult(minimum(R), no_strat, strat_vec(m, argmin(vec(R))))
-    m == 1 && return NashResult(maximum(R), strat_vec(n, argmin(vec(R))), no_strat)
+    n == 1 && return NashResult(minimum(R), no_strat, strat_vec(m, argmin(R)[2]))
+    m == 1 && return NashResult(maximum(R), strat_vec(n, argmax(R)[1]), no_strat)
     minmax(R, m) == maxmin(R, n) && return NashResult(minmax(R, m), findminmax(R, n), findmaxmin(R, m))
 
     # Set up model and payoff
