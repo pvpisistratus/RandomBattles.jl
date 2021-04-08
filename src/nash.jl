@@ -88,7 +88,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_
             @inbounds payoffs[i, j] = payoffs[i, j - 1]
         else
             @inbounds payoffs[i, j] = SM(play_turn(state, static_state, (A[i], B[j])),
-                static_state, depth - 1, allow_waiting = allow_waiting, sim_to_end = sim_to_end).z
+                static_state, depth - 1, allow_waiting = allow_waiting, sim_to_end = sim_to_end).payoff
         end
     end
     return nash(payoffs)
@@ -126,7 +126,7 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
                 β = get_β(O[1:end .!= i, 1:end .!= j], O[i, 1:end .!= j], P[1:end-1 .!= i, j])
                 if α < β
                     @inbounds v = SMAB(Q[i, j], static_state, α, β, depth - 1,
-                        allow_waiting = allow_waiting, sim_to_end = sim_to_end).z
+                        allow_waiting = allow_waiting, sim_to_end = sim_to_end).payoff
                     if v <= α
                         @inbounds non_dominated_rows[i] = false
                     elseif v >= β
@@ -136,7 +136,7 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
                     end
                 else
                     @inbounds v = SMAB(Q[i, j], static_state, α, α + ϵ, depth - 1,
-                        allow_waiting = allow_waiting, sim_to_end = sim_to_end).z
+                        allow_waiting = allow_waiting, sim_to_end = sim_to_end).payoff
                     if v <= α
                         @inbounds non_dominated_rows[i] = false
                     else
@@ -168,7 +168,7 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState, 
         else
             @inbounds payoffs[i, j] = SM(play_turn(state, static_state, (A[i], B[j])),
                 static_state, depth - 1, allow_waiting = allow_waiting, sim_to_end = sim_to_end,
-                max_depth = max_depth).z
+                max_depth = max_depth).payoff
         end
     end
     return nash(payoffs)
