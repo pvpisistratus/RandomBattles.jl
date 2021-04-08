@@ -174,7 +174,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
             calculate_damage(attack, Int8(0), opponents[1], Int8(0), fastMove) calculate_damage(attack, Int8(0), opponents[2], Int8(0), fastMove) calculate_damage(attack, Int8(0), opponents[3], Int8(0), fastMove)
             calculate_damage(attack, Int8(0), opponents[1], Int8(0), chargedMoves[1], Int8(100)) calculate_damage(attack, Int8(0), opponents[2], Int8(0), chargedMoves[1], Int8(100)) calculate_damage(attack, Int8(0), opponents[3], Int8(0), chargedMoves[1], Int8(100))
             calculate_damage(attack, Int8(0), opponents[1], Int8(0), chargedMoves[2], Int8(100)) calculate_damage(attack, Int8(0), opponents[2], Int8(0), chargedMoves[2], Int8(100)) calculate_damage(attack, Int8(0), opponents[3], Int8(0), chargedMoves[2], Int8(100))
-        ]))
+        ]'))
     )
 end
 
