@@ -42,9 +42,9 @@ function get_β(O::Matrix{Float64}, e::Vector{Float64}, f::Vector{Float64})
 end
 
 struct NashResult
-    z::Float64
-    x::Vector{Float64}
-    y::Vector{Float64}
+    payoff::Float64
+    row_strategy::Vector{Float64}
+    column_strategy::Vector{Float64}
 end
 
 function nash(R::Matrix{Float64})
@@ -66,6 +66,8 @@ function nash(R::Matrix{Float64})
     @constraint(model, sum(x) == 1.0)
 
     optimize!(model)
+
+    println(typeof(c1))
 
     return NashResult(JuMP.value(z), JuMP.value.(x), vec(shadow_price.(c1)))
 end
@@ -185,20 +187,20 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
             decision = A[1], B[1]
         else
             nash_result = SM(s, static_s, depth, sim_to_end = sim_to_end)
-            value = nash_result.z
+            value = nash_result.payoff
             d1, d2 = rand(), rand()
-            decision1, decision2 = length(nash_result.x), length(nash_result.y)
+            decision1, decision2 = length(nash_result.row_strategy), length(nash_result.column_strategy)
             j = 0.0
-            for i = 1:length(nash_result.x)-1
-                @inbounds j += nash_result.x[i]
+            for i = 1:length(nash_result.row_strategy)-1
+                @inbounds j += nash_result.row_strategy[i]
                 if d1 < j
                     decision1 = i
                     break
                 end
             end
             j = 0.0
-            for i = 1:length(nash_result.y)-1
-                @inbounds j += nash_result.y[i]
+            for i = 1:length(nash_result.column_strategy)-1
+                @inbounds j += nash_result.column_strategy[i]
                 if d2 < j
                     decision2 = i
                     break
