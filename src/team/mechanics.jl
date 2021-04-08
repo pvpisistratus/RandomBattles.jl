@@ -120,6 +120,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                 team2 ? min(state.teams[2].mons[3].energy + static_state.teams[2].mons[3].fastMove.energy, Int8(100)) : state.teams[2].mons[3].energy
                 ) : state.teams[2].mons[3])], state.teams[2].buffs, state.teams[2].switchCooldown,
                 state.teams[2].shields, state.teams[2].active)], state.fastMovesPending)
+    end
 end
 
 function get_cmp(state::DynamicState, static_state::StaticState, team1throwing::Bool, team2throwing::Bool)
