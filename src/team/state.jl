@@ -10,8 +10,9 @@ struct DynamicState
 end
 
 function StaticState(teams::Array{String}; league = "great", cup = "open")
-    global teams_copy = teams
-    opps1 = @SVector[i for i in StaticPokemon.(teams_copy[4:6], league = league, cup = cup)]
+    teams_copy = teams
+    opps = StaticPokemon.(teams_copy[4:6], league = league, cup = cup)
+    opps1 = @SVector[i for i in opps]
     opps2 = @SVector[i for i in StaticPokemon.(teams_copy[1:3], league = league, cup = cup)]
     team1 = StaticTeam(teams_copy[1:3], league = league, cup = cup, opponents = opps1)
     team2 = StaticTeam(teams_copy[4:6], league = league, cup = cup, opponents = opps2)
