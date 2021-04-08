@@ -10,10 +10,10 @@ struct DynamicState
 end
 
 function StaticState(teams::Array{String}; league = "great", cup = "open")
-    opps1 = @SVector[i for i in [
+    opps1 = @SVector(
         StaticPokemon(teams[4], league = league, cup = cup),
         StaticPokemon(teams[5], league = league, cup = cup),
-        StaticPokemon(teams[6], league = league, cup = cup)]]
+        StaticPokemon(teams[6], league = league, cup = cup))
     opps2 = @SVector[i for i in [
         StaticPokemon(teams[1], league = league, cup = cup),
         StaticPokemon(teams[2], league = league, cup = cup),
