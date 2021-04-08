@@ -1,6 +1,6 @@
 using JuMP, GLPK
 
-const no_strat = [1.0]]
+const no_strat = vec([1.0])
 
 function strat_vec(l::Int64, i::Int64)
     to_return = zeros(l)
