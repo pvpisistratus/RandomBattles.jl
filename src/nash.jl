@@ -67,7 +67,7 @@ function nash(R::Matrix{Float64})
 
     optimize!(model)
 
-    return NashResult(JuMP.value(z), JuMP.value.(x), shadow_price.(c1))
+    return NashResult(JuMP.value(z), JuMP.value.(x), vec(shadow_price.(c1)))
 end
 
 function SM(state::DynamicState, static_state::StaticState, depth::Int64; allow_waiting::Bool = false,
