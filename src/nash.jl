@@ -62,12 +62,12 @@ function nash(R::Matrix{Float64})
 
     # Solve for row player
     @variable(model, x[1:n], lower_bound = 0.0)
-    @constraint(model, c1, x' * R .>= z)
+    @constraint(model, c1::Matrix{JuMP.ConstraintRef{JuMP.Model,
+        MathOptInterface.ConstraintIndex{MathOptInterface.ScalarAffineFunction{Float64},
+        MathOptInterface.GreaterThan{Float64}}, JuMP.ScalarShape}}, x' * R .>= z)
     @constraint(model, sum(x) == 1.0)
 
     optimize!(model)
-
-    println(typeof(c1))
 
     return NashResult(JuMP.value(z), JuMP.value.(x), vec(shadow_price.(c1)))
 end
