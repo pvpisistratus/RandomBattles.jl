@@ -48,7 +48,6 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                         static_state.teams[1].mons[1],
                         get_def(state.teams[1].buffs),
                         static_state.teams[2].mons[state.teams[2].active].fastMove,
-                        Int8(100),
                     )) : state.teams[1].mons[1].hp,
                 team1 ? min(state.teams[1].mons[1].energy + static_state.teams[1].mons[1].fastMove.energy, Int8(100)) : state.teams[1].mons[1].energy
                 ) : state.teams[1].mons[1]),
@@ -61,7 +60,6 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                         static_state.teams[1].mons[2],
                         get_def(state.teams[1].buffs),
                         static_state.teams[2].mons[state.teams[2].active].fastMove,
-                        Int8(100),
                     )) : state.teams[1].mons[2].hp,
                 team1 ? min(state.teams[1].mons[2].energy + static_state.teams[1].mons[2].fastMove.energy, Int8(100)) : state.teams[1].mons[2].energy
                 ) : state.teams[1].mons[2]),
@@ -74,7 +72,6 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                         static_state.teams[1].mons[3],
                         get_def(state.teams[1].buffs),
                         static_state.teams[2].mons[state.teams[2].active].fastMove,
-                        Int8(100),
                     )) : state.teams[1].mons[3].hp,
                 team1 ? min(state.teams[1].mons[3].energy + static_state.teams[1].mons[3].fastMove.energy, Int8(100)) : state.teams[1].mons[3].energy
                 ) : state.teams[1].mons[3])], state.teams[1].buffs, state.teams[1].switchCooldown,
@@ -89,7 +86,6 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                         static_state.teams[2].mons[1],
                         get_def(state.teams[2].buffs),
                         static_state.teams[1].mons[state.teams[1].active].fastMove,
-                        Int8(100),
                     )) : state.teams[2].mons[1].hp,
                 team2 ? min(state.teams[2].mons[1].energy + static_state.teams[2].mons[1].fastMove.energy, Int8(100)) : state.teams[2].mons[1].energy
                 ) : state.teams[2].mons[1]),
@@ -102,7 +98,6 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                         static_state.teams[2].mons[2],
                         get_def(state.teams[2].buffs),
                         static_state.teams[1].mons[state.teams[1].active].fastMove,
-                        Int8(100),
                     )) : state.teams[2].mons[2].hp,
                 team2 ? min(state.teams[2].mons[2].energy + static_state.teams[2].mons[2].fastMove.energy, Int8(100)) : state.teams[2].mons[2].energy
                 ) : state.teams[2].mons[2]),
@@ -115,7 +110,6 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState, tea
                         static_state.teams[2].mons[3],
                         get_def(state.teams[2].buffs),
                         static_state.teams[1].mons[state.teams[1].active].fastMove,
-                        Int8(100),
                     )) : state.teams[2].mons[3].hp,
                 team2 ? min(state.teams[2].mons[3].energy + static_state.teams[2].mons[3].fastMove.energy, Int8(100)) : state.teams[2].mons[3].energy
                 ) : state.teams[2].mons[3])], state.teams[2].buffs, state.teams[2].switchCooldown,
