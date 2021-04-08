@@ -178,7 +178,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
         if length(A) == 1 && length(B) == 1
             decision = A[1], B[1]
         else
-            value, strategy1, strategy2 = SM(s, static_s, depth, max_depth = depth, sim_to_end = sim_to_end)
+            value, strategy1, strategy2 = SM(s, static_s, depth, sim_to_end = sim_to_end)
             d1, d2 = rand(), rand()
             decision1, decision2 = length(strategy1), length(strategy2)
             j = 0.0
