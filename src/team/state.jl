@@ -9,11 +9,13 @@ struct DynamicState
     fastMovesPending::SVector{2,Int8}
 end
 
-StaticState(teams::Array{String}; league = "great", cup = "open") =
-    StaticState([
-        StaticTeam(teams[1:3], league = league, cup = cup, opponents = @SVector[i for i in StaticPokemon.(teams[4:6], league = league, cup = cup)]),
-        StaticTeam(teams[4:6], league = league, cup = cup, opponents = @SVector[i for i in StaticPokemon.(teams[1:3], league = league, cup = cup)])
-    ])
+function StaticState(teams::Array{String}; league = "great", cup = "open")
+    opps1 = @SVector[i for i in StaticPokemon.(teams[4:6], league = league, cup = cup)]
+    opps2 = @SVector[i for i in StaticPokemon.(teams[1:3], league = league, cup = cup)]
+    team1 = StaticTeam(teams[1:3], league = league, cup = cup, opponents = opps1)
+    team2 = StaticTeam(teams[4:6], league = league, cup = cup, opponents = opps2)
+    return StaticState([team1, team2])
+end
 
 StaticState(team1::StaticTeam, team2::StaticTeam) = StaticState([team1, team2])
 
