@@ -185,6 +185,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
             decision = A[1], B[1]
         else
             nash_result = SM(s, static_s, depth, sim_to_end = sim_to_end)
+            value = nash_result.z
             d1, d2 = rand(), rand()
             decision1, decision2 = length(nash_result.x), length(nash_result.y)
             j = 0.0
@@ -207,7 +208,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
         end
         s = play_turn(s, static_s, decision)
         push!(strat.decisions, decision)
-        push!(strat.scores, nash_result.z + 0.5)
+        push!(strat.scores, value + 0.5)
         push!(strat.energies, (s.teams[1].mons[s.teams[1].active].energy,
             s.teams[2].mons[s.teams[2].active].energy))
         push!(strat.activeMons, (s.teams[1].active, s.teams[2].active))
