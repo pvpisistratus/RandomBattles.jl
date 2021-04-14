@@ -166,7 +166,7 @@ function StaticIndividualPokemon(mon::String; league = "great", cup = "open",
                 custom_stats = (mon_arr[5], mon_arr[6], mon_arr[7], mon_arr[8]), opponent = opponent)
         end
     else
-        return StaticPokemon(get_rankings_mon_id(mon, league = league, cup = cup),
+        return StaticIndividualPokemon(get_rankings_mon_id(mon, league = league, cup = cup),
             league = league, cup = cup, opponent = opponent)
     end
 end
