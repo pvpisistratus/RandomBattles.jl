@@ -8,11 +8,11 @@ throughout the battle: types, stats, and moves. Note that like moves, this
 struct is agnostic to the actual identity/dex/species of the mon.
 """
 struct StaticIndividualPokemon
-    types::SVector{2,Int8}
-    stats::Stats
+    damage_matrix::SVector{3, Int16}
     fastMove::FastMove
     chargedMoves::SVector{2,ChargedMove}
-    damage_matrix::SVector{3, Int16}
+    types::SVector{2,Int8}
+    stats::Stats
 end
 
 """
