@@ -4,7 +4,13 @@ struct StaticIndividualState
     teams::SVector{2,StaticIndividual}
 end
 
-function StaticIndividualState(teams::Array{Union{Int64, String}}; league = "great", cup = "open")
+function StaticIndividualState(teams::Array{Int64}; league = "great", cup = "open")
+    opp1 = StaticIndividualPokemon(teams[2], league = league, cup = cup)
+    opp2 = StaticIndividualPokemon(teams[1], league = league, cup = cup)
+    return StaticIndividualState([StaticIndividual(teams[1], league = league, cup = cup, opponent = opp1), StaticIndividual(teams[2], league = league, cup = cup, opponent = opp2)])
+end
+
+function StaticIndividualState(teams::Array{String}; league = "great", cup = "open")
     opp1 = StaticIndividualPokemon(teams[2], league = league, cup = cup)
     opp2 = StaticIndividualPokemon(teams[1], league = league, cup = cup)
     return StaticIndividualState([StaticIndividual(teams[1], league = league, cup = cup, opponent = opp1), StaticIndividual(teams[2], league = league, cup = cup, opponent = opp2)])
