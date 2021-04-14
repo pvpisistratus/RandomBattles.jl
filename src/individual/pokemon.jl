@@ -170,3 +170,13 @@ function StaticIndividualPokemon(mon::String; league = "great", cup = "open",
             league = league, cup = cup, opponent = opponent)
     end
 end
+
+"""
+    DynamicPokemon(mon)
+
+Construct a starting DynamicPokemon from a StaticPokemon. This is just setting
+the starting hp of the mon to the stat value, and the energy to zero.
+"""
+function DynamicPokemon(mon::StaticIndividualPokemon)
+    return DynamicPokemon(mon.stats.hitpoints, Int8(0))
+end
