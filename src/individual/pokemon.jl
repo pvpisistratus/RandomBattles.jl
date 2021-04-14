@@ -11,8 +11,8 @@ struct StaticIndividualPokemon
     damage_matrix::SVector{3, Int16}
     fastMove::FastMove
     chargedMoves::SVector{2,ChargedMove}
-    types::SVector{2,Int8}
     stats::Stats
+    types::SVector{2,Int8}
 end
 
 """
@@ -130,15 +130,15 @@ function StaticIndividualPokemon(i::Int64; league::String = "great", cup = "open
         chargedMoves = [ChargedMove(moveset[2]::String, types), ChargedMove(moveset[3]::String, types)]
     end
     return StaticIndividualPokemon(
-        types,
-        stats,
-        fastMove,
-        chargedMoves,
-        (isnothing(opponent) ? (@SVector [Int16(0), Int16(0), Int16(0)]) : (@SVector [
+        isnothing(opponent) ? (@SVector [Int16(0), Int16(0), Int16(0)]) : (@SVector [
             calculate_damage(attack, Int8(0), opponent, Int8(0), fastMove),
             calculate_damage(attack, Int8(0), opponent, Int8(0), chargedMoves[1], Int8(100)),
             calculate_damage(attack, Int8(0), opponent, Int8(0), chargedMoves[2], Int8(100))
-        ]))
+        ])
+        fastMove,
+        chargedMoves,
+        stats,
+        types
     )
 end
 
