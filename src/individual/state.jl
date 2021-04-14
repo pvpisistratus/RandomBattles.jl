@@ -7,9 +7,7 @@ end
 function StaticIndividualState(teams::Array{Union{Int64, String}}; league = "great", cup = "open")
     opp1 = StaticIndividualPokemon(teams[2], league = league, cup = cup)
     opp2 = StaticIndividualPokemon(teams[1], league = league, cup = cup)
-    team1 = StaticIndividual(teams[1], league = league, cup = cup, opponent = opp1)
-    team2 = StaticIndividual(teams[2], league = league, cup = cup, opponent = opp2)
-    return StaticIndividualState([team1, team2])
+    return StaticIndividualState([StaticIndividual(teams[1], league = league, cup = cup, opponent = opp1), StaticIndividual(teams[2], league = league, cup = cup, opponent = opp2)])
 end
 
 struct DynamicIndividualState
