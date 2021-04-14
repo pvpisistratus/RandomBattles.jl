@@ -9,7 +9,7 @@ function get_cmp(static_state::StaticIndividualState, team1throwing::Bool, team2
 end
 
 function evaluate_fast_moves(state::DynamicIndividualState, static_state::StaticIndividualState, agent1::Bool, agent2::Bool)
-    if defaultBuff == state.teams[1].buffs == state.teams[2].buffs
+    @inbounds if defaultBuff == state.teams[1].buffs == state.teams[2].buffs
         @inbounds return DynamicIndividualState(@SVector[DynamicIndividual(
             DynamicPokemon(agent2 ? max(Int16(0), state.teams[1].mon.hp - static_state.teams[2].mon.damage_matrix[1]) : state.teams[1].mon.hp,
             agent1 ? min(state.teams[1].mon.energy + static_state.teams[1].mon.fastMove.energy, Int8(100)) : state.teams[1].mon.energy),
@@ -37,7 +37,29 @@ function evaluate_fast_moves(state::DynamicIndividualState, static_state::Static
 end
 
 function evaluate_charged_moves(state::DynamicIndividualState, static_state::StaticIndividualState, cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool, buffs_applied::Bool)
-    if cmp == Int8(1)
+    @inbounds if defaultBuff == state.teams[1].buffs == state.teams[2].buffs
+        if cmp == Int8(1)
+            @inbounds return DynamicIndividualState(@SVector[
+                DynamicIndividual(DynamicPokemon(state.teams[1].mon.hp,
+                    min(state.teams[1].mon.energy - static_state.teams[1].mon.chargedMoves[move_id].energy, Int8(0))),
+                buffs_applied ? static_state.teams[1].mon.chargedMoves[move_id].self_buffs : defaultBuff, state.teams[1].shields),
+                DynamicIndividual(shielding ? state.teams[2].mon : DynamicPokemon(max(Int16(0),
+                    state.teams[2].mon.hp - static_state.teams[1].mon.damage_matrix[move_id]), state.teams[2].mon.energy),
+                buffs_applied ? static_state.teams[1].mon.chargedMoves[move_id].opp_buffs : defaultBuff,
+                shielding ? state.teams[2].shields - Int8(1) : state.teams[2].shields)], state.fastMovesPending)
+        else
+            @inbounds return DynamicIndividualState(@SVector[
+                DynamicIndividual(shielding ? state.teams[1].mon : DynamicPokemon(max(Int16(0),
+                    state.teams[1].mon.hp - static_state.teams[2].mon.damage_matrix[move_id],
+                ), state.teams[1].mon.energy),
+                buffs_applied ? static_state.teams[2].mon.chargedMoves[move_id].opp_buffs : defaultBuff,
+                shielding ? state.teams[1].shields - Int8(1) : state.teams[1].shields),
+                DynamicIndividual(DynamicPokemon(state.teams[2].mon.hp,
+                    min(state.teams[2].mon.energy - static_state.teams[2].mon.chargedMoves[move_id].energy, Int8(0))),
+                buffs_applied ? static_state.teams[2].mon.chargedMoves[move_id].self_buffs : defaultBuff,
+                state.teams[2].shields)], state.fastMovesPending)
+        end
+    elseif cmp == Int8(1)
         @inbounds return DynamicIndividualState(@SVector[
             DynamicIndividual(DynamicPokemon(state.teams[1].mon.hp,
                 min(state.teams[1].mon.energy - static_state.teams[1].mon.chargedMoves[move_id].energy, Int8(0))),
