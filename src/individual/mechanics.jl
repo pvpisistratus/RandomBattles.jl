@@ -12,14 +12,14 @@ function evaluate_fast_moves(state::DynamicIndividualState, static_state::Static
     @inbounds return DynamicIndividualState(@SVector[DynamicIndividual(
         DynamicPokemon(agent2 ? max(Int16(0),
             state.teams[1].mon.hp - calculate_damage(
-            static_state.teams[2].mon, get_atk(state.teams[2].buffs),
+            static_state.teams[2].mon.stats.attack, get_atk(state.teams[2].buffs),
             static_state.teams[1].mon, get_def(state.teams[1].buffs),
             static_state.teams[2].mon.fastMove, Int8(100))) : state.teams[1].mon.hp,
         agent1 ? min(state.teams[1].mon.energy + static_state.teams[1].mon.fastMove.energy, Int8(100)) : state.teams[1].mon.energy),
         state.teams[1].buffs, state.teams[1].shields),
         DynamicIndividual(DynamicPokemon(agent1 ? max(Int16(0),
             state.teams[2].mon.hp - calculate_damage(
-            static_state.teams[1].mon, get_atk(state.teams[1].buffs),
+            static_state.teams[1].mon.stats.attack, get_atk(state.teams[1].buffs),
             static_state.teams[2].mon, get_def(state.teams[2].buffs),
             static_state.teams[1].mon.fastMove, Int8(100))) : state.teams[2].mon.hp,
         agent2 ? min(state.teams[2].mon.energy + static_state.teams[2].mon.fastMove.energy, Int8(100)) : state.teams[2].mon.energy),
@@ -37,7 +37,7 @@ function evaluate_charged_moves(state::DynamicIndividualState, static_state::Sta
                 Int16(0),
                 state.teams[2].mon.hp -
                 calculate_damage(
-                    static_state.teams[1].mon,
+                    static_state.teams[1].mon.stats.attack,
                     get_atk(state.teams[1].buffs),
                     static_state.teams[2].mon,
                     get_def(state.teams[2].buffs),
@@ -53,7 +53,7 @@ function evaluate_charged_moves(state::DynamicIndividualState, static_state::Sta
                 Int16(0),
                 state.teams[1].mon.hp -
                 calculate_damage(
-                    static_state.teams[2].mon,
+                    static_state.teams[2].mon.stats.attack,
                     get_atk(state.teams[2].buffs),
                     static_state.teams[1].mon,
                     get_def(state.teams[1].buffs),
