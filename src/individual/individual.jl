@@ -11,11 +11,7 @@ struct DynamicIndividual
     shields::Int8            #Initially 2
 end
 
-StaticIndividual(mon::String; league::String = "great", cup::String = "open",
-  opponent::Union{Nothing, StaticIndividualPokemon} = nothing) =
-    StaticIndividual(StaticIndividualPokemon(mon, league = league, cup = cup, opponent = opponent))
-
-StaticIndividual(mon::Int64; league::String = "great", cup::String = "open",
+StaticIndividual(mon::Union{Int64, String}; league::String = "great", cup::String = "open",
   opponent::Union{Nothing, StaticIndividualPokemon} = nothing) =
     StaticIndividual(StaticIndividualPokemon(mon, league = league, cup = cup, opponent = opponent))
 

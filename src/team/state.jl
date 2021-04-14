@@ -9,7 +9,7 @@ struct DynamicState
     fastMovesPending::SVector{2,Int8}
 end
 
-function StaticState(teams::Array{String}; league = "great", cup = "open")
+function StaticState(teams::Array{Union{Int64, String}}; league = "great", cup = "open")
     opps1 = SVector(
         StaticPokemon(teams[4], league = league, cup = cup),
         StaticPokemon(teams[5], league = league, cup = cup),

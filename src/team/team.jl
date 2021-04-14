@@ -13,11 +13,7 @@ struct DynamicTeam
     active::Int8             #Initially 1 (the lead)
 end
 
-StaticTeam(mons::Array{Int64}; league::String = "great", cup::String = "open",
-  opponents::Union{Nothing, SVector{3,StaticPokemon}} = nothing) =
-    StaticTeam(StaticPokemon.(mons, league = league, cup = cup, opponents = opponents))
-
-StaticTeam(mons::Array{String}; league::String = "great", cup::String = "open",
+StaticTeam(mons::Array{Union{Int64, String}}; league::String = "great", cup::String = "open",
   opponents::Union{Nothing, SVector{3,StaticPokemon}} = nothing) =
     StaticTeam(StaticPokemon.(mons, league = league, cup = cup, opponents = opponents))
 
