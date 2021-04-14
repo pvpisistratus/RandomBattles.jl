@@ -134,7 +134,7 @@ function StaticIndividualPokemon(i::Int64; league::String = "great", cup = "open
         stats,
         fastMove,
         chargedMoves,
-        (isnothing(opponents) ? (@SVector [Int16(0), Int16(0), Int16(0)]) : (@SVector [
+        (isnothing(opponent) ? (@SVector [Int16(0), Int16(0), Int16(0)]) : (@SVector [
             calculate_damage(attack, Int8(0), opponent, Int8(0), fastMove),
             calculate_damage(attack, Int8(0), opponent, Int8(0), chargedMoves[1], Int8(100)),
             calculate_damage(attack, Int8(0), opponent, Int8(0), chargedMoves[2], Int8(100))
