@@ -1,7 +1,7 @@
 using StaticArrays
 
 struct StaticIndividual
-    mon::StaticPokemon
+    mon::StaticIndividualPokemon
 end
 
 struct DynamicIndividual
