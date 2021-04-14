@@ -7,7 +7,7 @@ Struct for holding the values associated with the mons that do not change
 throughout the battle: types, stats, and moves. Note that like moves, this
 struct is agnostic to the actual identity/dex/species of the mon.
 """
-struct IndividualStaticPokemon
+struct StaticIndividualPokemon
     types::SVector{2,Int8}
     stats::Stats
     fastMove::FastMove
@@ -58,7 +58,7 @@ Calculate the damage a particular pokemon does against another using a charged m
 function calculate_damage(
     attack::UInt16,
     atkBuff::Int8,
-    defender::IndividualStaticPokemon,
+    defender::StaticIndividualPokemon,
     defBuff::Int8,
     move::ChargedMove,
     charge::Int8,
@@ -76,7 +76,7 @@ end
 Construct a StaticPokemon from the index of a mon within its rankings
 (optionally specified). Other optional inputs are a custom moveset or IVs.
 """
-function IndividualStaticPokemon(i::Int64; league::String = "great", cup = "open",
+function StaticIndividualPokemon(i::Int64; league::String = "great", cup = "open",
   custom_moveset = ["none"], custom_stats = (), opponent::Union{Nothing, StaticPokemon} = nothing)
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
@@ -129,7 +129,7 @@ function IndividualStaticPokemon(i::Int64; league::String = "great", cup = "open
         fastMove = FastMove(moveset[1]::String, types)
         chargedMoves = [ChargedMove(moveset[2]::String, types), ChargedMove(moveset[3]::String, types)]
     end
-    return IndividualStaticPokemon(
+    return StaticIndividualPokemon(
         types,
         stats,
         fastMove,
@@ -149,19 +149,19 @@ Construct a StaticPokemon from the name of the pokemon, and the meta it is
 within. Movesets and IVs can also be specified by comma-separating the string
 being passed in.
 """
-function IndividualStaticPokemon(mon::String; league = "great", cup = "open",
+function StaticIndividualPokemon(mon::String; league = "great", cup = "open",
   opponent::Union{Nothing, StaticPokemon} = nothing)
     if occursin(",", mon)
         mon_arr = split(mon, ",")
         if length(mon_arr) == 4
-            return IndividualStaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
+            return StaticIndividualPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]), opponent = opponent)
         elseif length(mon_arr) == 7
-            return IndividualStaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
+            return StaticIndividualPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
                 custom_stats = ("0", mon_arr[5], mon_arr[6], mon_arr[7]), opponent = opponent)
         elseif length(mon_arr) == 8
-            return IndividualStaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
+            return StaticIndividualPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
                 custom_stats = (mon_arr[5], mon_arr[6], mon_arr[7], mon_arr[8]), opponent = opponent)
         end

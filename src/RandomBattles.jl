@@ -19,7 +19,7 @@ include("team/battle_logic.jl")
 include("team/diff.jl")
 
 # individual battles
-include("individual/individual_pokemon.jl")
+include("individual/pokemon.jl")
 include("individual/individual.jl")
 include("individual/state.jl")
 include("individual/mechanics.jl")
