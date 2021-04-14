@@ -8,10 +8,10 @@ end
 include("data.jl")
 include("stats.jl")
 include("moves.jl")
-include("pokemon.jl")
 
 # team battles
 include("team/team.jl")
+include("team/pokemon.jl")
 include("team/state.jl")
 include("team/mechanics.jl")
 include("team/decisions.jl")
@@ -19,6 +19,7 @@ include("team/battle_logic.jl")
 include("team/diff.jl")
 
 # individual battles
+include("individual/individual_pokemon.jl")
 include("individual/individual.jl")
 include("individual/state.jl")
 include("individual/mechanics.jl")
