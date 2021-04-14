@@ -77,7 +77,7 @@ Construct a StaticPokemon from the index of a mon within its rankings
 (optionally specified). Other optional inputs are a custom moveset or IVs.
 """
 function StaticIndividualPokemon(i::Int64; league::String = "great", cup = "open",
-  custom_moveset = ["none"], custom_stats = (), opponent::Union{Nothing, StaticPokemon} = nothing)
+  custom_moveset = ["none"], custom_stats = (), opponent::Union{Nothing, StaticIndividualPokemon} = nothing)
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
@@ -150,7 +150,7 @@ within. Movesets and IVs can also be specified by comma-separating the string
 being passed in.
 """
 function StaticIndividualPokemon(mon::String; league = "great", cup = "open",
-  opponent::Union{Nothing, StaticPokemon} = nothing)
+  opponent::Union{Nothing, StaticIndividualPokemon} = nothing)
     if occursin(",", mon)
         mon_arr = split(mon, ",")
         if length(mon_arr) == 4

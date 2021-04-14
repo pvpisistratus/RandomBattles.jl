@@ -12,11 +12,11 @@ struct DynamicIndividual
 end
 
 StaticIndividual(mon::String; league::String = "great", cup::String = "open",
-  opponent::Union{Nothing, StaticPokemon} = nothing) =
+  opponent::Union{Nothing, StaticIndividualPokemon} = nothing) =
     StaticIndividual(StaticIndividualPokemon(mon, league = league, cup = cup, opponent = opponent))
 
 StaticIndividual(mon::Int64; league::String = "great", cup::String = "open",
-  opponent::Union{Nothing, StaticPokemon} = nothing) =
+  opponent::Union{Nothing, StaticIndividualPokemon} = nothing) =
     StaticIndividual(StaticIndividualPokemon(mon, league = league, cup = cup, opponent = opponent))
 
 DynamicIndividual(ind::StaticIndividual; shields::Int8 = Int8(2)) = DynamicIndividual(DynamicPokemon(ind.mon),
