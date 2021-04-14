@@ -10,8 +10,8 @@ include("stats.jl")
 include("moves.jl")
 
 # team battles
-include("team/team.jl")
 include("team/pokemon.jl")
+include("team/team.jl")
 include("team/state.jl")
 include("team/mechanics.jl")
 include("team/decisions.jl")
