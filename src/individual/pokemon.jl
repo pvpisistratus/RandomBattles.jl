@@ -172,11 +172,25 @@ function StaticIndividualPokemon(mon::String; league = "great", cup = "open",
 end
 
 """
+    DynamicPokemon(hp, energy)
+
+Struct for holding the values associated with the mons that change throughout
+the battle: current hp and energy. Note that like moves, this struct is
+agnostic to the actual identity/dex/species of the mon.
+"""
+struct DynamicIndividualPokemon
+    hp::Int16                 #Initially hp stat of mon
+    energy::Int8              #Initially 0
+    buffs::StatBuffs          #Initially 0, 0
+    shields::Int8             #Initially 2
+end
+
+"""
     DynamicPokemon(mon)
 
 Construct a starting DynamicPokemon from a StaticPokemon. This is just setting
 the starting hp of the mon to the stat value, and the energy to zero.
 """
-function DynamicPokemon(mon::StaticIndividualPokemon)
-    return DynamicPokemon(mon.stats.hitpoints, Int8(0))
+function DynamicIndividualPokemon(mon::StaticIndividualPokemon; shields::Int8 = Int8(2))
+    return DynamicIndividualPokemon(mon.stats.hitpoints, Int8(0), defaultBuff, shields)
 end

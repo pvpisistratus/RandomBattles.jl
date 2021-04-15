@@ -2,7 +2,7 @@ using StaticArrays
 
 function get_possible_decisions(state::DynamicIndividualState, static_state::StaticIndividualState, agent::Int64; allow_nothing::Bool = false, allow_overfarming::Bool = false)
     @inbounds activeTeam = state.teams[agent]
-    @inbounds activeMon = state.teams[agent].mon
+    @inbounds activeMon = state.teams[agent]
     activeMon.hp == Int16(0) && return @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
     if !(state.fastMovesPending[agent] == Int8(0) || state.fastMovesPending[agent] == Int8(-1))
         if activeTeam.shields == Int8(0)
@@ -11,7 +11,7 @@ function get_possible_decisions(state::DynamicIndividualState, static_state::Sta
             return @SVector [1/2, 1/2, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
         end
     else
-        @inbounds activeStaticMon = static_state.teams[agent].mon
+        @inbounds activeStaticMon = static_state.teams[agent]
         if allow_nothing
             if activeTeam.shields == Int8(0)
                 @inbounds if activeMon.energy >= activeStaticMon.chargedMoves[1].energy

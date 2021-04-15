@@ -1,13 +1,15 @@
-function diff(t1::DynamicIndividual, t2::DynamicIndividual)
+function diff(t1::DynamicIndividualPokemon, t2::DynamicIndividualPokemon)
+    if t1.hp != t2.hp
+        println("Hp changed from $(t1.hp) to $(t2.hp)")
+    end
+    if t1.energy != t2.energy
+        println("Energy changed from $(t1.energy) to $(t2.energy)")
+    end
     if t1.shields != t2.shields
         println("Shields changed from $(t1.shields) to $(t2.shields)")
     end
     if t1.buffs != t2.buffs
         diff(t1.buffs, t2.buffs)
-    end
-    if t1.mon != t2.mon
-        println("Mon 1: ")
-        diff(t1.mon, t2.mon)
     end
 end
 

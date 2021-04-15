@@ -6,14 +6,14 @@ function play_turn(state::DynamicIndividualState, static_state::StaticIndividual
     end
 
     @inbounds next_state = step_timers(next_state,
-        3 <= decision[1] <= 4 ? static_state.teams[1].mon.fastMove.cooldown : Int8(0),
-        3 <= decision[2] <= 4 ? static_state.teams[2].mon.fastMove.cooldown : Int8(0))
+        3 <= decision[1] <= 4 ? static_state.teams[1].fastMove.cooldown : Int8(0),
+        3 <= decision[2] <= 4 ? static_state.teams[2].fastMove.cooldown : Int8(0))
 
     cmp = get_cmp(static_state, 5 <= decision[1], 5 <= decision[2])
     @inbounds if cmp[1] != Int8(0)
         @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[1],
             5 <= decision[cmp[1]] <= 6 ? Int8(1) : Int8(2), Int8(100), iseven(decision[get_other_agent(cmp[1])]),
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].mon.chargedMoves[5 <= decision[cmp[1]] <= 6 ? Int8(1) : Int8(2)].buffChance)
+            rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].chargedMoves[5 <= decision[cmp[1]] <= 6 ? Int8(1) : Int8(2)].buffChance)
         @inbounds if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
             @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1] == Int8(1), cmp[1] == Int8(2))
         end
@@ -21,7 +21,7 @@ function play_turn(state::DynamicIndividualState, static_state::StaticIndividual
     @inbounds if cmp[2] != Int8(0)
         @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[2],
             5 <= decision[cmp[2]] <= 6 ? Int8(1) : Int8(2), Int8(100), iseven(decision[cmp[1]]),
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mon.chargedMoves[5 <= decision[cmp[2]] <= 6 ? Int8(1) : Int8(2)].buffChance)
+            rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].chargedMoves[5 <= decision[cmp[2]] <= 6 ? Int8(1) : Int8(2)].buffChance)
         @inbounds if next_state.fastMovesPending[cmp[1]] != Int8(-1)
             @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1] == Int8(1), cmp[1] == Int8(2))
         end
