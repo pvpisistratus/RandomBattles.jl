@@ -1,5 +1,27 @@
 using StaticArrays
 
+function select_random_decision(weights1::SVector{20, Float64}, weights2::SVector{20, Float64})
+    d1, d2 = rand(), rand()
+    j = 0.0
+    decision1, decision2 = 20, 20
+    for i = 1:19
+        @inbounds j += weights1[i]
+        if d1 < j
+            decision1 = i
+            break
+        end
+    end
+    j = 0.0
+    for i = 1:19
+        @inbounds j += weights2[i]
+        if d2 < j
+            decision2 = i
+            break
+        end
+    end
+    return decision1, decision2
+end
+
 function get_possible_decisions(state::DynamicState, static_state::StaticState, agent::Int64; allow_nothing::Bool = false)
     @inbounds activeTeam = state.teams[agent]
     @inbounds if activeTeam.mons[activeTeam.active].hp == Int16(0)

@@ -34,7 +34,8 @@ function evaluate_fast_moves(state::DynamicIndividualState, static_state::Static
     end
 end
 
-function evaluate_charged_moves(state::DynamicIndividualState, static_state::StaticIndividualState, cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool, buffs_applied::Bool)
+function evaluate_charged_moves(state::DynamicIndividualState, static_state::StaticIndividualState,
+  cmp::Int8, move_id::Int8, charge::Int8, shielding::Bool, buffs_applied::Bool)
     @inbounds if defaultBuff == state.teams[1].buffs == state.teams[2].buffs
         if cmp == Int8(1)
             @inbounds return DynamicIndividualState(@SVector[
