@@ -20,7 +20,6 @@ include("team/diff.jl")
 
 # individual battles
 include("individual/pokemon.jl")
-include("individual/individual.jl")
 include("individual/state.jl")
 include("individual/mechanics.jl")
 include("individual/decisions.jl")
