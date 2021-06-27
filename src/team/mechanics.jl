@@ -101,7 +101,7 @@ the dynamic state after the fast move has occurred, with precisely one copy
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
         using_fm::Tuple{Bool, Bool})
     active = get_active(state)
-    @inbounds new_mons = @SMatrix [0x0001 == active[i] ?
+    @inbounds new_mons = @SMatrix [UInt16(j) == active[i] ?
                     add_energy(damage(state.teams[i].mons[j],
                     using_fm[get_other_agent(i)] ? calculate_damage(
                         static_state.teams[get_other_agent(i)].mons[
@@ -110,9 +110,9 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
                         static_state.teams[i].mons[j],
                         static_state.teams[get_other_agent(i)].mons[
                             active[get_other_agent(i)]].fastMove,
-                    ) : 0x0000), using_fm[i] ?
+                    ) : 0x0000), (using_fm[i] ?
                     static_state.teams[i].mons[j].fastMove.energy :
-                    Int8(0)) for i = 1:2, j = 1:3]
+                    Int8(0))) : state.teams[i].mons[j] for i = 1:2, j = 1:3]
     return DynamicState(@SVector[DynamicTeam(new_mons[1, :],
         state.teams[1].switchCooldown, state.teams[1].data),
         DynamicTeam(new_mons[2, :], state.teams[2].switchCooldown,
