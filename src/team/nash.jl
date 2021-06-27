@@ -82,7 +82,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
         odds = move.buffChance / 100
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
-        if odds == 1.0
+        if odds > 0.99
             @inbounds payoffs[i, j] = odds * SM(play_turn(state_1, static_state,
                 get_decision(A, B, i, j)), static_state, depth - 1,
                 allow_nothing = allow_nothing,
