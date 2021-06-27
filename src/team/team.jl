@@ -25,3 +25,4 @@ DynamicTeam(team::StaticTeam) = DynamicTeam(DynamicPokemon.(team.mons), Int8(0),
 # equivalent speed, but this is more readable.
 get_other_agent(agent::Int8) = agent == Int8(1) ? Int8(2) : Int8(1)
 get_other_agent(agent::UInt16) = agent == 0x0001 ? 0x0002 : 0x0001
+get_other_agent(agent::Int64) = agent == 1 ? 2 : 1
