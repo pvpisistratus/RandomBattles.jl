@@ -38,7 +38,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
         end
         if decision[1] == 0x04
             if decision[2] == 0x04
-                atk_cmp = cmp(
+                atk_cmp = Base.cmp(
                     static_state.teams[1].mons[active[1]].stats.attack,
                     static_state.teams[2].mons[active[2]].stats.attack
                 )
