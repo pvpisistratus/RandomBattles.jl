@@ -21,7 +21,10 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
     else
         @inbounds if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
             next_state = evaluate_fast_moves(next_state, static_state,
-                (fm_pending[1] == 0x0001, fm_pending[2] == 0x0001))
+                (fm_pending[1] == 0x0001 &&
+                get_hp(next_state.teams[1].mons[active[1]]) != 0x0000, 
+                fm_pending[2] == 0x0001 &&
+                get_hp(next_state.teams[2].mons[active[2]]) != 0x0000))
         end
 
         @inbounds next_state = step_timers(next_state,
