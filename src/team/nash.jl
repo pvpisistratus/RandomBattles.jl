@@ -65,9 +65,10 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
         state_2 = DynamicState(state.teams, state.data - 0x4050)
     else
         state_1 = DynamicState(state.teams, state.data - chance * 0x0f50)
-        agent = chance >> 0x0002
+        active = get_active(state)
+        agent = chance >> 0x0001
         move = static_state.teams[agent].mons[active[agent]].chargedMoves[
-            chance & 0x0003]
+            isodd(chance) ? 1 : 2]
         a_data = static_state.teams[agent].data
         d_data = static_state.teams[get_other_agent(agent)].data
         a_data, d_data = apply_buff(a_data, d_data, move)
