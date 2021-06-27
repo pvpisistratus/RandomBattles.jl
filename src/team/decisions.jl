@@ -27,12 +27,12 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
 
     if isodd(cmp) # if team 1 is using a charged move and has cmp
         @inbounds d = (get_energy(state.teams[1].mons[active[1]]) >=
-            static_state.teams[1].mons[active[1]].chargedMoves[2] ?
+            static_state.teams[1].mons[active[1]].chargedMoves[2].energy ?
             0xc0 : 0x40, has_shield(state.teams[2]) ? 0x03 : 0x02)
     elseif !iszero(cmp) # if team 2 is using a charged move and has cmp
         @inbounds d = (has_shield(state.teams[1]) ? 0x03 : 0x02,
             get_energy(state.teams[2].mons[active[2]]) >=
-            static_state.teams[2].mons[active[2]].chargedMoves[2] ?
+            static_state.teams[2].mons[active[2]].chargedMoves[2].energy ?
             0xc0 : 0x40)
     else
         for i = 1:2
@@ -45,7 +45,7 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
                 end
                 @inbounds if get_hp(state.teams[i].mons[active[i]]) != 0x0000 &&
                     get_energy(state.teams[i].mons[active[i]]) >=
-                    static_state.teams[i].mons[active[i]].chargedMoves[1]
+                    static_state.teams[i].mons[active[i]].chargedMoves[1].energy
                     @inbounds d = i == 1 ? (d[1] + 0x08, d[2]) :
                         (d[1], d[2] + 0x08)
                 end
