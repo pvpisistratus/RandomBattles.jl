@@ -13,7 +13,6 @@ end
 
 """
     StatBuffs(val)
-
 Because the stat buffs can only be between -4 and 4 inclusive, they are collectively
 stored as one 8-bit integer. Use of this constructor is not recommended. Also,
 use get_atk and get_def functions for extracting individual values.
@@ -24,7 +23,6 @@ end
 
 """
     StatBuffs(atk, def)
-
 Friendlier constructor for StatBuffs where attack and defense buffs can be
 passed in
 """
@@ -34,21 +32,18 @@ end
 
 """
     get_atk(x::StatBuffs)
-
 Get the attack value of the StatBuffs passed in
 """
 get_atk(x::StatBuffs) = Int8(x.val & 0x0F) - Int8(8)
 
 """
     get_def(x::StatBuffs)
-
 Get the defense value of the StatBuffs passed in
 """
 get_def(x::StatBuffs) = Int8(x.val >> 4) - Int8(8)
 
 """
     +(x::StatBuffs, y::StatBuffs)
-
 Adding two StatBuffs together adds the attack and defense values, and clamps
 the result between -4 and 4 inclusive.
 """

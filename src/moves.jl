@@ -74,7 +74,7 @@ function ChargedMove(gm_move::Dict{String,Any}, types)
         (typings[gm_move["type"]] in types) ? Int8(12) : Int8(10),
         UInt8(gm_move["power"]),
         Int8(gm_move["energy"]),
-        haskey(gm_move, "buffs") ? floor(Int8, parse(Float64, gm_move["buffApplyChance"]) * 100) : Int8(0),
+        haskey(gm_move, "buffs") ? round(Int8, parse(Float64, gm_move["buffApplyChance"]) * 100) : Int8(0),
         StatBuffs(haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][2]) : Int8(0)),
         StatBuffs(haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][2]) : Int8(0))
     )

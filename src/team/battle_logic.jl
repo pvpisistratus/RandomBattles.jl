@@ -1,56 +1,96 @@
-function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{Int64,Int64})
+function play_turn(state::DynamicState, static_state::StaticState, decision::Tuple{UInt8, UInt8})
     next_state = state
 
-    @inbounds if next_state.fastMovesPending[1] == Int8(0) || next_state.fastMovesPending[2] == Int8(0)
+    fm_pending = get_fast_moves_pending(state)
+
+    @inbounds if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
         next_state = evaluate_fast_moves(next_state, static_state,
-            next_state.fastMovesPending[1] == Int8(0),
-            next_state.fastMovesPending[2] == Int8(0))
+            (fm_pending[1] == 0x0001, fm_pending[2] == 0x0001))
     end
 
-    @inbounds next_state = step_timers(next_state,
-        2 < decision[1] < 5 ? static_state.teams[1].mons[next_state.teams[1].active].fastMove.cooldown : Int8(0),
-        2 < decision[2] < 5 ? static_state.teams[2].mons[next_state.teams[2].active].fastMove.cooldown : Int8(0))
+    active = get_active(next_state)
+    cmp = get_cmp(state)
 
-    @inbounds if 8 < decision[1]
-        next_state = evaluate_switch(next_state, Int8(1),
-            decision[1] < 11 || 14 < decision[1] < 17 ? Int8(1) :
-            decision[1] < 13 || 16 < decision[1] < 19 ? Int8(2) : Int8(3),
-            decision[1] < 15 ? Int8(0) : Int8(24))
-    end
-    @inbounds if 8 < decision[2]
-        next_state = evaluate_switch(next_state, Int8(2),
-            decision[2] < 11 || 14 < decision[2] < 17 ? Int8(1) :
-            decision[2] < 13 || 16 < decision[2] < 19 ? Int8(2) : Int8(3),
-            decision[2] < 15 ? Int8(0) : Int8(24))
-    end
-
-    cmp = get_cmp(next_state, static_state, 4 < decision[1] < 9, 4 < decision[2] < 9)
-    @inbounds if cmp[1] != Int8(0)
-        @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[1],
-            decision[cmp[1]] < 7 ? Int8(1) : Int8(2), Int8(100), iseven(decision[get_other_agent(cmp[1])]),
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].mons[next_state.teams[cmp[1]].active].chargedMoves[decision[cmp[1]] < 7 ? Int8(1) : Int8(2)].buffChance)
-        @inbounds if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, Int8(1) == cmp[1], Int8(2) == cmp[1])
+    if !iszero(cmp)
+        agent = isodd(cmp) ? 1 : 2
+        @inbounds next_state = evaluate_charged_move(next_state,
+            static_state, cmp, decision[agent] == 0x07 ? 0x01 : 0x02,
+            0x64, decision[get_other_agent(agent)] == 0x01)
+        @inbounds if !iszero(fm_pending[get_other_agent(agent)])
+            @inbounds next_state = evaluate_fast_moves(next_state,
+                static_state, 1 == agent, 2 == agent)
         end
-    end
-    @inbounds if cmp[2] != Int8(0)
-        @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[2],
-            decision[cmp[2]] < 7 ? Int8(1) : Int8(2), Int8(100), iseven(decision[cmp[1]]),
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].mons[next_state.teams[cmp[2]].active].chargedMoves[decision[cmp[2]] < 7 ? Int8(1) : Int8(2)].buffChance)
-        @inbounds if next_state.fastMovesPending[cmp[1]] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, Int8(1) == cmp[2], Int8(2) == cmp[2])
+    else
+        @inbounds next_state = step_timers(next_state,
+            decision[1] == 0x03 ?
+                static_state.teams[1].mons[active(1)].fastMove.cooldown :
+                Int8(0),
+            decision[2] == 0x03 ?
+                static_state.teams[2].mons[active(2)].fastMove.cooldown :
+                Int8(0))
+        for agent = 1:2
+            @inbounds if decision[agent] == 0x05 || decision[agent] == 0x06
+                @inbounds next_state = evaluate_switch(next_state, agent,
+                    active[agent], decision[agent] - 0x04,
+                    iszero(get_hp(state.teams[agent].mons[active[agent]])) ?
+                    0x18 : 0x00)
+            end
         end
+        if decision[1] == 0x04
+            if decision[2] == 0x04
+                atk_cmp = cmp(
+                    static_state.teams[1].mons[active(1)].stats.attack,
+                    static_state.teams[1].mons[active(1)].stats.attack
+                )
+                if atk_cmp == 1
+                    next_state = DynamicState(next_state.teams,
+                        next_state.data + 0x0930)
+                elseif atk_cmp == -1
+                    next_state = next_state(next_state.teams,
+                        next_state.data + 0x0c40)
+                else
+                    next_state = DynamicState(next_state.teams,
+                        next_state.data + 0x4c90)
+                end
     end
 
     return next_state
 end
 
-function play_battle(starting_state::DynamicState, static_state::StaticState)
-    state = starting_state
+function resolve_chance(state::DynamicState, static_state::StaticState)
+    chance = get_chance(state::DynamicState)
+    if chance == 0x0005
+        return rand() < 0.5 ?
+            # subtract chance, add cmp
+            DynamicState(state.teams, state.data - 0x4360) :
+            DynamicState(state.teams, state.data - 0x4050)
+    else
+        agent = chance >> 0x0002
+        move = static_state.teams[agent].mons[active[agent]].chargedMoves[
+            chance & 0x0003]
+        if rand(Int8(0):Int8(99)) < move.buffChance
+            a_data = static_state.teams[agent].data
+            d_data = static_state.teams[get_other_agent(agent)].data
+            a_data, d_data = apply_buff(a_data, d_data, move)
+            return DynamicState(@SVector[
+                DynamicTeam(state.teams[1].mons, state.teams[1].switchCooldown,
+                    agent == 0x0001 ? a_data : d_data),
+                DynamicTeam(state.teams[2].mons, state.teams[2].switchCooldown,
+                    agent == 0x0002 ? a_data : d_data)
+            ], state.data - chance * 0x0f50)
+        else
+            return DynamicState(state.teams, state.data - chance * 0x0f50)
+        end
+    end
+end
+
+function play_battle(state::DynamicState, static_state::StaticState;
+    allow_nothing::Bool = allow_nothing, allow_overfarming::Bool = allow_overfarming)
     while true
-        weights1, weights2 = get_possible_decisions(state, static_state, 1), get_possible_decisions(state, static_state, 2)
-        (iszero(weights1) || iszero(weights2)) && return get_battle_score(state, static_state)
-        state = play_turn(state, static_state, select_random_decision(weights1, weights2))
+        d1, d2 = get_possible_decisions(state, static_state,
+            allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
+        (iszero(d1) || iszero(d2)) && return get_battle_score(state, static_state)
+        state = play_turn(state, static_state, select_random_decision(d1, d2))
     end
 end
 

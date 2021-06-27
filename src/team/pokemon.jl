@@ -12,93 +12,6 @@ struct StaticPokemon
     stats::Stats
     fastMove::FastMove
     chargedMoves::SVector{2,ChargedMove}
-    damage_matrix::SMatrix{3, 3, Int16, 9}
-end
-
-"""
-    get_effectiveness(defenderTypes, moveType)
-
-Compute the effectiveness of a particular move against a type combination.
-In the example below, flying is super-effective against a pure fighting type.
-
-# Examples
-```jldoctest
-julia> using StaticArrays; get_effectiveness(@SVector[Int8(2), Int8(19)], Int8(3))
-1.6
-"""
-function get_effectiveness(defenderTypes::SVector{2,Int8}, moveType::Int8)
-    @inbounds return type_effectiveness[defenderTypes[1], moveType] *
-            type_effectiveness[defenderTypes[2], moveType]
-end
-
-"""
-    get_buff_modifier(buff)
-
-Compute the mulitplier associated with stat buffs (multiplied by 12 to return an integer).
-As a result, the multiplier for no buff effect is 0. Inputs should be between -4 and 4.
-
-# Examples
-```jldoctest
-julia> get_buff_modifier(Int8(0))
-12
-"""
-function get_buff_modifier(buff::Int8)
-    return buff == Int8(0) ? Int8(12) : (buff > Int8(0) ? Int8(12) + Int8(3) * buff : Int8(48) ÷ (Int8(4) - buff))
-end
-
-"""
-    calculate_damage(
-        attacker::StaticPokemon,
-        atkBuff::Int8,
-        defender::StaticPokemon,
-        defBuff::Int8,
-        move::FastMove,
-        charge::Int8,
-    )
-
-Calculate the damage a particular pokemon does against another using its fast move
-
-"""
-function calculate_damage(
-    attack::UInt16,
-    atkBuff::Int8,
-    defender::StaticPokemon,
-    defBuff::Int8,
-    move::FastMove
-)
-    return Int16((Int64(move.power) * Int64(move.stab) *
-        Int64(attack) * Int64(get_buff_modifier(atkBuff)) *
-        floor(Int64, get_effectiveness(defender.types, move.moveType) *
-        12_800) * 65) ÷ (Int64(defender.stats.defense) *
-        Int64(get_buff_modifier(defBuff)) * 12_800_000) + 1)
-end
-
-"""
-    calculate_damage(
-        attacker::StaticPokemon,
-        atkBuff::Int8,
-        defender::StaticPokemon,
-        defBuff::Int8,
-        move::ChargedMove,
-        charge::Int8,
-    )
-
-Calculate the damage a particular pokemon does against another using a charged move
-
-"""
-function calculate_damage(
-    attack::UInt16,
-    atkBuff::Int8,
-    defender::StaticPokemon,
-    defBuff::Int8,
-    move::ChargedMove,
-    charge::Int8,
-)
-    return Int16((Int64(move.power) * Int64(move.stab) *
-        Int64(attack) * Int64(get_buff_modifier(atkBuff)) *
-        floor(Int64, get_effectiveness(defender.types, move.moveType) *
-        12_800) * Int64(charge) * 65) ÷ (Int64(defender.stats.defense) *
-        Int64(get_buff_modifier(defBuff)) * 1_280_000_000) + 1)
 end
 
 """
@@ -166,15 +79,6 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
         stats,
         fastMove,
         chargedMoves,
-        (isnothing(opponents) ? (@SMatrix [
-            Int16(0) Int16(0) Int16(0)
-            Int16(0) Int16(0) Int16(0)
-            Int16(0) Int16(0) Int16(0)
-        ]) : (@SMatrix [
-            calculate_damage(attack, Int8(0), opponents[1], Int8(0), fastMove) calculate_damage(attack, Int8(0), opponents[1], Int8(0), chargedMoves[1], Int8(100)) calculate_damage(attack, Int8(0), opponents[1], Int8(0), chargedMoves[2], Int8(100))
-            calculate_damage(attack, Int8(0), opponents[2], Int8(0), fastMove) calculate_damage(attack, Int8(0), opponents[2], Int8(0), chargedMoves[1], Int8(100)) calculate_damage(attack, Int8(0), opponents[2], Int8(0), chargedMoves[2], Int8(100))
-            calculate_damage(attack, Int8(0), opponents[3], Int8(0), fastMove) calculate_damage(attack, Int8(0), opponents[3], Int8(0), chargedMoves[1], Int8(100)) calculate_damage(attack, Int8(0), opponents[3], Int8(0), chargedMoves[2], Int8(100))
-        ]))
     )
 end
 
@@ -185,25 +89,24 @@ Construct a StaticPokemon from the name of the pokemon, and the meta it is
 within. Movesets and IVs can also be specified by comma-separating the string
 being passed in.
 """
-function StaticPokemon(mon::String; league = "great", cup = "open",
-  opponents::Union{Nothing, SVector{3,StaticPokemon}} = nothing)
+function StaticPokemon(mon::String; league = "great", cup = "open")
     if occursin(",", mon)
         mon_arr = split(mon, ",")
         if length(mon_arr) == 4
             return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
-                league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]), opponents = opponents)
+                league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]))
         elseif length(mon_arr) == 7
-            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
+            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1])),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
                 custom_stats = ("0", mon_arr[5], mon_arr[6], mon_arr[7]), opponents = opponents)
         elseif length(mon_arr) == 8
-            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
+            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1])),
                 league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
-                custom_stats = (mon_arr[5], mon_arr[6], mon_arr[7], mon_arr[8]), opponents = opponents)
+                custom_stats = (mon_arr[5], mon_arr[6], mon_arr[7], mon_arr[8]))
         end
     else
         return StaticPokemon(get_rankings_mon_id(mon, league = league, cup = cup),
-            league = league, cup = cup, opponents = opponents)
+            league = league, cup = cup)
     end
 end
 
@@ -215,8 +118,7 @@ the battle: current hp and energy. Note that like moves, this struct is
 agnostic to the actual identity/dex/species of the mon.
 """
 struct DynamicPokemon
-    hp::Int16                 #Initially hp stat of mon
-    energy::Int8              #Initially 0
+    data::UInt16    # hp (initially hitpoints stat) and energy (initially 0)
 end
 
 """
@@ -225,6 +127,28 @@ end
 Construct a starting DynamicPokemon from a StaticPokemon. This is just setting
 the starting hp of the mon to the stat value, and the energy to zero.
 """
+
+function get_energy(p::DynamicPokemon)
+    return p.d >> 0x0009
+end
+
+function get_hp(p::DynamicPokemon)
+    return p.d % 0x0200
+end
+
+function add_energy(p::DynamicPokemon, e::Int8)
+    return DynamicPokemon(min(0x0064, get_energy(p) + e) << 9 + get_hp(p))
+end
+
+function subtract_energy(p::DynamicPokemon, e::Int8)
+    curr_e = get_energy(p)
+    return DynamicPokemon((curr_e - min(curr_e, e)) << 9 + get_hp(p))
+end
+
+function damage(p::DynamicPokemon, d::UInt16)
+    return DynamicPokemon(p.d - min(get_hp(p), d))
+end
+
 function DynamicPokemon(mon::StaticPokemon)
-    return DynamicPokemon(mon.stats.hitpoints, Int8(0))
+    DynamicPokemon(mon.stats.hitpoints)
 end

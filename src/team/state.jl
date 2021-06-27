@@ -6,7 +6,7 @@ end
 
 struct DynamicState
     teams::SVector{2,DynamicTeam}
-    fastMovesPending::SVector{2,Int8}
+    data::UInt16                    # active, fastMovesPending, cmp, chance
 end
 
 function StaticState(teams::Array{Int64}; league = "great", cup = "open")
@@ -38,5 +38,15 @@ function StaticState(teams::Array{String}; league = "great", cup = "open")
 end
 
 StaticState(team1::StaticTeam, team2::StaticTeam) = StaticState([team1, team2])
+
+get_active(state::DynamicState) = state.data & 0x0003,
+    (state.data >> 0x0002) & 0x0003
+
+get_fast_moves_pending(state::DynamicState) = state.data % 0x0070,
+    (state.data ÷ 0x0070) % 0x0007
+
+get_cmp(state::DynamicState) = (state.data ÷ 0x0310) % 0x0005
+
+get_chance(state::DynamicState) = state.data ÷ 0x0f50
 
 DynamicState(state::StaticState) = DynamicState(DynamicTeam.(state.teams), [Int8(-1), Int8(-1)])

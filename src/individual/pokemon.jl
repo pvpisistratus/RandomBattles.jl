@@ -37,7 +37,7 @@ function calculate_damage(
 )
     return Int16((Int64(move.power) * Int64(move.stab) *
         Int64(attack) * Int64(get_buff_modifier(atkBuff)) *
-        floor(Int64, get_effectiveness(defender.types, move.moveType) *
+        trunc(Int64, get_effectiveness(defender.types, move.moveType) *
         12_800) * 65) ÷ (Int64(defender.stats.defense) *
         Int64(get_buff_modifier(defBuff)) * 12_800_000) + 1)
 end
@@ -65,7 +65,7 @@ function calculate_damage(
 )
     return Int16((Int64(move.power) * Int64(move.stab) *
         Int64(attack) * Int64(get_buff_modifier(atkBuff)) *
-        floor(Int64, get_effectiveness(defender.types, move.moveType) *
+        trunc(Int64, get_effectiveness(defender.types, move.moveType) *
         12_800) * Int64(charge) * 65) ÷ (Int64(defender.stats.defense) *
         Int64(get_buff_modifier(defBuff)) * 1_280_000_000) + 1)
 end
@@ -89,8 +89,8 @@ function StaticIndividualPokemon(i::Int64; league::String = "great", cup = "open
             function get_cp(lvl)
                 attack = (atk + gm["baseStats"]["atk"]) * cpm[lvl]
                 defense = (def + gm["baseStats"]["def"]) * cpm[lvl]
-                hitpoints = floor(Int16, (hp + gm["baseStats"]["hp"]) * cpm[lvl])
-                cp = floor(max(10, (attack * sqrt(defense) * sqrt(hitpoints)) / 10.0))
+                hitpoints = trunc(Int16, (hp + gm["baseStats"]["hp"]) * cpm[lvl])
+                cp = trunc(max(10, (attack * sqrt(defense) * sqrt(hitpoints)) / 10.0))
                 return cp
             end
             level = (1:0.5:40)[findfirst(x -> get_cp(x) > cp_limit, 1:0.5:40) - 1]
@@ -103,9 +103,9 @@ function StaticIndividualPokemon(i::Int64; league::String = "great", cup = "open
         def = gm["defaultIVs"]["cp$(cp_limit)"][3]
         hp = gm["defaultIVs"]["cp$(cp_limit)"][4]
     end
-    attack = haskey(gm, "tags") && "shadow" in gm["tags"] ? floor(UInt16, (6/5 * atk + gm["baseStats"]["atk"]) * cpm[level] * 100) : floor(UInt16, (atk + gm["baseStats"]["atk"]) * cpm[level] * 100)
-    defense = haskey(gm, "tags") && "shadow" in gm["tags"] ? floor(UInt16, (5/6 * def + gm["baseStats"]["def"]) * cpm[level] * 100) : floor(UInt16, (def + gm["baseStats"]["def"]) * cpm[level] * 100)
-    hitpoints = floor(Int16, (hp + gm["baseStats"]["hp"]) * cpm[level])
+    attack = haskey(gm, "tags") && "shadow" in gm["tags"] ? trunc(UInt16, (6/5 * atk + gm["baseStats"]["atk"]) * cpm[level] * 100) : trunc(UInt16, (atk + gm["baseStats"]["atk"]) * cpm[level] * 100)
+    defense = haskey(gm, "tags") && "shadow" in gm["tags"] ? trunc(UInt16, (5/6 * def + gm["baseStats"]["def"]) * cpm[level] * 100) : trunc(UInt16, (def + gm["baseStats"]["def"]) * cpm[level] * 100)
+    hitpoints = trunc(Int16, (hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
     if haskey(rankings[i], "moveStr")
         moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
