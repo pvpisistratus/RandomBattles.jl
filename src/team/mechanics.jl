@@ -121,14 +121,14 @@ end
 
 
 """
-    evaluate_charged_moves(state, static_state, cmp, move_id, charge, shielding, buffs_applied)
+    evaluate_charged_move(state, static_state, cmp, move_id, charge, shielding, buffs_applied)
 
 Takes in the dynamic state, the static state, the attacking agent, the move,
 the charge, whether or not the opponent shields, and whether or not buffs are
 applied (say in the case of a random buff move) and returns
 the dynamic state after the charged move has occurred, with precisely one copy
 """
-function evaluate_charged_moves(state::DynamicState, static_state::StaticState,
+function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     cmp::Int16, move_id::Int8, charge::Int8, shielding::Bool)
     next_state = state
     active = get_active(next_state)
