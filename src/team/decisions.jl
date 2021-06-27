@@ -50,12 +50,12 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
                         (d[1], d[2] + 0x08)
                 end
                 @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0001 ?
-                    2 : 1]) != 0x0000
+                    2 : 1]) != 0x0000 && state.teams[i].switchCooldown == Int8(0)
                     @inbounds d = i == 1 ? (d[1] + 0x10, d[2]) :
                         (d[1], d[2] + 0x10)
                 end
                 @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0003 ?
-                    2 : 3]) != 0x0000
+                    2 : 3]) != 0x0000 && state.teams[i].switchCooldown == Int8(0)
                     @inbounds d = i == 1 ? (d[1] + 0x20, d[2]) :
                         (d[1], d[2] + 0x20)
                 end
