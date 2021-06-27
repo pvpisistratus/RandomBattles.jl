@@ -27,8 +27,8 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
 
     active = get_active(state)
     fast_moves_pending = get_fast_moves_pending(state)
-    cmp = get_cmp(state)
 
+    cmp = get_cmp(state)
     if isodd(cmp) # if team 1 is using a charged move and has cmp
         @inbounds d = (get_energy(state.teams[1].mons[active[1]]) >=
             static_state.teams[1].mons[active[1]].chargedMoves[2].energy ?
@@ -40,52 +40,51 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
             0xc0 : 0x40)
     else
         for i = 1:2
-            if fast_moves_pending[i] <= 0x0001
-                @inbounds if get_hp(state.teams[i].mons[active[i]]) != 0x0000 &&
-                    (allow_overfarming ||
-                    get_energy(state.teams[i].mons[active[i]]) != 0x0064)
-                    @inbounds d = i == 1 ? (d[1] + 0x04, d[2]) :
-                        (d[1], d[2] + 0x04)
-                end
-                @inbounds if get_hp(state.teams[i].mons[active[i]]) != 0x0000 &&
-                    get_energy(state.teams[i].mons[active[i]]) >=
-                    static_state.teams[i].mons[active[i]].chargedMoves[1].energy
-                    @inbounds d = i == 1 ? (d[1] + 0x08, d[2]) :
-                        (d[1], d[2] + 0x08)
-                end
-                @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0001 ?
-                    2 : 1]) != 0x0000 && state.teams[i].switchCooldown == Int8(0)
+            if get_hp(state.teams[i].mons[active[i]]) == 0x0000
+                @inbounds if get_hp(state.teams[i].mons[(active[i] == 0x0001 ?
+                    2 : 1)]) != 0x0000
                     @inbounds d = i == 1 ? (d[1] + 0x10, d[2]) :
                         (d[1], d[2] + 0x10)
                 end
-                @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0003 ?
-                    2 : 3]) != 0x0000 && state.teams[i].switchCooldown == Int8(0)
+                @inbounds if get_hp(state.teams[i].mons[(active[i] == 0x0003 ?
+                    2 : 3)]) != 0x0000
                     @inbounds d = i == 1 ? (d[1] + 0x20, d[2]) :
                         (d[1], d[2] + 0x20)
                 end
-                if get_hp(state.teams[i].mons[active[i]]) != 0x0000 &&
-                    allow_nothing
-                    @inbounds d = i == 1 ? (d[1] + 0x02, d[2]) :
-                        (d[1], d[2] + 0x02)
-                end
             else
-                if get_hp(state.teams[i].mons[active[i]]) != 0x0000
-                    @inbounds d = i == 1 ? (d[1] + 0x02, d[2]) :
-                        (d[1], d[2] + 0x02)
-                else
+                if fast_moves_pending[i] <= 0x0001
+                    @inbounds if allow_overfarming ||
+                        get_energy(state.teams[i].mons[active[i]]) != 0x0064
+                        @inbounds d = i == 1 ? (d[1] + 0x04, d[2]) :
+                            (d[1], d[2] + 0x04)
+                    end
+                    @inbounds if get_energy(state.teams[i].mons[active[i]]) >=
+                        static_state.teams[i].mons[active[i]].chargedMoves[1].energy
+                        @inbounds d = i == 1 ? (d[1] + 0x08, d[2]) :
+                            (d[1], d[2] + 0x08)
+                    end
                     @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0001 ?
-                        2 : 1]) != 0x0000
+                        2 : 1]) != 0x0000 && state.teams[i].switchCooldown == Int8(0)
                         @inbounds d = i == 1 ? (d[1] + 0x10, d[2]) :
                             (d[1], d[2] + 0x10)
                     end
                     @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0003 ?
-                        2 : 3]) != 0x0000
+                        2 : 3]) != 0x0000 && state.teams[i].switchCooldown == Int8(0)
                         @inbounds d = i == 1 ? (d[1] + 0x20, d[2]) :
                             (d[1], d[2] + 0x20)
                     end
+                    if allow_nothing
+                        @inbounds d = i == 1 ? (d[1] + 0x02, d[2]) :
+                            (d[1], d[2] + 0x02)
+                    end
+                else
+                    @inbounds d = i == 1 ? (d[1] + 0x02, d[2]) :
+                        (d[1], d[2] + 0x02)
                 end
             end
         end
+
+    end
     end
 
     return d

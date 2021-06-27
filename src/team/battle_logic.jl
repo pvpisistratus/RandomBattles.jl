@@ -36,29 +36,33 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
                     0x18 : 0x00)
             end
         end
-        if decision[1] == 0x04
-            if decision[2] == 0x04
-                atk_cmp = Base.cmp(
-                    static_state.teams[1].mons[active[1]].stats.attack,
-                    static_state.teams[2].mons[active[2]].stats.attack
-                )
-                if atk_cmp == 1
-                    next_state = DynamicState(next_state.teams,
-                        next_state.data + 0x0930)
-                elseif atk_cmp == -1
-                    next_state = DynamicState(next_state.teams,
-                        next_state.data + 0x0c40)
+        new_active = get_active(new_state)
+        if get_hp(next_state.teams[1].mons[new_active[1]]) != 0x0000 &&
+            get_hp(next_state.teams[1].mons[new_active[1]]) != 0x0000
+            if decision[1] == 0x04
+                if decision[2] == 0x04
+                    atk_cmp = Base.cmp(
+                        static_state.teams[1].mons[active[1]].stats.attack,
+                        static_state.teams[2].mons[active[2]].stats.attack
+                    )
+                    if atk_cmp == 1
+                        next_state = DynamicState(next_state.teams,
+                            next_state.data + 0x0930)
+                    elseif atk_cmp == -1
+                        next_state = DynamicState(next_state.teams,
+                            next_state.data + 0x0c40)
+                    else
+                        next_state = DynamicState(next_state.teams,
+                            next_state.data + 0x4c90)
+                    end
                 else
                     next_state = DynamicState(next_state.teams,
-                        next_state.data + 0x4c90)
+                        next_state.data + 0x0310)
                 end
-            else
+            elseif decision[2] == 0x04
                 next_state = DynamicState(next_state.teams,
-                    next_state.data + 0x0310)
+                    next_state.data + 0x0620)
             end
-        elseif decision[2] == 0x04
-            next_state = DynamicState(next_state.teams,
-                next_state.data + 0x0620)
         end
     end
 
