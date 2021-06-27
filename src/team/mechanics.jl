@@ -146,7 +146,6 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     elseif buff_chance != Int8(0)
         data += agent == 1 ? (move_id == 0x01 ? 0x0f50 : 0x1ea0) :
                              (move_id == 0x01 ? 0x2df0 : 0x3d40)
-        println("buff chance changed")
     end
 
     attacking_team = DynamicTeam(@SVector[
@@ -170,6 +169,10 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
             )) for i = 1:3],
             next_state.teams[d_agent].switchCooldown, d_data)
     end
+    println(cmp)
+    println(data)
+    println(data - (cmp == 0x0004 ? 0x0930 :
+           (cmp == 0x0002 ? 0x0620 : 0x0310)))
     return DynamicState(
         @SVector[agent == 1 ? attacking_team : defending_team,
                  agent == 2 ? attacking_team : defending_team],
@@ -177,8 +180,8 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         # or go from cmp 3 (1 then 2) to cmp 2
         # or go from cmp 2 to 0
         # or go from cmp 1 to 0
-        data - cmp == 0x0004 ? 0x0930 :
-               cmp == 0x0002 ? 0x0620 : 0x0310
+        data - (cmp == 0x0004 ? 0x0930 :
+               (cmp == 0x0002 ? 0x0620 : 0x0310))
     )
 end
 
