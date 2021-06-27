@@ -111,8 +111,8 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
         push!(strat.hps, ((get_hp(s.teams[1].mons[1]),
                            get_hp(s.teams[1].mons[2]),
                            get_hp(s.teams[1].mons[3])),
-                          (get_hp(s.teams[1].mons[1]),
-                           get_hp(s.teams[1].mons[2]),
-                           get_hp(s.teams[1].mons[3]))))
+                          (get_hp(s.teams[2].mons[1]),
+                           get_hp(s.teams[2].mons[2]),
+                           get_hp(s.teams[2].mons[3]))))
     end
 end
