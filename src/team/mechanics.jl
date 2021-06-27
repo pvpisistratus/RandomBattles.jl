@@ -132,7 +132,6 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     cmp::UInt16, move_id::UInt8, charge::UInt8, shielding::Bool)
     next_state = state
     active = get_active(next_state)
-    println(active)
     agent = isodd(cmp) ? 1 : 2
     d_agent = get_other_agent(agent)
     data = next_state.data
@@ -169,10 +168,6 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
             )) for i = 1:3],
             next_state.teams[d_agent].switchCooldown, d_data)
     end
-    println(cmp)
-    println(data)
-    println(data - (cmp == 0x0004 ? 0x0930 :
-           (cmp == 0x0002 ? 0x0620 : 0x0310)))
     return DynamicState(
         @SVector[agent == 1 ? attacking_team : defending_team,
                  agent == 2 ? attacking_team : defending_team],
