@@ -58,11 +58,12 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     payoffs = zeros(Float64, Base.ctpop_int(A), Base.ctpop_int(B))
 
     state_1, state_2 = state, state
-    odds = 0.5
+    odds = 1.0
     chance = get_chance(state)
     if chance == 0x0005
         state_1 = DynamicState(state.teams, state.data - 0x4360)
         state_2 = DynamicState(state.teams, state.data - 0x4050)
+        odds = 0.5
     else
         state_1 = DynamicState(state.teams, state.data - chance * 0x0f50)
         active = get_active(state)
@@ -81,16 +82,24 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
         odds = move.buffChance / 100
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
-        @inbounds payoffs[i, j] = odds * SM(play_turn(state_1, static_state,
-            get_decision(A, B, i, j)), static_state, depth - 1,
-            allow_nothing = allow_nothing,
-            allow_overfarming = allow_overfarming,
-            sim_to_end = sim_to_end).payoff +
-            (1 - odds) * SM(play_turn(state_2, static_state,
-            get_decision(A, B, i, j)), static_state, depth - 1,
-            allow_nothing = allow_nothing,
-            allow_overfarming = allow_overfarming,
-            sim_to_end = sim_to_end).payoff
+        if odds == 1.0
+            @inbounds payoffs[i, j] = odds * SM(play_turn(state_1, static_state,
+                get_decision(A, B, i, j)), static_state, depth - 1,
+                allow_nothing = allow_nothing,
+                allow_overfarming = allow_overfarming,
+                sim_to_end = sim_to_end).payoff
+        else
+            @inbounds payoffs[i, j] = odds * SM(play_turn(state_1, static_state,
+                get_decision(A, B, i, j)), static_state, depth - 1,
+                allow_nothing = allow_nothing,
+                allow_overfarming = allow_overfarming,
+                sim_to_end = sim_to_end).payoff +
+                (1 - odds) * SM(play_turn(state_2, static_state,
+                get_decision(A, B, i, j)), static_state, depth - 1,
+                allow_nothing = allow_nothing,
+                allow_overfarming = allow_overfarming,
+                sim_to_end = sim_to_end).payoff
+        end
     end
     return nash(payoffs)
 end
