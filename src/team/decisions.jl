@@ -83,8 +83,6 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
                 end
             end
         end
-
-    end
     end
 
     return d
