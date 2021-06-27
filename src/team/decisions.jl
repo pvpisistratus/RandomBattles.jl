@@ -62,7 +62,7 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
                 end
             else
                 if get_hp(state.teams[i].mons[active[i]]) != 0x0000
-                    @inbounds d[i] = 0x02
+                    @inbounds d[i] += 0x02
                 else
                     @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0001 ?
                         2 : 1]) != 0x0000
