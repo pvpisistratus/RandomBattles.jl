@@ -195,19 +195,19 @@ Takes in the dynamic state, the switching agent, which team member they switch t
 and the time in the switch (only applies in switches after a faint) and returns
 the dynamic state after the switch has occurred, with precisely one copy
 """
-function evaluate_switch(state::DynamicState, agent::Int64, active::Int16,
-    to_switch::Int8, time::Int8)
+function evaluate_switch(state::DynamicState, agent::Int64, active::UInt16,
+    to_switch::UInt8, time::UInt8)
     data = state.data
     fmPending = get_fast_moves_pending(state)
     if agent == 1
-        data += active == 0x0001 ? to_switch == Int8(1) ? Int16(1)  : Int16(2) :
-                active == 0x0002 ? to_switch == Int8(1) ? Int16(-1) : Int16(1) :
-                                   to_switch == Int8(2) ? Int16(-2) : Int16(-1)
+        data += active == 0x0001 ? to_switch == 0x01 ? Int16(1)  : Int16(2) :
+                active == 0x0002 ? to_switch == 0x01 ? Int16(-1) : Int16(1) :
+                                   to_switch == 0x01 ? Int16(-2) : Int16(-1)
         data -= fmPending[1] * 0x0010
     else
-        data += active == 0x0001 ? to_switch == Int8(1) ? Int16(4)  : Int16(8) :
-                active == 0x0002 ? to_switch == Int8(1) ? Int16(-4) : Int16(4) :
-                                   to_switch == Int8(2) ? Int16(-8) : Int16(-8)
+        data += active == 0x0001 ? to_switch == 0x01 ? Int16(4)  : Int16(8) :
+                active == 0x0002 ? to_switch == 0x01 ? Int16(-4) : Int16(4) :
+                                   to_switch == 0x01 ? Int16(-8) : Int16(-8)
         data -= fmPending[2] * 0x0070
     end
     return DynamicState(@SVector[
