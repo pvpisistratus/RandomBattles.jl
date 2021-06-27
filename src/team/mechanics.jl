@@ -132,62 +132,57 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     cmp::UInt16, move_id::UInt8, charge::UInt8, shielding::Bool)
     next_state = state
     active = get_active(next_state)
-    if get_hp(next_state.teams[1].mons[active[1]]) != 0x0000 &&
-        get_hp(next_state.teams[2].mons[active[2]]) != 0x0000
-        agent = isodd(cmp) ? 1 : 2
-        d_agent = get_other_agent(agent)
-        data = next_state.data
-        a_data = next_state.teams[agent].data
-        d_data = next_state.teams[d_agent].data
-        move = static_state.teams[agent].mons[active[agent]].chargedMoves[move_id]
+    agent = isodd(cmp) ? 1 : 2
+    d_agent = get_other_agent(agent)
+    data = next_state.data
+    a_data = next_state.teams[agent].data
+    d_data = next_state.teams[d_agent].data
+    move = static_state.teams[agent].mons[active[agent]].chargedMoves[move_id]
 
-        buff_chance = move.buffChance
-        if buff_chance == Int8(100)
-            a_data, d_data = apply_buff(a_data, d_data, move)
-        elseif buff_chance != Int8(0)
-            data += agent == 1 ? (move_id == 0x01 ? 0x0f50 : 0x1ea0) :
-                                 (move_id == 0x01 ? 0x2df0 : 0x3d40)
-        end
-
-        attacking_team = DynamicTeam(@SVector[
-            subtract_energy(next_state.teams[agent].mons[i], move.energy)
-            for i = 1:3], next_state.teams[agent].switchCooldown,
-            a_data)
-
-        if shielding
-            defending_team = DynamicTeam(@SVector[
-                damage(next_state.teams[d_agent].mons[i], 0x0001) for i = 1:3],
-                next_state.teams[d_agent].switchCooldown, d_data - UInt8(1))
-        else
-            defending_team = DynamicTeam(@SVector[
-                damage(next_state.teams[d_agent].mons[i],
-                calculate_damage(
-                    static_state.teams[agent].mons[active[agent]].stats.attack,
-                    state.teams[agent].data,
-                    static_state.teams[d_agent].mons[active[d_agent]],
-                    move,
-                    Int8(100)
-                )) for i = 1:3],
-                next_state.teams[d_agent].switchCooldown, d_data)
-        end
-        return DynamicState(
-            @SVector[agent == 1 ? attacking_team : defending_team,
-                     agent == 2 ? attacking_team : defending_team],
-            # go from cmp 4 (2 then 1) to cmp 1
-            # or go from cmp 3 (1 then 2) to cmp 2
-            # or go from cmp 2 to 0
-            # or go from cmp 1 to 0
-            data  - (cmp == 0x0004 ?
-                        (get_hp(defendingTeam.mons[active[d_agent]]) != 0x0000 ?
-                            0x0930 : 0x0c40) :
-                    (cmp == 0x0002 ?
-                        (get_hp(defendingTeam.mons[active[d_agent]]) != 0x0000 ?
-                            0x0620 : 0x0930) :
-                    0x0310))
-        )
-    else
-        return DynamicState(state.teams, state.data - cmp * 0x0310)
+    buff_chance = move.buffChance
+    if buff_chance == Int8(100)
+        a_data, d_data = apply_buff(a_data, d_data, move)
+    elseif buff_chance != Int8(0)
+        data += agent == 1 ? (move_id == 0x01 ? 0x0f50 : 0x1ea0) :
+                             (move_id == 0x01 ? 0x2df0 : 0x3d40)
     end
+
+    attacking_team = DynamicTeam(@SVector[
+        subtract_energy(next_state.teams[agent].mons[i], move.energy)
+        for i = 1:3], next_state.teams[agent].switchCooldown,
+        a_data)
+
+    if shielding
+        defending_team = DynamicTeam(@SVector[
+            damage(next_state.teams[d_agent].mons[i], 0x0001) for i = 1:3],
+            next_state.teams[d_agent].switchCooldown, d_data - UInt8(1))
+    else
+        defending_team = DynamicTeam(@SVector[
+            damage(next_state.teams[d_agent].mons[i],
+            calculate_damage(
+                static_state.teams[agent].mons[active[agent]].stats.attack,
+                state.teams[agent].data,
+                static_state.teams[d_agent].mons[active[d_agent]],
+                move,
+                Int8(100)
+            )) for i = 1:3],
+            next_state.teams[d_agent].switchCooldown, d_data)
+    end
+    return DynamicState(
+        @SVector[agent == 1 ? attacking_team : defending_team,
+                 agent == 2 ? attacking_team : defending_team],
+        # go from cmp 4 (2 then 1) to cmp 1
+        # or go from cmp 3 (1 then 2) to cmp 2
+        # or go from cmp 2 to 0
+        # or go from cmp 1 to 0
+        data  - (cmp == 0x0004 ?
+                    (get_hp(defendingTeam.mons[active[d_agent]]) != 0x0000 ?
+                        0x0930 : 0x0c40) :
+                (cmp == 0x0002 ?
+                    (get_hp(defendingTeam.mons[active[d_agent]]) != 0x0000 ?
+                        0x0620 : 0x0930) :
+                0x0310))
+    )
 end
 
 function apply_buff(a_data::UInt8, d_data::UInt8, move::ChargedMove)

@@ -2,12 +2,6 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
     next_state = state
 
     fm_pending = get_fast_moves_pending(state)
-
-    @inbounds if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
-        next_state = evaluate_fast_moves(next_state, static_state,
-            (fm_pending[1] == 0x0001, fm_pending[2] == 0x0001))
-    end
-
     active = get_active(next_state)
     cmp = get_cmp(state)
 
@@ -21,6 +15,11 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
                 static_state, (1 == agent, 2 == agent))
         end
     else
+        @inbounds if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
+            next_state = evaluate_fast_moves(next_state, static_state,
+                (fm_pending[1] == 0x0001, fm_pending[2] == 0x0001))
+        end
+
         @inbounds next_state = step_timers(next_state,
             decision[1] == 0x03 ?
                 static_state.teams[1].mons[active[1]].fastMove.cooldown :
@@ -36,9 +35,9 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
                     0x18 : 0x00)
             end
         end
-        new_active = get_active(new_state)
+        new_active = get_active(next_state)
         if get_hp(next_state.teams[1].mons[new_active[1]]) != 0x0000 &&
-            get_hp(next_state.teams[1].mons[new_active[1]]) != 0x0000
+            get_hp(next_state.teams[2].mons[new_active[2]]) != 0x0000
             if decision[1] == 0x04
                 if decision[2] == 0x04
                     atk_cmp = Base.cmp(
