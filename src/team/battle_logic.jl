@@ -90,8 +90,8 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
         move = static_state.teams[agent].mons[active[agent]].chargedMoves[
             isodd(chance) ? 1 : 2]
         if rand(Int8(0):Int8(99)) < move.buffChance
-            a_data = static_state.teams[agent].data
-            d_data = static_state.teams[get_other_agent(agent)].data
+            a_data = state.teams[agent].data
+            d_data = state.teams[get_other_agent(agent)].data
             a_data, d_data = apply_buff(a_data, d_data, move)
             return DynamicState(@SVector[
                 DynamicTeam(state.teams[1].mons, state.teams[1].switchCooldown,

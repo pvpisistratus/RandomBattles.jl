@@ -69,8 +69,8 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
         agent = chance < 0x0003 ? 1 : 2
         move = static_state.teams[agent].mons[active[agent]].chargedMoves[
             isodd(chance) ? 1 : 2]
-        a_data = static_state.teams[agent].data
-        d_data = static_state.teams[get_other_agent(agent)].data
+        a_data = state.teams[agent].data
+        d_data = state.teams[get_other_agent(agent)].data
         a_data, d_data = apply_buff(a_data, d_data, move)
         state_2 = DynamicState(@SVector[
             DynamicTeam(state.teams[1].mons, state.teams[1].switchCooldown,
