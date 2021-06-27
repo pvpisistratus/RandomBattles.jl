@@ -87,7 +87,7 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
 end
 
 function play_battle(state::DynamicState, static_state::StaticState;
-    allow_nothing::Bool = allow_nothing, allow_overfarming::Bool = allow_overfarming)
+    allow_nothing::Bool = false, allow_overfarming::Bool = false)
     while true
         d1, d2 = get_possible_decisions(state, static_state,
             allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
