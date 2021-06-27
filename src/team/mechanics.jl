@@ -57,7 +57,7 @@ function calculate_damage(
     move::FastMove
 )
     a, d = get_buff_modifier(buff_data)
-    return Int16((Int64(move.power) * Int64(move.stab) *
+    return UInt16((Int64(move.power) * Int64(move.stab) *
         Int64(attack) * Int64(a) *
         floor(Int64, get_effectiveness(defender.types, move.moveType) *
         12_800) * 65) ÷ (Int64(defender.stats.defense) *
@@ -85,7 +85,7 @@ function calculate_damage(
     charge::Int8,
 )
     a, d = get_buff_modifier(buff_data)
-    return Int16((Int64(move.power) * Int64(move.stab) *
+    return UInt16((Int64(move.power) * Int64(move.stab) *
         Int64(attack) * Int64(a) *
         floor(Int64, get_effectiveness(defender.types, move.moveType) *
         12_800) * Int64(charge) * 65) ÷ (Int64(defender.stats.defense) *
