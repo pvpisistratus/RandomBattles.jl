@@ -212,10 +212,14 @@ function evaluate_switch(state::DynamicState, agent::Int64, active::UInt16,
     end
     return DynamicState(@SVector[
         DynamicTeam(state.teams[1].mons,
-            agent == 1 && time == 0x00 ? Int8(120) : state.teams[1].switchCooldown - time,
+            agent == 1 && time == 0x00 ? Int8(120) :
+            state.teams[1].switchCooldown - 
+            min(state.teams[1].switchCooldown, time),
             state.teams[1].data),
         DynamicTeam(state.teams[2].mons,
-            agent == 2 && time == 0x00 ? Int8(120) : state.teams[2].switchCooldown - time,
+            agent == 2 && time == 0x00 ? Int8(120) :
+            state.teams[2].switchCooldown -
+            min(state.teams[2].switchCooldown, time),
             state.teams[2].data),
     ], data)
 end

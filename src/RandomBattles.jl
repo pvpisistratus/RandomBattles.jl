@@ -17,6 +17,9 @@ include("team/mechanics.jl")
 include("team/decisions.jl")
 include("team/battle_logic.jl")
 include("team/diff.jl")
+include("team/strategy.jl")
+include("team/nash.jl")
+#include("team/alpha_beta_pruning.jl")
 
 # individual battles
 include("individual/pokemon.jl")
@@ -25,12 +28,11 @@ include("individual/mechanics.jl")
 include("individual/decisions.jl")
 include("individual/battle_logic.jl")
 include("individual/diff.jl")
+include("individual/nash.jl")
 
 # higher level abstractions
-include("strategy.jl")
 include("pokemon_meta.jl")
 include("rankings.jl")
-include("nash.jl")
 
 # export useful variables and functions
 export DynamicState, StaticState, DynamicTeam, StaticTeam, DynamicPokemon, StaticPokemon,

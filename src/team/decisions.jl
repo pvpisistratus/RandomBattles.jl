@@ -1,11 +1,15 @@
-function select_random_decision(d1::UInt8, d2::UInt8)
-    r1, r2 = rand(0x01:Base.ctpop_int(d1)), rand(0x01:Base.ctpop_int(d2))
+function get_decision(d1::UInt8, d2::UInt8, i::UInt8, j::UInt8)
     to_return_1, to_return_2 = 0x08, 0x08
-    for i = 0x00:0x06
-        to_return_1 -= isodd(d1 >> i) && Base.ctpop_int(d1 >> i) == r1 ? 0x07 - i : 0x00
-        to_return_2 -= isodd(d2 >> i) && Base.ctpop_int(d2 >> i) == r2 ? 0x07 - i : 0x00
+    for n = 0x00:0x06
+        to_return_1 -= isodd(d1 >> n) && Base.ctpop_int(d1 >> n) == i ? 0x07 - n : 0x00
+        to_return_2 -= isodd(d2 >> n) && Base.ctpop_int(d2 >> n) == j ? 0x07 - n : 0x00
     end
     return to_return_1, to_return_2
+end
+
+function select_random_decision(d1::UInt8, d2::UInt8)
+    return get_decision(d1, d2,
+        rand(0x01:Base.ctpop_int(d1)), rand(0x01:Base.ctpop_int(d2)))
 end
 
 function get_possible_decisions(state::DynamicState, static_state::StaticState;
