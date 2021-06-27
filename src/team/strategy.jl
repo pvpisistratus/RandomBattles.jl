@@ -25,17 +25,17 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
     gr()
     plt1 = plot(1:length(strat.scores), strat.scores, width = 2, label = "possible battle scores",
         ylims = [0, 1], ylabel = "Battle Score", xlabel = "Decisions", size = (950, 400))
-    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][1][1]) ./
+    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][1][1], 1:length(strat.scores)) ./
         static_s.teams[1].mons[1].stats.hitpoints, color = :green, label = "")
-    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][1][2]) ./
+    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][1][2], 1:length(strat.scores)) ./
         static_s.teams[1].mons[1].stats.hitpoints, color = :green, label = "")
-    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][1][3]) ./
+    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][1][3], 1:length(strat.scores)) ./
         static_s.teams[1].mons[1].stats.hitpoints, color = :green, label = "")
-    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][2][1]) ./
+    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][2][1], 1:length(strat.scores)) ./
         static_s.teams[1].mons[1].stats.hitpoints, color = :purple, label = "")
-    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][2][2]) ./
+    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][2][2], 1:length(strat.scores)) ./
         static_s.teams[1].mons[1].stats.hitpoints, color = :purple, label = "")
-    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][2][3]) ./
+    plot!(plt1, 1:length(strat.scores), map(i -> strat.hps[i][2][3], 1:length(strat.scores)) ./
         static_s.teams[1].mons[1].stats.hitpoints, color = :purple, label = "")
     hline!(plt1, [0.5], label = "win/loss")
     plt2 = plot(xlims = [0, length(strat.scores)], ylims = [-3, 0], legend = false, size = (950, 200), axis = nothing)
