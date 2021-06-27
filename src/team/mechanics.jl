@@ -217,7 +217,7 @@ function evaluate_switch(state::DynamicState, agent::Int64, active::UInt16,
         DynamicTeam(state.teams[2].mons,
             agent == 2 ? Int8(120) : state.teams[2].switchCooldown,
             state.teams[2].data),
-    ], state.data + diff)
+    ], data)
 end
 
 """
