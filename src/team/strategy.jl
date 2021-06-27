@@ -11,6 +11,7 @@ the active mons used by each team.
 mutable struct Strategy
     decisions::Array{Tuple{UInt8,UInt8}}
     scores::Array{Float64}
+    hps::Array{Tuple{Tuple{UInt16, UInt16, UInt16}, Tuple{UInt16, UInt16, UInt16}}}
     activeMons::Array{Tuple{UInt16, UInt16}}
 end
 

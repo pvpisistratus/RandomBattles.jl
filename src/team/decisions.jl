@@ -85,13 +85,5 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
         end
     end
 
-    for i = 1:2
-        if d[i] == 0x00 && get_hp(state.teams[i].mons[1]) +
-            get_hp(state.teams[i].mons[2]) +
-            get_hp(state.teams[i].mons[3]) != 0x0000
-            println(state)
-        end
-    end
-
     return d
 end

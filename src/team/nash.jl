@@ -71,7 +71,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
     sim_to_end::Bool = false)
     value = 0.0
     decision = 0, 0
-    strat = Strategy([], [], [])
+    strat = Strategy([], [], [], [])
     while true
         A, B = get_possible_decisions(s, static_s,
             allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
@@ -108,5 +108,11 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
         push!(strat.decisions, decision)
         push!(strat.scores, value + 0.5)
         push!(strat.activeMons, get_active(s))
+        push!(strat.hps, ((get_hp(s.teams[1].mons[1]),
+                           get_hp(s.teams[1].mons[2]),
+                           get_hp(s.teams[1].mons[3])),
+                          (get_hp(s.teams[1].mons[1]),
+                           get_hp(s.teams[1].mons[2]),
+                           get_hp(s.teams[1].mons[3]))))
     end
 end
