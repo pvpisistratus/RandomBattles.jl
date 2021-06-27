@@ -200,13 +200,13 @@ function evaluate_switch(state::DynamicState, agent::Int64, active::Int16,
     data = state.data
     fmPending = get_fast_moves_pending(state)
     if agent == 1
-        data += active == 0x0001 ? to_switch == Int8(1) ? Int16(1) : Int16(2)
-                active == 0x0002 ? to_switch == Int8(1) ? Int16(-1) : Int16(1)
+        data += active == 0x0001 ? to_switch == Int8(1) ? Int16(1)  : Int16(2) :
+                active == 0x0002 ? to_switch == Int8(1) ? Int16(-1) : Int16(1) :
                                    to_switch == Int8(2) ? Int16(-2) : Int16(-1)
         data -= fmPending[1] * 0x0010
     else
-        data += active == 0x0001 ? to_switch == Int8(1) ? Int16(4) : Int16(8)
-                active == 0x0002 ? to_switch == Int8(1) ? Int16(-4) : Int16(4)
+        data += active == 0x0001 ? to_switch == Int8(1) ? Int16(4)  : Int16(8) :
+                active == 0x0002 ? to_switch == Int8(1) ? Int16(-4) : Int16(4) :
                                    to_switch == Int8(2) ? Int16(-8) : Int16(-8)
         data -= fmPending[2] * 0x0070
     end
