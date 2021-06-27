@@ -153,8 +153,9 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         a_data)
 
     if shielding
-        defending_team = DynamicTeam(@SVector[
-            damage(next_state.teams[d_agent].mons[i], 0x0001) for i = 1:3],
+        defending_team = DynamicTeam(@SVector[UInt16(i) == active[d_agent] ?
+            damage(next_state.teams[d_agent].mons[i], 0x0001) :
+            next_state.teams[d_agent].mons[i]for i = 1:3],
             next_state.teams[d_agent].switchCooldown, d_data - UInt8(1))
     else
         defending_team = DynamicTeam(@SVector[

@@ -12,7 +12,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
             0x64, decision[get_other_agent(agent)] == 0x01)
         @inbounds if !iszero(fm_pending[get_other_agent(agent)])
             @inbounds next_state = evaluate_fast_moves(next_state,
-                static_state, (1 == agent, 2 == agent))
+                static_state, (2 == agent, 1 == agent))
         end
     else
         @inbounds if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
