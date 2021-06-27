@@ -85,9 +85,9 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
             DynamicState(state.teams, state.data - 0x4360) :
             DynamicState(state.teams, state.data - 0x4050)
     else
-        agent = chance >> 0x0002
+        agent = chance >> 0x0001
         move = static_state.teams[agent].mons[active[agent]].chargedMoves[
-            chance & 0x0003]
+            isodd(chance) ? 1 : 2]
         if rand(Int8(0):Int8(99)) < move.buffChance
             a_data = static_state.teams[agent].data
             d_data = static_state.teams[get_other_agent(agent)].data
