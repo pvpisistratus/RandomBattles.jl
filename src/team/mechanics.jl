@@ -178,10 +178,10 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         data  - (cmp == 0x0004 ?
                     (get_hp(defending_team.mons[active[d_agent]]) != 0x0000 ?
                         0x0930 : 0x0c40) :
-                (cmp == 0x0002 ?
+                (cmp == 0x0003 ?
                     (get_hp(defending_team.mons[active[d_agent]]) != 0x0000 ?
-                        0x0620 : 0x0930) :
-                0x0310))
+                        0x0130 : 0x0930) :
+                (cmp == 0x0002 ? 0x0620 : 0x0310))
     )
 end
 
