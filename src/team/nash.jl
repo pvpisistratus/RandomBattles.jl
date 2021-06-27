@@ -84,10 +84,10 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
             nash_result = SM(s, static_s, depth, sim_to_end = sim_to_end)
             value = nash_result.payoff
             d1, d2 = rand(), rand()
-            decision1, decision2 = length(nash_result.row_strategy),
-                length(nash_result.column_strategy)
+            decision1, decision2 = UInt8(length(nash_result.row_strategy)),
+                UInt8(length(nash_result.column_strategy))
             j = 0.0
-            for i = 1:length(nash_result.row_strategy)-1
+            for i = 0x01:(UInt8(length(nash_result.row_strategy)) - 0x01)
                 @inbounds j += nash_result.row_strategy[i]
                 if d1 < j
                     decision1 = i
@@ -95,7 +95,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
                 end
             end
             j = 0.0
-            for i = 1:length(nash_result.column_strategy)-1
+            for i = 0x01:(UInt8(length(nash_result.column_strategy)) - 0x01)
                 @inbounds j += nash_result.column_strategy[i]
                 if d2 < j
                     decision2 = i
