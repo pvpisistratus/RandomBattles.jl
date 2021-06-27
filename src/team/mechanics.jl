@@ -180,7 +180,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState,
     )
 end
 
-function apply_buff(a_data::UInt8, d_data::UIn8, move::ChargedMove)
+function apply_buff(a_data::UInt8, d_data::UInt8, move::ChargedMove)
     return (a_data + Int8(27) * get_atk(move.self_buffs) +
                      Int8(3) * get_def(move.opp_buffs),
             d_data + Int8(27) * get_atk(move.opp_buffs) +
