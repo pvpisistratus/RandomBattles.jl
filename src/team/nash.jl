@@ -109,5 +109,4 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
         push!(strat.scores, value + 0.5)
         push!(strat.activeMons, get_active(s))
     end
-    return strat
 end

@@ -27,7 +27,7 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
     hline!(plt1, [0.5], label = "win/loss")
     plt2 = plot(xlims = [0, length(strat.scores)], ylims = [-3, 0], legend = false, size = (950, 200), axis = nothing)
     for i = 1:length(strat.scores), j = Int8(1):Int8(2)
-        if strat.decision[i][j] == 0x01
+        if strat.decisions[i][j] == 0x01
             scatter!(plt2, [i], [-j], markershape = :hexagon, markersize = 12, alpha = 0.5, color = shieldColor)
         elseif strat.decisions[i][j] == 0x03
             color = colors[static_s.teams[j].mons[strat.activeMons[i][j]].fastMove.moveType]
