@@ -129,7 +129,7 @@ applied (say in the case of a random buff move) and returns
 the dynamic state after the charged move has occurred, with precisely one copy
 """
 function evaluate_charged_move(state::DynamicState, static_state::StaticState,
-    cmp::Int16, move_id::Int8, charge::Int8, shielding::Bool)
+    cmp::UInt16, move_id::UInt8, charge::UInt8, shielding::Bool)
     next_state = state
     active = get_active(next_state)
     agent = isodd(cmp) ? 1 : 2
@@ -143,8 +143,8 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     if buff_chance == Int8(100)
         a_data, d_data = apply_buff(a_data, d_data, move)
     elseif buff_chance != Int8(0)
-        data += agent == 1 ? (move_id == Int8(1) ? 0x0f50 : 0x1ea0) :
-                             (move_id == Int8(1) ? 0x2df0 : 0x3d40)
+        data += agent == 1 ? (move_id == 0x01 ? 0x0f50 : 0x1ea0) :
+                             (move_id == 0x01 ? 0x2df0 : 0x3d40)
     end
 
     attacking_team = DynamicTeam(@SVector[
