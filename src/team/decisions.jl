@@ -26,51 +26,58 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
     cmp = get_cmp(state)
 
     if isodd(cmp) # if team 1 is using a charged move and has cmp
-        @inbounds d[2] = has_shield(state.teams[2]) ? 0x03 : 0x02
-        @inbounds d[1] = get_energy(state.teams[1].mons[active[1]]) >=
+        @inbounds d = (get_energy(state.teams[1].mons[active[1]]) >=
             static_state.teams[1].mons[active[1]].chargedMoves[2] ?
-            0xc0 : 0x40
+            0xc0 : 0x40, has_shield(state.teams[2]) ? 0x03 : 0x02)
     elseif !iszero(cmp) # if team 2 is using a charged move and has cmp
-        @inbounds d[1] = has_shield(state.teams[1]) ? 0x03 : 0x02
-        @inbounds d[2] = get_energy(state.teams[2].mons[active[2]]) >=
+        @inbounds d = (has_shield(state.teams[1]) ? 0x03 : 0x02,
+            d[2] = get_energy(state.teams[2].mons[active[2]]) >=
             static_state.teams[2].mons[active[2]].chargedMoves[2] ?
-            0xc0 : 0x40
+            0xc0 : 0x40)
     else
         for i = 1:2
             if fast_moves_pending[i] <= 0x0001
                 @inbounds if get_hp(state.teams[i].mons[active[i]]) != 0x0000 &&
                     (allow_overfarming ||
                     get_energy(state.teams[i].mons[active[i]]) != 0x0064)
-                    @inbounds d[i] += 0x04
+                    @inbounds d = i == 1 ? (d[1] + 0x04, d[2]) :
+                        (d[1], d[2] + 0x04)
                 end
                 @inbounds if get_hp(state.teams[i].mons[active[i]]) != 0x0000 &&
                     get_energy(state.teams[i].mons[active[i]]) >=
                     static_state.teams[i].mons[active[i]].chargedMoves[1]
-                    @inbounds d[i] += 0x08
+                    @inbounds d = i == 1 ? (d[1] + 0x08, d[2]) :
+                        (d[1], d[2] + 0x08)
                 end
                 @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0001 ?
                     2 : 1]) != 0x0000
-                    @inbounds d[i] += 0x10
+                    @inbounds d = i == 1 ? (d[1] + 0x10, d[2]) :
+                        (d[1], d[2] + 0x10)
                 end
                 @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0003 ?
                     2 : 3]) != 0x0000
-                    @inbounds d[i] += 0x20
+                    @inbounds d = i == 1 ? (d[1] + 0x20, d[2]) :
+                        (d[1], d[2] + 0x20)
                 end
                 if get_hp(state.teams[i].mons[active[i]]) != 0x0000 &&
                     allow_nothing
-                    @inbounds d[i] += 0x02
+                    @inbounds d = i == 1 ? (d[1] + 0x02, d[2]) :
+                        (d[1], d[2] + 0x02)
                 end
             else
                 if get_hp(state.teams[i].mons[active[i]]) != 0x0000
-                    @inbounds d[i] += 0x02
+                    @inbounds d = i == 1 ? (d[1] + 0x02, d[2]) :
+                        (d[1], d[2] + 0x02)
                 else
                     @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0001 ?
                         2 : 1]) != 0x0000
-                        @inbounds d[i] += 0x10
+                        @inbounds d = i == 1 ? (d[1] + 0x10, d[2]) :
+                            (d[1], d[2] + 0x10)
                     end
                     @inbounds if get_hp(state.teams[i].mons[active[i] == 0x0003 ?
                         2 : 3]) != 0x0000
-                        @inbounds d[i] += 0x20
+                        @inbounds d = i == 1 ? (d[1] + 0x20, d[2]) :
+                            (d[1], d[2] + 0x20)
                     end
                 end
             end
