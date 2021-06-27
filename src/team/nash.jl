@@ -79,12 +79,6 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
                 agent == 0x0002 ? a_data : d_data)
         ], state.data - chance * 0x0f50)
         odds = move.buffChance / 100
-        if rand(Int8(0):Int8(99)) < move.buffChance
-
-            return
-        else
-            return DynamicState(state.teams, state.data - chance * 0x0f50)
-        end
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
         @inbounds payoffs[i, j] = odds * SM(play_turn(state_1, static_state,
