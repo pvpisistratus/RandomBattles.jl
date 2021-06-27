@@ -59,7 +59,9 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
         @inbounds payoffs[i, j] = SM(play_turn(state, static_state,
             get_decision(A, B, i, j)), static_state, depth - 1,
-            allow_waiting = allow_waiting, sim_to_end = sim_to_end).payoff
+            allow_nothing = allow_nothing, 
+            allow_overfarming = allow_overfarming,
+            sim_to_end = sim_to_end).payoff
     end
     return nash(payoffs)
 end
