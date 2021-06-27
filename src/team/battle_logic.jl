@@ -22,7 +22,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
         @inbounds if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
             next_state = evaluate_fast_moves(next_state, static_state,
                 (fm_pending[1] == 0x0001 &&
-                get_hp(next_state.teams[1].mons[active[1]]) != 0x0000, 
+                get_hp(next_state.teams[1].mons[active[1]]) != 0x0000,
                 fm_pending[2] == 0x0001 &&
                 get_hp(next_state.teams[2].mons[active[2]]) != 0x0000))
         end
@@ -77,7 +77,9 @@ end
 
 function resolve_chance(state::DynamicState, static_state::StaticState)
     chance = get_chance(state::DynamicState)
-    if chance == 0x0005
+    if chance == 0x0000
+        return state
+    elseif chance == 0x0005
         return rand() < 0.5 ?
             # subtract chance, add cmp
             DynamicState(state.teams, state.data - 0x4360) :
@@ -105,6 +107,7 @@ end
 function play_battle(state::DynamicState, static_state::StaticState;
     allow_nothing::Bool = false, allow_overfarming::Bool = false)
     while true
+        state = resolve_chance(state, static_state)
         d1, d2 = get_possible_decisions(state, static_state,
             allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
         (iszero(d1) || iszero(d2)) && return get_battle_score(state, static_state)
