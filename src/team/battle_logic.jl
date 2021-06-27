@@ -23,10 +23,10 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
     else
         @inbounds next_state = step_timers(next_state,
             decision[1] == 0x03 ?
-                static_state.teams[1].mons[active(1)].fastMove.cooldown :
+                static_state.teams[1].mons[active[1]].fastMove.cooldown :
                 Int8(0),
             decision[2] == 0x03 ?
-                static_state.teams[2].mons[active(2)].fastMove.cooldown :
+                static_state.teams[2].mons[active[2]].fastMove.cooldown :
                 Int8(0))
         for agent = 1:2
             @inbounds if decision[agent] == 0x05 || decision[agent] == 0x06
