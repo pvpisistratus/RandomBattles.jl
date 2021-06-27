@@ -52,6 +52,8 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
                     next_state = DynamicState(next_state.teams,
                         next_state.data + 0x4c90)
                 end
+            end
+        end
     end
 
     return next_state
