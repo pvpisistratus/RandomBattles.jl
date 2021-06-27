@@ -10,14 +10,14 @@ end
 
 function get_possible_decisions(state::DynamicState, static_state::StaticState;
     allow_nothing::Bool = false, allow_overfarming::Bool = false)
-    # 10000000 - shield
-    # 01000000 - nothing
-    # 00100000 - fast move
-    # 00010000 - charged move
-    # 00001000 - switch 1
-    # 00000100 - switch 2
-    # 00000010 - charged move 1
-    # 00000001 - charged move 2
+    # 00000001 - shield
+    # 00000010 - nothing
+    # 00000100 - fast move
+    # 00001000 - charged move
+    # 00010000 - switch 1
+    # 00100000 - switch 2
+    # 01000000 - charged move 1
+    # 10000000 - charged move 2
 
     d = 0x00, 0x00
 
