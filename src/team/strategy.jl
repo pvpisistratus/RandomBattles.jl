@@ -55,16 +55,19 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
         elseif i > 1 && sum(strat.hps[i][get_other_agent(j)]) < sum(strat.hps[i - 1][get_other_agent(j)])
             color = colors[static_s.teams[j].mons[strat.activeMons[i][j]].fastMove.moveType]
             scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5, color = color)
-
         end
-    end
-    if strat.scores[end] > 0.5
-        scatter!(plt2, [length(strat.scores)], [-2], markershape = :xcross, alpha = 0.5, markersize = 10, color = :red)
-    elseif strat.scores[end] < 0.5
-        scatter!(plt2, [length(strat.scores)], [-1], markershape = :xcross, alpha = 0.5, markersize = 10, color = :red)
-    else
-        scatter!(plt2, [length(strat.scores)], [-2], markershape = :xcross, alpha = 0.5, markersize = 10, color = :red)
-        scatter!(plt2, [length(strat.scores)], [-1], markershape = :xcross, alpha = 0.5, markersize = 10, color = :red)
+        if i > 1
+            if strat.decisions[i][j] != 0x07 && strat.decisions[i][j] != 0x08 &&
+                sum(strat.hps[i][get_other_agent(j)]) <
+                sum(strat.hps[i - 1][get_other_agent(j)])
+                color = colors[static_s.teams[j].mons[strat.activeMons[i][j]].fastMove.moveType]
+                scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5, color = color)
+            end
+            if count(isequal(0x0000), strat.hps[i][get_other_agent(j)]) <
+                count(isequal(0x0000), strat.hps[i - 1][get_other_agent(j)])
+                scatter!(plt2, [i], [-j], markershape = :xcross, alpha = 0.5, markersize = 10, color = :red)
+            end
+        end
     end
 
     l = @layout [a; b{0.2h}]
