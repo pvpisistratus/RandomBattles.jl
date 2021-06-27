@@ -66,7 +66,9 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     return nash(payoffs)
 end
 
-function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_to_end::Bool = false)
+function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
+    allow_nothing::Bool = false, allow_overfarming::Bool = false,
+    sim_to_end::Bool = false)
     value = 0.0
     decision = 0, 0
     strat = Strategy([], [], [])
