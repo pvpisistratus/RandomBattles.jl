@@ -56,8 +56,42 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
                 no_strat, no_strat)
 
     payoffs = zeros(Float64, Base.ctpop_int(A), Base.ctpop_int(B))
+
+    state_1, state_2 = state, state
+    odds = 0.5
+    chance = get_chance(state)
+    if chance == 0x0005
+        state_1 = DynamicState(state.teams, state.data - 0x4360)
+        state_2 = DynamicState(state.teams, state.data - 0x4050)
+    else
+        state_1 = DynamicState(state.teams, state.data - chance * 0x0f50)
+        agent = chance >> 0x0002
+        move = static_state.teams[agent].mons[active[agent]].chargedMoves[
+            chance & 0x0003]
+        a_data = static_state.teams[agent].data
+        d_data = static_state.teams[get_other_agent(agent)].data
+        a_data, d_data = apply_buff(a_data, d_data, move)
+        state_2 = DynamicState(@SVector[
+            DynamicTeam(state.teams[1].mons, state.teams[1].switchCooldown,
+                agent == 0x0001 ? a_data : d_data),
+            DynamicTeam(state.teams[2].mons, state.teams[2].switchCooldown,
+                agent == 0x0002 ? a_data : d_data)
+        ], state.data - chance * 0x0f50)
+        odds = move.buffChance / 100
+        if rand(Int8(0):Int8(99)) < move.buffChance
+
+            return
+        else
+            return DynamicState(state.teams, state.data - chance * 0x0f50)
+        end
+    end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
-        @inbounds payoffs[i, j] = SM(play_turn(state, static_state,
+        @inbounds payoffs[i, j] = odds * SM(play_turn(state_1, static_state,
+            get_decision(A, B, i, j)), static_state, depth - 1,
+            allow_nothing = allow_nothing,
+            allow_overfarming = allow_overfarming,
+            sim_to_end = sim_to_end).payoff +
+            (1 - odds) * SM(play_turn(state_2, static_state,
             get_decision(A, B, i, j)), static_state, depth - 1,
             allow_nothing = allow_nothing,
             allow_overfarming = allow_overfarming,
@@ -105,6 +139,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
             decision = get_decision(A, B, decision1, decision2)
         end
         s = play_turn(s, static_s, decision)
+        s = resolve_chance(s, static_s)
         push!(strat.decisions, decision)
         push!(strat.scores, value + 0.5)
         push!(strat.activeMons, get_active(s))
