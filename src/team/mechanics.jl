@@ -117,7 +117,6 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
         state.teams[1].switchCooldown, state.teams[1].data),
         DynamicTeam(new_mons[2, :], state.teams[2].switchCooldown,
         state.teams[2].data)], state.data)
-    end
 end
 
 
