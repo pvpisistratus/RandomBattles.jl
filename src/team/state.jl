@@ -49,4 +49,5 @@ get_cmp(state::DynamicState) = (state.data ÷ 0x0310) % 0x0005
 
 get_chance(state::DynamicState) = state.data ÷ 0x0f50
 
-DynamicState(state::StaticState) = DynamicState(DynamicTeam.(state.teams), [Int8(-1), Int8(-1)])
+DynamicState(state::StaticState) = DynamicState(
+    DynamicTeam.(state.teams), 0x0085)
