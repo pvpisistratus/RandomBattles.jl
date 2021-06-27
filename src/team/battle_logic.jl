@@ -18,7 +18,7 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
             0x64, decision[get_other_agent(agent)] == 0x01)
         @inbounds if !iszero(fm_pending[get_other_agent(agent)])
             @inbounds next_state = evaluate_fast_moves(next_state,
-                static_state, 1 == agent, 2 == agent)
+                static_state, (1 == agent, 2 == agent))
         end
     else
         @inbounds next_state = step_timers(next_state,
