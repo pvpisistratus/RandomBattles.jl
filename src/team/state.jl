@@ -18,8 +18,8 @@ function StaticState(teams::Array{Int64}; league = "great", cup = "open")
         StaticPokemon(teams[1], league = league, cup = cup),
         StaticPokemon(teams[2], league = league, cup = cup),
         StaticPokemon(teams[3], league = league, cup = cup))
-    team1 = StaticTeam(teams[1:3], league = league, cup = cup, opponents = opps1)
-    team2 = StaticTeam(teams[4:6], league = league, cup = cup, opponents = opps2)
+    team1 = StaticTeam(teams[1:3], league = league, cup = cup)
+    team2 = StaticTeam(teams[4:6], league = league, cup = cup)
     return StaticState([team1, team2])
 end
 
@@ -32,8 +32,8 @@ function StaticState(teams::Array{String}; league = "great", cup = "open")
         StaticPokemon(teams[1], league = league, cup = cup),
         StaticPokemon(teams[2], league = league, cup = cup),
         StaticPokemon(teams[3], league = league, cup = cup))
-    team1 = StaticTeam(teams[1:3], league = league, cup = cup, opponents = opps1)
-    team2 = StaticTeam(teams[4:6], league = league, cup = cup, opponents = opps2)
+    team1 = StaticTeam(teams[1:3], league = league, cup = cup)
+    team2 = StaticTeam(teams[4:6], league = league, cup = cup)
     return StaticState([team1, team2])
 end
 
