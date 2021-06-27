@@ -42,7 +42,7 @@ StaticState(team1::StaticTeam, team2::StaticTeam) = StaticState([team1, team2])
 get_active(state::DynamicState) = state.data & 0x0003,
     (state.data >> 0x0002) & 0x0003
 
-get_fast_moves_pending(state::DynamicState) = state.data % 0x0070,
+get_fast_moves_pending(state::DynamicState) = (state.data >> 2) % 0x0007,
     (state.data ÷ 0x0070) % 0x0007
 
 get_cmp(state::DynamicState) = (state.data ÷ 0x0310) % 0x0005

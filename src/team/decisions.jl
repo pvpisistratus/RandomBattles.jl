@@ -31,7 +31,7 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
             0xc0 : 0x40, has_shield(state.teams[2]) ? 0x03 : 0x02)
     elseif !iszero(cmp) # if team 2 is using a charged move and has cmp
         @inbounds d = (has_shield(state.teams[1]) ? 0x03 : 0x02,
-            d[2] = get_energy(state.teams[2].mons[active[2]]) >=
+            get_energy(state.teams[2].mons[active[2]]) >=
             static_state.teams[2].mons[active[2]].chargedMoves[2] ?
             0xc0 : 0x40)
     else
