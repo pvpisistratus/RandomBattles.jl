@@ -73,7 +73,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
     decision = 0, 0
     strat = Strategy([], [], [])
     while true
-        A, B = get_possible_decisions(state, static_state,
+        A, B = get_possible_decisions(s, static_s,
             allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
 
         (Base.ctpop_int(A) == 0x00 || Base.ctpop_int(B) == 0x00) &&
