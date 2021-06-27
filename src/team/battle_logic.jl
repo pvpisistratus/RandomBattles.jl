@@ -11,9 +11,13 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
             static_state, cmp, decision[agent] == 0x07 ? 0x01 : 0x02,
             0x64, decision[get_other_agent(agent)] == 0x01)
         @inbounds if !iszero(fm_pending[get_other_agent(agent)])
-            @inbounds next_state = evaluate_fast_moves(next_state,
-                static_state, (2 == agent, 1 == agent))
+            @inbounds next_state = DynamicState(next_state.teams,
+                next_state.data - (fm_pending[get_other_agent(agent)] -
+                0x0001) * (get_other_agent(agent) == 1 ? 0x0010 : 0x0070))
         end
+        @inbounds next_state = DynamicState(next_state.teams,
+            next_state.data - fm_pending[agent] *
+            (agent == 1 ? 0x0010 : 0x0070))
     else
         @inbounds if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
             next_state = evaluate_fast_moves(next_state, static_state,

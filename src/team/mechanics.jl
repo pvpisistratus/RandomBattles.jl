@@ -241,12 +241,12 @@ function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
     fmPending = get_fast_moves_pending(state)
     data = state.data
     if fmCooldown1 != Int8(0)
-        data += (UInt16(fmCooldown1) + 0x0001 - fmPending[1]) * 0x0010
+        data += (UInt16(fmCooldown1) - fmPending[1]) * 0x0010
     elseif fmPending[1] != 0x0000
         data -= 0x0010
     end
     if fmCooldown2 != Int8(0)
-        data += (UInt16(fmCooldown2) + 0x0001 - fmPending[2]) * 0x0070
+        data += (UInt16(fmCooldown2) - fmPending[2]) * 0x0070
     elseif fmPending[2] != 0x0000
         data -= 0x0070
     end
