@@ -91,6 +91,7 @@ function play_battle(state::DynamicState, static_state::StaticState;
     while true
         d1, d2 = get_possible_decisions(state, static_state,
             allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
+        println(d1, d2)
         (iszero(d1) || iszero(d2)) && return get_battle_score(state, static_state)
         state = play_turn(state, static_state, select_random_decision(d1, d2))
     end
