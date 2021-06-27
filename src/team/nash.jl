@@ -48,15 +48,15 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     A, B = get_possible_decisions(state, static_state,
         allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
 
-    (Base.ct_popint(A) == 0x00 || depth == 0) &&
+    (Base.ctpop_int(A) == 0x00 || depth == 0) &&
         return sim_to_end ?
             NashResult(sum(get_battle_scores(state, static_state, 100)
                 / 100) - 0.5, no_strat, no_strat) :
             NashResult(get_battle_score(state, static_state) - 0.5,
                 no_strat, no_strat)
 
-    payoffs = zeros(Float64, Base.ct_popint(A), Base.ct_popint(B))
-    for i = 0x01:Base.ct_popint(A), j = 0x01:Base.ct_popint(B)
+    payoffs = zeros(Float64, Base.ctpop_int(A), Base.ctpop_int(B))
+    for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
         @inbounds payoffs[i, j] = SM(play_turn(state, static_state,
             get_decision(A, B, i, j)), static_state, depth - 1,
             allow_waiting = allow_waiting, sim_to_end = sim_to_end).payoff
@@ -72,9 +72,9 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64; sim_
         A, B = get_possible_decisions(state, static_state,
             allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
 
-        (Base.ct_popint(A) == 0x00 || Base.ct_popint(B) == 0x00) &&
+        (Base.ctpop_int(A) == 0x00 || Base.ctpop_int(B) == 0x00) &&
             return value, strat
-        if Base.ct_popint(A) == 0x01 && Base.ct_popint(B) == 0x01
+        if Base.ctpop_int(A) == 0x01 && Base.ctpop_int(B) == 0x01
             decision = get_decision(A, B, 0x01, 0x01)
         else
             nash_result = SM(s, static_s, depth, sim_to_end = sim_to_end)
