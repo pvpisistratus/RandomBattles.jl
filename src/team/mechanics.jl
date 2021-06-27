@@ -132,6 +132,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     cmp::UInt16, move_id::UInt8, charge::UInt8, shielding::Bool)
     next_state = state
     active = get_active(next_state)
+    println(active)
     agent = isodd(cmp) ? 1 : 2
     d_agent = get_other_agent(agent)
     data = next_state.data
@@ -145,6 +146,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     elseif buff_chance != Int8(0)
         data += agent == 1 ? (move_id == 0x01 ? 0x0f50 : 0x1ea0) :
                              (move_id == 0x01 ? 0x2df0 : 0x3d40)
+        println("buff chance changed")
     end
 
     attacking_team = DynamicTeam(@SVector[
@@ -168,7 +170,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
             )) for i = 1:3],
             next_state.teams[d_agent].switchCooldown, d_data)
     end
-    next_state = DynamicState(
+    return DynamicState(
         @SVector[agent == 1 ? attacking_team : defending_team,
                  agent == 2 ? attacking_team : defending_team],
         # go from cmp 4 (2 then 1) to cmp 1
