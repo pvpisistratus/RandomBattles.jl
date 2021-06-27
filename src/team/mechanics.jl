@@ -106,7 +106,7 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
                     using_fm[get_other_agent(i)] ? calculate_damage(
                         static_state.teams[get_other_agent(i)].mons[
                             active[get_other_agent(i)]].stats.attack,
-                        static_state.teams[get_other_agent(i)].data,
+                        state.teams[get_other_agent(i)].data,
                         static_state.teams[i].mons[j],
                         static_state.teams[get_other_agent(i)].mons[
                             active[get_other_agent(i)]].fastMove,
@@ -161,7 +161,7 @@ function evaluate_charged_moves(state::DynamicState, static_state::StaticState,
             damage(next_state.teams[d_agent].mons[i],
             calculate_damage(
                 static_state.teams[agent].mons[active[agent]].stats.attack,
-                static_state.teams[agent].data,
+                state.teams[agent].data,
                 static_state.teams[d_agent].mons[active[d_agent]],
                 move,
                 Int8(100)
