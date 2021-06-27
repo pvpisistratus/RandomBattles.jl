@@ -128,11 +128,11 @@ the starting hp of the mon to the stat value, and the energy to zero.
 """
 
 function get_energy(p::DynamicPokemon)
-    return p.d >> 0x0009
+    return p.data >> 0x0009
 end
 
 function get_hp(p::DynamicPokemon)
-    return p.d % 0x0200
+    return p.data % 0x0200
 end
 
 function add_energy(p::DynamicPokemon, e::Int8)
@@ -145,7 +145,7 @@ function subtract_energy(p::DynamicPokemon, e::Int8)
 end
 
 function damage(p::DynamicPokemon, d::UInt16)
-    return DynamicPokemon(p.d - min(get_hp(p), d))
+    return DynamicPokemon(p.data - min(get_hp(p), d))
 end
 
 function DynamicPokemon(mon::StaticPokemon)
