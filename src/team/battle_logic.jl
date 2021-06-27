@@ -46,18 +46,18 @@ function play_turn(state::DynamicState, static_state::StaticState, decision::Tup
                     next_state = DynamicState(next_state.teams,
                         next_state.data + 0x0930)
                 elseif atk_cmp == -1
-                    next_state = next_state(next_state.teams,
+                    next_state = DynamicState(next_state.teams,
                         next_state.data + 0x0c40)
                 else
                     next_state = DynamicState(next_state.teams,
                         next_state.data + 0x4c90)
                 end
             else
-                next_state = next_state(next_state.teams,
+                next_state = DynamicState(next_state.teams,
                     next_state.data + 0x0310)
             end
         elseif decision[2] == 0x04
-            next_state = next_state(next_state.teams,
+            next_state = DynamicState(next_state.teams,
                 next_state.data + 0x0620)
         end
     end
