@@ -60,11 +60,11 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
             if strat.decisions[i][j] != 0x07 && strat.decisions[i][j] != 0x08 &&
                 sum(strat.hps[i][get_other_agent(j)]) <
                 sum(strat.hps[i - 1][get_other_agent(j)])
-                color = colors[static_s.teams[j].mons[strat.activeMons[i][j]].fastMove.moveType]
+                color = colors[static_s.teams[j].mons[strat.activeMons[i-1][j]].fastMove.moveType]
                 scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5, color = color)
             end
-            if count(isequal(0x0000), strat.hps[i][get_other_agent(j)]) <
-                count(isequal(0x0000), strat.hps[i - 1][get_other_agent(j)])
+            if count(isequal(0x0000), strat.hps[i][j]) >
+                count(isequal(0x0000), strat.hps[i - 1][j])
                 scatter!(plt2, [i], [-j], markershape = :xcross, alpha = 0.5, markersize = 10, color = :red)
             end
         end
