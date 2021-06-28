@@ -1,29 +1,65 @@
-function play_turn(state::DynamicIndividualState, static_state::StaticIndividualState, decision::Tuple{Int64,Int64})
+function play_turn(state::DynamicIndividualState,
     next_state = state
 
-    @inbounds if next_state.fastMovesPending[1] == Int8(0) || next_state.fastMovesPending[2] == Int8(0)
-        next_state = evaluate_fast_moves(next_state, static_state, next_state.fastMovesPending[1] == Int8(0), next_state.fastMovesPending[2] == Int8(0))
-    end
+    fm_pending = get_fast_moves_pending(state)
+    active = get_active(next_state)
+    cmp = get_cmp(state)
 
-    @inbounds next_state = step_timers(next_state,
-        3 <= decision[1] <= 4 ? static_state.teams[1].fastMove.cooldown : Int8(0),
-        3 <= decision[2] <= 4 ? static_state.teams[2].fastMove.cooldown : Int8(0))
-
-    cmp = get_cmp(static_state, 5 <= decision[1], 5 <= decision[2])
-    @inbounds if cmp[1] != Int8(0)
-        @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[1],
-            5 <= decision[cmp[1]] <= 6 ? Int8(1) : Int8(2), Int8(100), iseven(decision[get_other_agent(cmp[1])]),
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[1]].chargedMoves[5 <= decision[cmp[1]] <= 6 ? Int8(1) : Int8(2)].buffChance)
-        @inbounds if next_state.fastMovesPending[get_other_agent(cmp[1])] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1] == Int8(1), cmp[1] == Int8(2))
+    if !iszero(cmp)
+        agent = isodd(cmp) ? 1 : 2
+        @inbounds next_state = evaluate_charged_move(next_state,
+            static_state, cmp, decision[agent] == 0x05 ? 0x01 : 0x02,
+            0x64, decision[get_other_agent(agent)] == 0x01)
+        @inbounds if !iszero(fm_pending[get_other_agent(agent)])
+            @inbounds next_state = DynamicState(next_state.teams,
+                next_state.data - (fm_pending[get_other_agent(agent)] -
+                0x0001) * (get_other_agent(agent) == 1 ? UInt32(9) :
+                UInt32(63)))
         end
-    end
-    @inbounds if cmp[2] != Int8(0)
-        @inbounds next_state = evaluate_charged_moves(next_state, static_state, cmp[2],
-            5 <= decision[cmp[2]] <= 6 ? Int8(1) : Int8(2), Int8(100), iseven(decision[cmp[1]]),
-            rand(Int8(0):Int8(99)) < static_state.teams[cmp[2]].chargedMoves[5 <= decision[cmp[2]] <= 6 ? Int8(1) : Int8(2)].buffChance)
-        @inbounds if next_state.fastMovesPending[cmp[1]] != Int8(-1)
-            @inbounds next_state = evaluate_fast_moves(next_state, static_state, cmp[1] == Int8(1), cmp[1] == Int8(2))
+        @inbounds next_state = DynamicState(next_state.teams,
+            next_state.data - fm_pending[agent] * (agent == 1 ? UInt32(9) :
+            UInt32(63)))
+    else
+        @inbounds if fm_pending[1] == UInt32(1) || fm_pending[2] == UInt32(1)
+            next_state = evaluate_fast_moves(next_state, static_state,
+                (fm_pending[1] == UInt32(1) &&
+                get_hp(next_state.teams[1]) != 0x0000,
+                fm_pending[2] == UInt32(1) &&
+                get_hp(next_state.teams[2]) != 0x0000))
+        end
+
+        @inbounds next_state = step_timers(next_state,
+            decision[1] == 0x03 ?
+                static_state.teams[1].fastMove.cooldown : Int8(0),
+            decision[2] == 0x03 ?
+                static_state.teams[2].fastMove.cooldown : Int8(0))
+
+        if get_hp(next_state.teams[1]) != 0x0000 &&
+            get_hp(next_state.teams[2]) != 0x0000
+            if decision[1] == 0x04
+                if decision[2] == 0x04
+                    atk_cmp = Base.cmp(
+                        static_state.teams[1].stats.attack,
+                        static_state.teams[2].stats.attack
+                    )
+                    if atk_cmp == 1
+                        next_state = DynamicState(next_state.teams,
+                            next_state.data + UInt32(1323))
+                    elseif atk_cmp == -1
+                        next_state = DynamicState(next_state.teams,
+                            next_state.data + UInt32(1764))
+                    else
+                        next_state = DynamicState(next_state.teams,
+                            next_state.data + UInt32(11025))
+                    end
+                else
+                    next_state = DynamicState(next_state.teams,
+                        next_state.data + UInt32(441))
+                end
+            elseif decision[2] == 0x04
+                next_state = DynamicState(next_state.teams,
+                    next_state.data + UInt32(882))
+            end
         end
     end
 
