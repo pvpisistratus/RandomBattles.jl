@@ -1,7 +1,7 @@
 using JuMP, GLPK
 
 function SM(state::DynamicIndividualState, static_state::StaticIndividualState, depth::Int64; allow_nothing::Bool = false,
-    allow_overfarming::Bool = false, max_depth = 15::Int64, sim_to_end::Bool = false)
+    allow_overfarming::Bool = false, sim_to_end::Bool = false)
     A, B = get_possible_decisions(state, static_state,
         allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
 
@@ -53,7 +53,7 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState, 
 end
 
 function solve_battle(s::DynamicIndividualState, static_s::StaticIndividualState, depth::Int64;
-  sim_to_end = false)
+    allow_nothing::Bool = false, allow_overfarming::Bool = false, sim_to_end = false)
     value = 0.0
     decision = 0, 0
     strat = IndividualStrategy([], [], [])
