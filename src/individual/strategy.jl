@@ -44,7 +44,7 @@ function plot_strategy(strat::IndividualStrategy, static_s::StaticIndividualStat
                 color = colors[static_s.teams[j].fastMove.moveType]
                 scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5, color = color)
             end
-            if strat.hps[i][j]) == 0x0000
+            if strat.hps[i][j] == 0x0000
                 scatter!(plt2, [i], [-j], markershape = :xcross, alpha = 0.5, markersize = 10, color = :red)
             end
         end
