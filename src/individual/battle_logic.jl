@@ -67,7 +67,8 @@ function play_turn(state::DynamicIndividualState,
     return next_state
 end
 
-function resolve_chance(state::DynamicState, static_state::StaticState)
+function resolve_chance(state::DynamicIndividualState,
+    static_state::StaticIndividualState)
     chance = get_chance(state::DynamicState)
     if chance == UInt32(0)
         return state
