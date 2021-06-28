@@ -92,8 +92,7 @@ function evaluate_fast_moves(state::DynamicIndividualState,
                         static_state.teams[i],
                         static_state.teams[get_other_agent(i)].fastMove,
                     ) : 0x0000), (using_fm[i] ?
-                    static_state.teams[i].fastMove.energy : Int8(0))) :
-                    state.teams[i] for i = 1:2]
+                    static_state.teams[i].fastMove.energy : Int8(0))) for i = 1:2]
     return DynamicState(new_mons, state.data)
 end
 
@@ -214,5 +213,6 @@ battles in progress, and thus differs from PvPoke's use cases
 """
 function get_battle_score(state::DynamicIndividualState,
     static_state::StaticIndividualState)
-    return get_min_score(state, static_state) + get_max_score(state, static_state) - 0.5
+    return get_min_score(state, static_state) +
+        get_max_score(state, static_state) - 0.5
 end
