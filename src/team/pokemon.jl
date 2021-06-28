@@ -67,7 +67,9 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
         sort!(chargedMovesAvailable)
         chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
         chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[3]],)]
-        chargedMoves = [Move(chargedMove1Gm, types), Move(chargedMove2Gm, types)]
+        chargedMove1 = Move(chargedMove1Gm, types)
+        chargedMove2 = Move(chargedMove2Gm, types)
+        chargedMoves = chargedMove1.energy <= chargedMove2.energy ? [chargedMove1, chargedMove2] : [chargedMove2, chargedMove1]
     else
         moveset = custom_moveset == ["none"] ? rankings[i]["moveset"] : custom_moveset
         fastMove = FastMove(moveset[1]::String, types)
