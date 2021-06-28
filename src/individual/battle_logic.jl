@@ -66,12 +66,36 @@ function play_turn(state::DynamicIndividualState,
     return next_state
 end
 
+function resolve_chance(state::DynamicState, static_state::StaticState)
+    chance = get_chance(state::DynamicState)
+    if chance == UInt32(0)
+        return state
+    elseif chance == UInt32(5)
+        return rand() < 0.5 ?
+            # subtract chance, add cmp
+            DynamicIndividualState(state.teams, state.data - UInt32(9702)) :
+            DynamicIndividualState(state.teams, state.data - UInt32(9261))
+    else
+        active = get_active(state)
+        agent = chance < UInt32(3) ? 1 : 2
+        move = static_state.teams[agent].chargedMoves[isodd(chance) ? 1 : 2]
+        if rand(Int8(0):Int8(99)) < move.buffChance
+            data = apply_buff(state.data, move, agent)
+            return DynamicState(state.teams, data - chance * UInt32(2205))
+        else
+            return DynamicState(state.teams, state.data - chance * UInt32(2205))
+        end
+    end
+end
+
 function play_battle(starting_state::DynamicIndividualState, static_state::StaticIndividualState)
     state = starting_state
     while true
-        weights1, weights2 = get_possible_decisions(state, static_state, 1), get_possible_decisions(state, static_state, 2)
-        (iszero(weights1) || iszero(weights2)) && return get_battle_score(state, static_state)
-        state = play_turn(state, static_state, select_random_decision(weights1, weights2))
+        state = resolve_chance(state, static_state)
+        d1, d2 = get_possible_decisions(state, static_state,
+            allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
+        (iszero(d1) || iszero(d2)) && return get_battle_score(state, static_state)
+        state = play_turn(state, static_state, select_random_decision(d1, d2))
     end
 end
 

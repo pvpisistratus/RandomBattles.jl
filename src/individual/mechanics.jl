@@ -93,7 +93,7 @@ function evaluate_fast_moves(state::DynamicIndividualState,
                         static_state.teams[get_other_agent(i)].fastMove,
                     ) : 0x0000), (using_fm[i] ?
                     static_state.teams[i].fastMove.energy : Int8(0))) for i = 1:2]
-    return DynamicState(new_mons, state.data)
+    return DynamicIndividualState(new_mons, state.data)
 end
 
 """
@@ -115,7 +115,7 @@ function evaluate_charged_move(state::DynamicIndividualState,
 
     buff_chance = move.buffChance
     if buff_chance == Int8(100)
-        data = apply_buff(data, move)
+        data = apply_buff(data, move, agent)
     elseif buff_chance != Int8(0)
         data += agent == 1 ? (move_id == 0x01 ? UInt32(2205) : UInt32(4410)) :
                              (move_id == 0x01 ? UInt32(6615) : UInt32(8820))
@@ -136,7 +136,7 @@ function evaluate_charged_move(state::DynamicIndividualState,
                 Int8(100)
             )
     end
-    return DynamicState(
+    return DynamicIndividualState(
         @SVector[agent == 1 ? attacking_team : defending_team,
                  agent == 2 ? attacking_team : defending_team],
         # go from cmp 4 (2 then 1) to cmp 1
@@ -151,11 +151,15 @@ function evaluate_charged_move(state::DynamicIndividualState,
     )
 end
 
-function apply_buff(data::UInt32, move::ChargedMove)
-    return data + Int32(13230)   * get_atk(move.self_buffs) +
-                  Int32(119070)  * get_def(move.opp_buffs)  +
-                  Int32(1071630) * get_atk(move.opp_buffs)  +
-                  Int32(9644670) * get_def(move.self_buffs)
+function apply_buff(data::UInt32, move::ChargedMove, agent::Int64)
+    return agent == 1 ? data + Int32(13230)   * get_atk(move.self_buffs) +
+                               Int32(119070)  * get_def(move.opp_buffs)  +
+                               Int32(1071630) * get_atk(move.opp_buffs)  +
+                               Int32(9644670) * get_def(move.self_buffs) :
+                        data + Int32(13230)   * get_atk(move.opp_buffs) +
+                               Int32(119070)  * get_def(move.self_buffs)  +
+                               Int32(1071630) * get_atk(move.self_buffs)  +
+                               Int32(9644670) * get_def(move.opp_buffs) :
 end
 
 function step_timers(state::DynamicIndividualState, fmCooldown1::Int8,
@@ -173,7 +177,7 @@ function step_timers(state::DynamicIndividualState, fmCooldown1::Int8,
         data -= 63
     end
 
-    return DynamicState(state.teams, data)
+    return DynamicIndividualState(state.teams, data)
 end
 
 """
