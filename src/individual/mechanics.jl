@@ -127,14 +127,14 @@ function evaluate_charged_move(state::DynamicIndividualState,
         defending_team = damage(next_state.teams[d_agent], 0x0001)
         data -= d_agent == 1 ? 1 : 3
     else
-        defending_team = calculate_damage(
+        defending_team = damage(next_state.teams[d_agent], calculate_damage(
                 static_state.teams[agent].stats.attack,
                 state.data,
                 agent,
                 static_state.teams[d_agent],
                 move,
                 Int8(100)
-            )
+            ))
     end
     return DynamicIndividualState(
         @SVector[agent == 1 ? attacking_team : defending_team,
