@@ -34,9 +34,8 @@ get_chance(state::DynamicIndividualState) = (state.data ÷ 2205) % 6
 get_buffs(state::DynamicIndividualState, attacker::Int64) = attacker == 1 ?
     ((state.data ÷ 13230)   % 9, (state.data ÷ 119070)  % 9) :
     ((state.data ÷ 1071630) % 9, (state.data ÷ 9644670) % 9)
-end
 
 DynamicIndividualState(state::StaticIndividualState; shields::Int8 = Int8(2)) = DynamicIndividualState(
-    DynamicPokemon.(state.teams, shields = shields),
-    ,
+    DynamicPokemon.(state.teams),
+    0x04*shields + UInt32(43394400)
 )
