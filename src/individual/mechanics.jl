@@ -217,7 +217,6 @@ battles in progress, and thus differs from PvPoke's use cases
 """
 function get_battle_score(state::DynamicIndividualState,
     static_state::StaticIndividualState)
-    println((get_hp(state.teams[1]), get_hp(state.teams[2])))
     return get_min_score(state, static_state) +
         get_max_score(state, static_state) - 0.5
 end
