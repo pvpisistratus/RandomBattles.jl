@@ -159,7 +159,7 @@ function apply_buff(data::UInt32, move::ChargedMove, agent::Int64)
                         data + Int32(13230)   * get_atk(move.opp_buffs) +
                                Int32(119070)  * get_def(move.self_buffs)  +
                                Int32(1071630) * get_atk(move.self_buffs)  +
-                               Int32(9644670) * get_def(move.opp_buffs) :
+                               Int32(9644670) * get_def(move.opp_buffs)
 end
 
 function step_timers(state::DynamicIndividualState, fmCooldown1::Int8,
