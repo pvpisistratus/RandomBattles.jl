@@ -13,10 +13,10 @@ julia> get_buff_modifier(Int8(0))
 """
 function get_buff_modifier(i::UInt32, agent::Int64)
     a, d = agent == 1 ?
-        (UInt8((state.data ÷ UInt32(13230))   % 9),
-        UInt8((state.data ÷ UInt32(119070))   % 9)) :
-        (UInt8((state.data ÷ UInt32(1071630)) % 9),
-        UInt8((state.data ÷ UInt32(9644670))  % 9))
+        (UInt8((i ÷ UInt32(13230))   % 9),
+        UInt8((i ÷ UInt32(119070))   % 9)) :
+        (UInt8((i ÷ UInt32(1071630)) % 9),
+        UInt8((i ÷ UInt32(9644670))  % 9))
     a1, a2 = a > UInt8(3) ? (a, UInt8(4)) :
         (UInt8(4), UInt8(8) - a)
     d1, d2 = d > UInt8(3) ? (d, UInt8(4)) :
