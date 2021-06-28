@@ -1,6 +1,6 @@
 using JuMP, GLPK
 
-function SM(state::DynamicIndividualState, static_state::StaticIndividualState, depth::Int64; allow_waiting::Bool = false,
+function SM(state::DynamicIndividualState, static_state::StaticIndividualState, depth::Int64; allow_nothing::Bool = false,
     allow_overfarming::Bool = false, max_depth = 15::Int64, sim_to_end::Bool = false)
     A, B = get_possible_decisions(state, static_state,
         allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
