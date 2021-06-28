@@ -27,6 +27,7 @@ include("individual/mechanics.jl")
 include("individual/decisions.jl")
 include("individual/battle_logic.jl")
 #include("individual/diff.jl")
+include("individual/strategy.jl")
 include("individual/nash.jl")
 
 # higher level abstractions
@@ -38,6 +39,7 @@ export DynamicState, StaticState, DynamicTeam, StaticTeam, DynamicPokemon,
       StaticPokemon, DynamicIndividualState, StaticIndividualState,
       get_possible_decisions, get_battle_score, get_battle_scores, play_turn,
       play_battle, gamemaster, greatRankings, ultraRankings, masterRankings,
-      diff, Strategy, plot_strategy, rank, PokemonMeta, SM, solve_battle
+      diff, Strategy, IndividualStrategym plot_strategy, rank, PokemonMeta,
+      SM, solve_battle
 
 end # module
