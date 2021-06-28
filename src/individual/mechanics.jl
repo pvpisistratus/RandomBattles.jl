@@ -87,7 +87,7 @@ function evaluate_fast_moves(state::DynamicIndividualState,
                     add_energy(damage(state.teams[i],
                     using_fm[get_other_agent(i)] ? calculate_damage(
                         static_state.teams[get_other_agent(i)].stats.attack,
-                        get_buffs(state, get_other_agent(i)),
+                        state.data,
                         get_other_agent(i),
                         static_state.teams[i],
                         static_state.teams[get_other_agent(i)].fastMove,
