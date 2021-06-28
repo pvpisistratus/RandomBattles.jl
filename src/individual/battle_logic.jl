@@ -12,12 +12,12 @@ function play_turn(state::DynamicIndividualState,
             static_state, cmp, decision[agent] == 0x05 ? 0x01 : 0x02,
             0x64, decision[get_other_agent(agent)] == 0x01)
         @inbounds if !iszero(fm_pending[get_other_agent(agent)])
-            @inbounds next_state = DynamicState(next_state.teams,
+            @inbounds next_state = DynamicIndividualState(next_state.teams,
                 next_state.data - (fm_pending[get_other_agent(agent)] -
                 0x0001) * (get_other_agent(agent) == 1 ? UInt32(9) :
                 UInt32(63)))
         end
-        @inbounds next_state = DynamicState(next_state.teams,
+        @inbounds next_state = DynamicIndividualState(next_state.teams,
             next_state.data - fm_pending[agent] * (agent == 1 ? UInt32(9) :
             UInt32(63)))
     else
@@ -44,21 +44,21 @@ function play_turn(state::DynamicIndividualState,
                         static_state.teams[2].stats.attack
                     )
                     if atk_cmp == 1
-                        next_state = DynamicState(next_state.teams,
+                        next_state = DynamicIndividualState(next_state.teams,
                             next_state.data + UInt32(1323))
                     elseif atk_cmp == -1
-                        next_state = DynamicState(next_state.teams,
+                        next_state = DynamicIndividualState(next_state.teams,
                             next_state.data + UInt32(1764))
                     else
-                        next_state = DynamicState(next_state.teams,
+                        next_state = DynamicIndividualState(next_state.teams,
                             next_state.data + UInt32(11025))
                     end
                 else
-                    next_state = DynamicState(next_state.teams,
+                    next_state = DynamicIndividualState(next_state.teams,
                         next_state.data + UInt32(441))
                 end
             elseif decision[2] == 0x04
-                next_state = DynamicState(next_state.teams,
+                next_state = DynamicIndividualState(next_state.teams,
                     next_state.data + UInt32(882))
             end
         end
@@ -69,7 +69,7 @@ end
 
 function resolve_chance(state::DynamicIndividualState,
     static_state::StaticIndividualState)
-    chance = get_chance(state::DynamicState)
+    chance = get_chance(state)
     if chance == UInt32(0)
         return state
     elseif chance == UInt32(5)
@@ -83,9 +83,9 @@ function resolve_chance(state::DynamicIndividualState,
         move = static_state.teams[agent].chargedMoves[isodd(chance) ? 1 : 2]
         if rand(Int8(0):Int8(99)) < move.buffChance
             data = apply_buff(state.data, move, agent)
-            return DynamicState(state.teams, data - chance * UInt32(2205))
+            return DynamicIndividualState(state.teams, data - chance * UInt32(2205))
         else
-            return DynamicState(state.teams, state.data - chance * UInt32(2205))
+            return DynamicIndividualState(state.teams, state.data - chance * UInt32(2205))
         end
     end
 end

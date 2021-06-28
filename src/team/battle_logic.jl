@@ -77,7 +77,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
 end
 
 function resolve_chance(state::DynamicState, static_state::StaticState)
-    chance = get_chance(state::DynamicState)
+    chance = get_chance(state)
     if chance == 0x0000
         return state
     elseif chance == 0x0005
