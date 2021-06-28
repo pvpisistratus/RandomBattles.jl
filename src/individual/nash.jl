@@ -56,7 +56,7 @@ function solve_battle(s::DynamicIndividualState, static_s::StaticIndividualState
   sim_to_end = false)
     value = 0.0
     decision = 0, 0
-    strat = Strategy([], [], [])
+    strat = IndividualStrategy([], [], [])
     while true
         s = resolve_chance(s, static_s)
         A, B = get_possible_decisions(s, static_s,
