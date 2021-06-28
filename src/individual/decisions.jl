@@ -8,7 +8,6 @@ function get_possible_decisions(state::DynamicIndividualState,
     # 00010000 - charged move 1
     # 00100000 - charged move 2
 
-    active = get_active(state)
     fast_moves_pending = get_fast_moves_pending(state)
 
     if get_hp(state.teams[1]) == 0x0000 || get_hp(state.teams[2]) == 0x0000
