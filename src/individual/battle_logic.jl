@@ -90,7 +90,9 @@ function resolve_chance(state::DynamicIndividualState,
     end
 end
 
-function play_battle(starting_state::DynamicIndividualState, static_state::StaticIndividualState)
+function play_battle(starting_state::DynamicIndividualState,
+    static_state::StaticIndividualState; allow_nothing::Bool = false,
+    allow_overfarming::Bool = false,)
     state = starting_state
     while true
         state = resolve_chance(state, static_state)
