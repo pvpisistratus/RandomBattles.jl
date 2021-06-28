@@ -3,7 +3,6 @@ function play_turn(state::DynamicIndividualState,
     next_state = state
 
     fm_pending = get_fast_moves_pending(state)
-    active = get_active(next_state)
     cmp = get_cmp(state)
 
     if !iszero(cmp)
@@ -78,7 +77,6 @@ function resolve_chance(state::DynamicIndividualState,
             DynamicIndividualState(state.teams, state.data - UInt32(9702)) :
             DynamicIndividualState(state.teams, state.data - UInt32(9261))
     else
-        active = get_active(state)
         agent = chance < UInt32(3) ? 1 : 2
         move = static_state.teams[agent].chargedMoves[isodd(chance) ? 1 : 2]
         if rand(Int8(0):Int8(99)) < move.buffChance
