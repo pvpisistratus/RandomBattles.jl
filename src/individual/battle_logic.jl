@@ -1,4 +1,5 @@
 function play_turn(state::DynamicIndividualState,
+    static_state::StaticIndividualState, decision::Tuple{UInt8, UInt8})
     next_state = state
 
     fm_pending = get_fast_moves_pending(state)
