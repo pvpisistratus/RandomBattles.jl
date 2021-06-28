@@ -21,7 +21,7 @@ struct DynamicIndividualState
     data::UInt32
 end
 
-has_shields(state::DynamicIndividualState, agent::Int64) = agent == 1 ?
+has_shield(state::DynamicIndividualState, agent::Int64) = agent == 1 ?
   iszero(state.data % UInt32(3)) : iszero((state.data ÷ UInt32(3)) % UInt32(3))
 
 get_fast_moves_pending(state::DynamicIndividualState) =
