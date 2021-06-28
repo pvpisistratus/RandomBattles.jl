@@ -73,7 +73,7 @@ function calculate_damage(
     move::ChargedMove,
     charge::Int8,
 )
-    a, d = get_buff_modifier(buff_data)
+    a, d = get_buff_modifier(buff_data, agent)
     return UInt16((Int64(move.power) * Int64(move.stab) *
         Int64(attack) * Int64(a) *
         floor(Int64, get_effectiveness(defender.types, move.moveType) *
