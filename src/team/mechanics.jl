@@ -187,10 +187,14 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
 end
 
 function apply_buff(a_data::UInt8, d_data::UInt8, move::ChargedMove)
-    return (a_data + Int8(27) * get_atk(move.self_buffs) +
-                     Int8(3) * get_def(move.opp_buffs),
-            d_data + Int8(27) * get_atk(move.opp_buffs) +
-                     Int8(3) * get_def(move.self_buffs)
+    a1 = a_data ÷ UInt8(27)
+    d1 = (a_data ÷ UInt8(3)) % UInt8(9)
+    a2 = d_data ÷ UInt8(27)
+    d2 = (d_data ÷ UInt8(3)) % UInt8(9)
+    return (a_data + Int8(27) * clamp(get_atk(move.self_buffs), -Int8(a1), Int8(9 - a1)) +
+                     Int8(3) * clamp(get_def(move.opp_buffs), -Int8(d1), Int8(9 - a1)),
+            d_data + Int8(27) * clamp(get_atk(move.opp_buffs), -Int8(a2), Int8(9 - a1)) +
+                     Int8(3) * clamp(get_def(move.self_buffs), -Int8(d2), Int8(9 - a1))
     )
 end
 

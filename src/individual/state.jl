@@ -31,9 +31,9 @@ get_cmp(state::DynamicIndividualState) = (state.data ÷ UInt32(441)) % UInt32(5)
 
 get_chance(state::DynamicIndividualState) = (state.data ÷ UInt32(2205)) % UInt32(6)
 
-get_buffs(state::DynamicIndividualState, attacker::Int64) = attacker == 1 ?
-    ((state.data ÷ UInt32(13230))   % 9, (state.data ÷ UInt32(119070))  % 9) :
-    ((state.data ÷ UInt32(1071630)) % 9, (state.data ÷ UInt32(9644670)) % 9)
+get_buffs(data::UInt32, attacker::Int64) = attacker == 1 ?
+    ((data ÷ UInt32(13230))   % 9, (data ÷ UInt32(119070))  % 9) :
+    ((data ÷ UInt32(1071630)) % 9, (data ÷ UInt32(9644670)) % 9)
 
 DynamicIndividualState(state::StaticIndividualState; shields::Int8 = Int8(2)) = DynamicIndividualState(
     DynamicPokemon.(state.teams),

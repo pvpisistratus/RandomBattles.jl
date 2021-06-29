@@ -152,14 +152,24 @@ function evaluate_charged_move(state::DynamicIndividualState,
 end
 
 function apply_buff(data::UInt32, move::ChargedMove, agent::Int64)
-    return agent == 1 ? data + Int32(13230)   * get_atk(move.self_buffs) +
-                               Int32(119070)  * get_def(move.opp_buffs)  +
-                               Int32(1071630) * get_atk(move.opp_buffs)  +
-                               Int32(9644670) * get_def(move.self_buffs) :
-                        data + Int32(13230)   * get_atk(move.opp_buffs) +
-                               Int32(119070)  * get_def(move.self_buffs)  +
-                               Int32(1071630) * get_atk(move.self_buffs)  +
-                               Int32(9644670) * get_def(move.opp_buffs)
+    buffs1 = get_buffs(data, 1)
+    buffs2 = get_buffs(data, 2)
+    @inbounds return agent == 1 ? data + Int32(13230) * clamp(
+        get_atk(move.self_buffs), -Int8(buffs1[1]), 9 - Int8(buffs1[1])) +
+        Int32(119070) * clamp(get_def(move.opp_buffs),
+        -Int8(buffs1[2]), 9 - Int8(buffs1[2]))  +
+        Int32(1071630) * clamp(get_atk(move.opp_buffs),
+        -Int8(buffs2[1]), 9 - Int8(buffs2[1]))  +
+        Int32(9644670) * clamp(get_def(move.self_buffs),
+        -Int8(buffs2[2]), 9 - Int8(buffs2[2])) :
+        data + Int32(13230) * clamp(get_atk(move.opp_buffs),
+        -Int8(buffs2[1]), 9 - Int8(buffs2[1]))  +
+        Int32(119070) * clamp(get_def(move.self_buffs),
+        -Int8(buffs2[2]), 9 - Int8(buffs2[2])) +
+        Int32(1071630) * clamp(get_atk(move.self_buffs),
+        -Int8(buffs1[1]), 9 - Int8(buffs1[1])) +
+        Int32(9644670) * clamp(get_def(move.opp_buffs), 
+        -Int8(buffs1[2]), 9 - Int8(buffs1[2]))
 end
 
 function step_timers(state::DynamicIndividualState, fmCooldown1::Int8,
@@ -168,12 +178,12 @@ function step_timers(state::DynamicIndividualState, fmCooldown1::Int8,
     data = state.data
     if fmCooldown1 != Int8(0)
         data += (UInt32(fmCooldown1) - fmPending[1]) * 9
-    elseif fmPending[1] != 0x0000
+    elseif fmPending[1] != UInt32(0)
         data -= 9
     end
     if fmCooldown2 != Int8(0)
         data += (UInt32(fmCooldown2) - fmPending[2]) * 63
-    elseif fmPending[2] != 0x0000
+    elseif fmPending[2] != UInt32(0)
         data -= 63
     end
 
