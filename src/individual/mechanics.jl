@@ -116,7 +116,6 @@ function evaluate_charged_move(state::DynamicIndividualState,
     buff_chance = move.buffChance
     if buff_chance == Int8(100)
         data = apply_buff(data, move, agent)
-        println(data)
     elseif buff_chance != Int8(0)
         data += agent == 1 ? (move_id == 0x01 ? UInt32(2205) : UInt32(4410)) :
                              (move_id == 0x01 ? UInt32(6615) : UInt32(8820))
