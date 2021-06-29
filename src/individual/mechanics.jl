@@ -116,6 +116,7 @@ function evaluate_charged_move(state::DynamicIndividualState,
     buff_chance = move.buffChance
     if buff_chance == Int8(100)
         data = apply_buff(data, move, agent)
+        println(data)
     elseif buff_chance != Int8(0)
         data += agent == 1 ? (move_id == 0x01 ? UInt32(2205) : UInt32(4410)) :
                              (move_id == 0x01 ? UInt32(6615) : UInt32(8820))
@@ -163,13 +164,13 @@ function apply_buff(data::UInt32, move::ChargedMove, agent::Int64)
         Int32(9644670) * clamp(get_def(move.self_buffs),
         -Int8(buffs2[2]), 9 - Int8(buffs2[2])) :
         data + Int32(13230) * clamp(get_atk(move.opp_buffs),
-        -Int8(buffs2[1]), 9 - Int8(buffs2[1]))  +
-        Int32(119070) * clamp(get_def(move.self_buffs),
-        -Int8(buffs2[2]), 9 - Int8(buffs2[2])) +
-        Int32(1071630) * clamp(get_atk(move.self_buffs),
         -Int8(buffs1[1]), 9 - Int8(buffs1[1])) +
-        Int32(9644670) * clamp(get_def(move.opp_buffs), 
-        -Int8(buffs1[2]), 9 - Int8(buffs1[2]))
+        Int32(119070) * clamp(get_def(move.self_buffs),
+        -Int8(buffs1[2]), 9 - Int8(buffs1[2]))  +
+        Int32(1071630) * clamp(get_atk(move.self_buffs),
+        -Int8(buffs2[1]), 9 - Int8(buffs2[1]))  +
+        Int32(9644670) * clamp(get_def(move.opp_buffs),
+        -Int8(buffs2[2]), 9 - Int8(buffs2[2]))
 end
 
 function step_timers(state::DynamicIndividualState, fmCooldown1::Int8,
