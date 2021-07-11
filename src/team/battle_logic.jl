@@ -106,17 +106,32 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
     end
 end
 
+"""
+    play_battle(state, static_state)
+
+Play through one battle, starting from the inputted state with random, 
+equally weighted decisions.
+"""
 function play_battle(state::DynamicState, static_state::StaticState;
-    allow_nothing::Bool = false, allow_overfarming::Bool = false)
+  allow_nothing::Bool = false, allow_overfarming::Bool = false)
     while true
         state = resolve_chance(state, static_state)
         d1, d2 = get_possible_decisions(state, static_state,
-            allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
-        (iszero(d1) || iszero(d2)) && return get_battle_score(state, static_state)
+            allow_nothing = allow_nothing,
+            allow_overfarming = allow_overfarming)
+        (iszero(d1) || iszero(d2)) &&
+            return get_battle_score(state, static_state)
         state = play_turn(state, static_state, select_random_decision(d1, d2))
     end
 end
 
-function get_battle_scores(starting_state::DynamicState, static_state::StaticState, N::Int64)
+"""
+    get_battle_scores(state, static_state, N)
+
+Play through N battles, starting from the inputted state with random,
+equally weighted decisions.
+"""
+function get_battle_scores(starting_state::DynamicState,
+  static_state::StaticState, N::Int64)
     return map(x -> play_battle(starting_state, static_state), 1:N)
 end
