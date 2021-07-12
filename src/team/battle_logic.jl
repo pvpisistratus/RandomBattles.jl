@@ -7,68 +7,68 @@ function play_turn(state::DynamicState, static_state::StaticState,
     cmp = get_cmp(state)
 
     if !iszero(cmp)
-        agent = isodd(cmp) ? 1 : 2
-        @inbounds next_state = evaluate_charged_move(next_state,
+        agent = isodd(cmp) ? 0x01 : 0x02
+        next_state = evaluate_charged_move(next_state,
             static_state, cmp, decision[agent] == 0x07 ? 0x01 : 0x02,
             0x64, decision[get_other_agent(agent)] == 0x01)
-        @inbounds if !iszero(fm_pending[get_other_agent(agent)])
-            @inbounds next_state = DynamicState(next_state.teams,
+        if !iszero(fm_pending[get_other_agent(agent)])
+            next_state = DynamicState(next_state[0x01], next_state[0x02],
                 next_state.data - (fm_pending[get_other_agent(agent)] -
-                0x0001) * (get_other_agent(agent) == 1 ? 0x0010 : 0x0070))
+                0x0001) * (agent == 0x02 ? 0x0010 : 0x0070))
         end
-        @inbounds next_state = DynamicState(next_state.teams,
+        next_state = DynamicState(next_state[0x01], next_state[0x02],
             next_state.data - fm_pending[agent] *
-            (agent == 1 ? 0x0010 : 0x0070))
+            (agent == 0x01 ? 0x0010 : 0x0070))
     else
-        @inbounds if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
+        if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
             next_state = evaluate_fast_moves(next_state, static_state,
                 (fm_pending[1] == 0x0001 &&
-                get_hp(next_state.teams[1].mons[active[1]]) != 0x0000,
+                get_hp(next_state[0x01][active[1]]) != 0x0000,
                 fm_pending[2] == 0x0001 &&
-                get_hp(next_state.teams[2].mons[active[2]]) != 0x0000))
+                get_hp(next_state[0x02][active[2]]) != 0x0000))
         end
 
-        @inbounds next_state = step_timers(next_state,
+        next_state = step_timers(next_state,
             decision[1] == 0x03 ?
-                static_state.teams[1].mons[active[1]].fastMove.cooldown :
+                static_state[0x01][active[1]].fastMove.cooldown :
                 Int8(0),
             decision[2] == 0x03 ?
-                static_state.teams[2].mons[active[2]].fastMove.cooldown :
+                static_state[0x02][active[2]].fastMove.cooldown :
                 Int8(0))
-        for agent = 1:2
-            @inbounds if decision[agent] == 0x05 || decision[agent] == 0x06
-                @inbounds next_state = evaluate_switch(next_state, agent,
+        for agent = 0x01:0x02
+            if decision[agent] == 0x05 || decision[agent] == 0x06
+                next_state = evaluate_switch(next_state, agent,
                     active[agent], decision[agent] - 0x04,
-                    iszero(get_hp(state.teams[agent].mons[active[agent]])) ?
+                    iszero(get_hp(state[agent][active[agent]])) ?
                     0x18 : 0x00)
             end
         end
         new_active = get_active(next_state)
-        if get_hp(next_state.teams[1].mons[new_active[1]]) != 0x0000 &&
-            get_hp(next_state.teams[2].mons[new_active[2]]) != 0x0000
+        if get_hp(next_state[0x01][new_active[1]]) != 0x0000 &&
+            get_hp(next_state[0x02][new_active[2]]) != 0x0000
             if decision[1] == 0x04
                 if decision[2] == 0x04
                     atk_cmp = Base.cmp(
-                        static_state.teams[1].mons[active[1]].stats.attack,
-                        static_state.teams[2].mons[active[2]].stats.attack
+                        static_state[0x01][active[1]].stats.attack,
+                        static_state[0x02][active[2]].stats.attack
                     )
                     if atk_cmp == 1
-                        next_state = DynamicState(next_state.teams,
-                            next_state.data + 0x0930)
+                        next_state = DynamicState(next_state[0x01],
+                            next_state[0x02], next_state.data + 0x0930)
                     elseif atk_cmp == -1
-                        next_state = DynamicState(next_state.teams,
-                            next_state.data + 0x0c40)
+                        next_state = DynamicState(next_state[0x01],
+                            next_state[0x02], next_state.data + 0x0c40)
                     else
-                        next_state = DynamicState(next_state.teams,
-                            next_state.data + 0x4c90)
+                        next_state = DynamicState(next_state[0x01],
+                            next_state[0x02], next_state.data + 0x4c90)
                     end
                 else
-                    next_state = DynamicState(next_state.teams,
-                        next_state.data + 0x0310)
+                    next_state = DynamicState(next_state[0x01],
+                        next_state[0x02], next_state.data + 0x0310)
                 end
             elseif decision[2] == 0x04
-                next_state = DynamicState(next_state.teams,
-                    next_state.data + 0x0620)
+                next_state = DynamicState(next_state[0x01],
+                    next_state[0x02], next_state.data + 0x0620)
             end
         end
     end
@@ -83,25 +83,28 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
     elseif chance == 0x0005
         return rand() < 0.5 ?
             # subtract chance, add cmp
-            DynamicState(state.teams, state.data - 0x4360) :
-            DynamicState(state.teams, state.data - 0x4050)
+            DynamicState(state[0x01], state[0x02], state.data - 0x4360) :
+            DynamicState(state[0x01], state[0x02], state.data - 0x4050)
     else
         active = get_active(state)
-        agent = chance < 0x0003 ? 1 : 2
-        move = static_state.teams[agent].mons[active[agent]].chargedMoves[
+        agent = chance < 0x0003 ? 0x01 : 0x02
+        move = static_state[agent][active[agent]].chargedMoves[
             isodd(chance) ? 1 : 2]
         if rand(Int8(0):Int8(99)) < move.buffChance
-            a_data = state.teams[agent].data
-            d_data = state.teams[get_other_agent(agent)].data
+            a_data = state[agent].data
+            d_data = state[get_other_agent(agent)].data
             a_data, d_data = apply_buff(a_data, d_data, move)
-            return DynamicState(@SVector[
-                DynamicTeam(state.teams[1].mons, state.teams[1].switchCooldown,
-                    agent == 0x0001 ? a_data : d_data),
-                DynamicTeam(state.teams[2].mons, state.teams[2].switchCooldown,
-                    agent == 0x0002 ? a_data : d_data)
-            ], state.data - chance * 0x0f50)
+            return DynamicState(
+                DynamicTeam(state[0x01][0x0001], state[0x01][0x0002],
+                    state[0x01][0x0003], state[0x01].switchCooldown,
+                    agent == 0x01 ? a_data : d_data),
+                DynamicTeam(state[0x02][0x0001], state[0x02][0x0002],
+                    state[0x02][0x0003], state[0x02].switchCooldown,
+                    agent == 0x02 ? a_data : d_data),
+                state.data - chance * 0x0f50)
         else
-            return DynamicState(state.teams, state.data - chance * 0x0f50)
+            return DynamicState(state[0x01], state[0x02],
+                state.data - chance * 0x0f50)
         end
     end
 end
@@ -109,7 +112,7 @@ end
 """
     play_battle(state, static_state)
 
-Play through one battle, starting from the inputted state with random, 
+Play through one battle, starting from the inputted state with random,
 equally weighted decisions.
 """
 function play_battle(state::DynamicState, static_state::StaticState;

@@ -8,10 +8,14 @@ function strat_vec(l::Int64, i::Int64)
     return to_return
 end
 
-minmax(R::Matrix{Float64}, m::Int64) = @inbounds mapreduce(x -> maximum(R[:, x]), min, 1:m)
-maxmin(R::Matrix{Float64}, n::Int64) = @inbounds mapreduce(x -> minimum(R[x, :]), max, 1:n)
-findminmax(R::Matrix{Float64}, n::Int64) = @inbounds strat_vec(n, argmax(map(x -> minimum(R[x, :]), 1:n)))
-findmaxmin(R::Matrix{Float64}, m::Int64) = @inbounds strat_vec(m, argmin(map(x -> maximum(R[:, x]), 1:m)))
+minmax(R::Matrix{Float64}, m::Int64) =
+    @inbounds mapreduce(x -> maximum(R[:, x]), min, 1:m)
+maxmin(R::Matrix{Float64}, n::Int64) =
+    @inbounds mapreduce(x -> minimum(R[x, :]), max, 1:n)
+findminmax(R::Matrix{Float64}, n::Int64) =
+    @inbounds strat_vec(n, argmax(map(x -> minimum(R[x, :]), 1:n)))
+findmaxmin(R::Matrix{Float64}, m::Int64) =
+    @inbounds strat_vec(m, argmin(map(x -> maximum(R[:, x]), 1:m)))
 
 struct NashResult
     payoff::Float64
@@ -23,9 +27,12 @@ function nash(R::Matrix{Float64})
     n, m = size(R)
 
     # Check if we have to do linear programming
-    n == 1 && return NashResult(minimum(R), no_strat, strat_vec(m, argmin(R)[2]))
-    m == 1 && return NashResult(maximum(R), strat_vec(n, argmax(R)[1]), no_strat)
-    minmax(R, m) == maxmin(R, n) && return NashResult(minmax(R, m), findminmax(R, n), findmaxmin(R, m))
+    n == 1 && return NashResult(
+        minimum(R), no_strat, strat_vec(m, argmin(R)[2]))
+    m == 1 && return NashResult(
+        maximum(R), strat_vec(n, argmax(R)[1]), no_strat)
+    minmax(R, m) == maxmin(R, n) && return NashResult(
+        minmax(R, m), findminmax(R, n), findmaxmin(R, m))
 
     # Set up model and payoff
     model = direct_model(GLPK.Optimizer())
@@ -61,24 +68,27 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     odds = 1.0
     chance = get_chance(state)
     if chance == 0x0005
-        state_1 = DynamicState(state.teams, state.data - 0x4360)
-        state_2 = DynamicState(state.teams, state.data - 0x4050)
+        state_1 = DynamicState(state[0x01], state[0x02], state.data - 0x4360)
+        state_2 = DynamicState(state[0x01], state[0x02], state.data - 0x4050)
         odds = 0.5
     else
-        state_2 = DynamicState(state.teams, state.data - chance * 0x0f50)
+        state_2 = DynamicState(state[0x01], state[0x02],
+            state.data - chance * 0x0f50)
         active = get_active(state)
-        agent = chance < 0x0003 ? 1 : 2
-        move = static_state.teams[agent].mons[active[agent]].chargedMoves[
+        agent = chance < 0x0003 ? 0x01 : 0x02
+        move = static_state[agent][active[agent]].chargedMoves[
             isodd(chance) ? 1 : 2]
-        a_data = state.teams[agent].data
-        d_data = state.teams[get_other_agent(agent)].data
+        a_data = state[agent].data
+        d_data = state[get_other_agent(agent)].data
         a_data, d_data = apply_buff(a_data, d_data, move)
-        state_1 = DynamicState(@SVector[
-            DynamicTeam(state.teams[1].mons, state.teams[1].switchCooldown,
+        state_1 = DynamicState(
+            DynamicTeam(state[0x01][0x0001], state[0x01][0x0002],
+                state[0x01][0x0003], state[0x01].switchCooldown,
                 agent == 0x0001 ? a_data : d_data),
-            DynamicTeam(state.teams[2].mons, state.teams[2].switchCooldown,
-                agent == 0x0002 ? a_data : d_data)
-        ], state.data - chance * 0x0f50)
+            DynamicTeam(state[0x02][0x0001], state[0x02][0x0002],
+                state[0x02][0x0003], state[0x02].switchCooldown,
+                agent == 0x0002 ? a_data : d_data),
+            state.data - chance * 0x0f50)
         odds = move.buffChance / 100
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
@@ -147,11 +157,11 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
         push!(strat.decisions, decision)
         push!(strat.scores, value + 0.5)
         push!(strat.activeMons, get_active(s))
-        push!(strat.hps, ((get_hp(s.teams[1].mons[1]),
-                           get_hp(s.teams[1].mons[2]),
-                           get_hp(s.teams[1].mons[3])),
-                          (get_hp(s.teams[2].mons[1]),
-                           get_hp(s.teams[2].mons[2]),
-                           get_hp(s.teams[2].mons[3]))))
+        push!(strat.hps, ((get_hp(s[0x01][0x0001]),
+                           get_hp(s[0x01][0x0002]),
+                           get_hp(s[0x01][0x0003])),
+                          (get_hp(s[0x02][0x0001]),
+                           get_hp(s[0x02][0x0002]),
+                           get_hp(s[0x02][0x0003]))))
     end
 end

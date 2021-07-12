@@ -1,28 +1,48 @@
-using StaticArrays
-
-struct StaticTeam
-    mons::SVector{3,StaticPokemon}
+struct StaticTeam <: AbstractArray{StaticPokemon, 1}
+    mon1::StaticPokemon
+    mon2::StaticPokemon
+    mon3::StaticPokemon
 end
 
-struct DynamicTeam
+Base.size(s::StaticTeam) = (3,)
+Base.IndexStyle(::Type{<:StaticTeam}) = IndexLinear()
+Base.getindex(s::StaticTeam, i::UInt16) =
+    i == 0x0001 ? s.mon1 : i == 0x0002 ? s.mon2 : s.mon3
+
+StaticTeam(mons::Array{String}; league::String = "great", cup::String = "open") =
+    StaticTeam(StaticPokemon(mons[1], league = league, cup = cup),
+        StaticPokemon(mons[2], league = league, cup = cup),
+        StaticPokemon(mons[3], league = league, cup = cup))
+
+StaticTeam(mons::Array{Int64}; league::String = "great", cup::String = "open") =
+    StaticTeam(StaticPokemon(mons[1], league = league, cup = cup),
+        StaticPokemon(mons[2], league = league, cup = cup),
+        StaticPokemon(mons[3], league = league, cup = cup))
+
+struct DynamicTeam <: AbstractArray{DynamicPokemon, 1}
     #These values are initialized, but change throughout the battle
-    mons::SVector{3,DynamicPokemon}
+    mon1::DynamicPokemon
+    mon2::DynamicPokemon
+    mon3::DynamicPokemon
     switchCooldown::Int8     # Initially 0
     data::UInt8              # StatBuff info and shields
 end
 
-StaticTeam(mons::Array{String}; league::String = "great", cup::String = "open") =
-    StaticTeam(StaticPokemon.(mons, league = league, cup = cup))
-
-StaticTeam(mons::Array{Int64}; league::String = "great", cup::String = "open") =
-    StaticTeam(StaticPokemon.(mons, league = league, cup = cup))
+Base.size(d::DynamicTeam) = (3,)
+Base.IndexStyle(::Type{<:DynamicTeam}) = IndexLinear()
+Base.getindex(d::DynamicTeam, i::UInt16) =
+    i == 0x0001 ? d.mon1 : i == 0x0002 ? d.mon2 : d.mon3
 
 has_shield(team::DynamicTeam) = !iszero(team.data % 0x03)
 
-DynamicTeam(team::StaticTeam) = DynamicTeam(DynamicPokemon.(team.mons), Int8(0), UInt8(122))
+DynamicTeam(team::StaticTeam) = DynamicTeam(
+    DynamicPokemon(team.mons[1]),
+    DynamicPokemon(team.mons[2]),
+    DynamicPokemon(team.mons[3]),
+    Int8(0),
+    UInt8(122)
+)
 
 # returns 2 if 1, 1 if 2. Note: tested some bit twiddling code that was roughly
 # equivalent speed, but this is more readable.
-get_other_agent(agent::Int8) = agent == Int8(1) ? Int8(2) : Int8(1)
-get_other_agent(agent::UInt16) = agent == 0x0001 ? 0x0002 : 0x0001
-get_other_agent(agent::Int64) = agent == 1 ? 2 : 1
+get_other_agent(agent::UInt8) = agent == 0x01 ? 0x02 : 0x01
