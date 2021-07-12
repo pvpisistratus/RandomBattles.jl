@@ -24,7 +24,7 @@ struct DynamicState <: AbstractArray{DynamicTeam, 1}
 end
 
 Base.size(d::DynamicState) = (2,)
-Base.IndexStyle(::Type(<:DynamicState)) = IndexLinear()
+Base.IndexStyle(::Type{<:DynamicState}) = IndexLinear()
 Base.getindex(d::DynamicState, i::UInt8) = i = 0x01 ? d.team1 : d.team2
 
 DynamicState(state::StaticState) = DynamicState(
