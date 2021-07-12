@@ -104,14 +104,14 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
     new_mons = @SMatrix [UInt16(j) == active[i] ?
                     add_energy(damage(state[i][j],
                     using_fm[get_other_agent(i)] ? calculate_damage(
-                        static_state[get_other_agent(i)][active[
-                            get_other_agent(i)]].stats.attack,
+                        static_state[get_other_agent(i)][
+                            active[get_other_agent(i)]].stats.attack,
                         state[get_other_agent(i)].data,
                         static_state[i][j],
-                        static_state[get_other_agent(i)][active[
-                            get_other_agent(i)]].fastMove,
+                        static_state[get_other_agent(i)][
+                            active[get_other_agent(i)]].fastMove,
                     ) : 0x0000), (using_fm[i] ?
-                    static_state[i][j].fastMove.energy : Int8(0)) :
+                    static_state[i][j].fastMove.energy : Int8(0))) :
                     state[i][j] for i = 0x01:0x02, j = 0x0001:0x0003]
     return DynamicState(DynamicTeam(new_mons[1, 1], new_mons[1, 2],
         new_mons[1, 3], state[0x01].switchCooldown, state[0x01].data),
