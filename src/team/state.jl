@@ -4,7 +4,7 @@ struct StaticState <: AbstractArray{StaticTeam, 1}
 end
 
 Base.size(s::StaticState) = (2,)
-Base.IndexStyle(::Types{<:StaticState}) = IndexLinear()
+Base.IndexStyle(::Type{<:StaticState}) = IndexLinear()
 Base.getindex(s::StaticState, i::UInt8) = i = 0x01 ? s.team1 : s.team2
 
 StaticState(teams::Array{Int64}; league = "great", cup = "open") =
