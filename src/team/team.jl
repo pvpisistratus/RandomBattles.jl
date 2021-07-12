@@ -36,9 +36,9 @@ Base.getindex(d::DynamicTeam, i::UInt16) =
 has_shield(team::DynamicTeam) = !iszero(team.data % 0x03)
 
 DynamicTeam(team::StaticTeam) = DynamicTeam(
-    DynamicPokemon(team.mons[1]),
-    DynamicPokemon(team.mons[2]),
-    DynamicPokemon(team.mons[3]),
+    DynamicPokemon(team[0x0001]),
+    DynamicPokemon(team[0x0002]),
+    DynamicPokemon(team[0x0003]),
     Int8(0),
     UInt8(122)
 )
