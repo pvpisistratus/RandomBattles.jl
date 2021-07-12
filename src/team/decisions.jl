@@ -63,12 +63,14 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
                             (d[1], d[2] + 0x08)
                     end
                     if get_hp(state[i][active[i] == 0x0001 ?
-                        2 : 1]) != 0x0000 && state[i].switchCooldown == Int8(0)
+                        0x0002 : 0x0001]) != 0x0000 && state[
+                        i].switchCooldown == Int8(0)
                         d = i == 0x0001 ? (d[1] + 0x10, d[2]) :
                             (d[1], d[2] + 0x10)
                     end
                     if get_hp(state[i][active[i] == 0x0003 ?
-                        2 : 3]) != 0x0000 && state[i].switchCooldown == Int8(0)
+                        0x0002 : 0x0003]) != 0x0000 && state[
+                        i].switchCooldown == Int8(0)
                         d = i == 1 ? (d[1] + 0x20, d[2]) :
                             (d[1], d[2] + 0x20)
                     end
