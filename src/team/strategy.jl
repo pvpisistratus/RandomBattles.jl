@@ -50,28 +50,28 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
         legend = false, size = (950, 200), axis = nothing)
     for i = 1:length(strat.scores), j = 0x01:0x02
         if strat.decisions[i][j] == 0x01
-            scatter!(plt2, [i], [-j], markershape = :hexagon, markersize = 12,
+            scatter!(plt2, [i], [-Int64(j)], markershape = :hexagon, markersize = 12,
                 alpha = 0.5, color = shieldColor)
         elseif strat.decisions[i][j] == 0x05 || strat.decisions[i][j] == 0x06
             color = colors[static_s[j][strat.activeMons[i][j]].primary_type]
-            scatter!(plt2, [i - .25], [-j + .25], markershape = :utriangle,
+            scatter!(plt2, [i - .25], [-Int64(j) + .25], markershape = :utriangle,
                 alpha = 0.5, color = color)
             if 1 <= static_s[j][strat.activeMons[i][j]].secondary_type <= 18
                 color = colors[static_s[j][strat.activeMons[i][j]].secondary_type]
             end
-            scatter!(plt2, [i + .25], [-j - .25], markershape = :dtriangle,
+            scatter!(plt2, [i + .25], [-Int64(j) - .25], markershape = :dtriangle,
                 alpha = 0.5, color = color)
         elseif strat.decisions[i][j] == 0x07 || strat.decisions[i][j] == 0x08
             color = colors[strat.decisions[i][j] == 0x07 ? static_s[j][
                 strat.activeMons[i][j]].charged_move_1.moveType : static_s[j][
                     strat.activeMons[i][j]].charged_move_2.moveType]
-            scatter!(plt2, [i], [-j], markershape = :circle, markersize = 10,
+            scatter!(plt2, [i], [-Int64(j)], markershape = :circle, markersize = 10,
                 alpha = 0.5, color = color)
         elseif i > 1 && sum(strat.hps[i][get_other_agent(j)]) < sum(
             strat.hps[i - 1][get_other_agent(j)])
             color = colors[static_s[j][
                 strat.activeMons[i][j]].fastMove.moveType]
-            scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5,
+            scatter!(plt2, [i], [-Int64(j)], markershape = :square, alpha = 0.5,
                 color = color)
         end
         if i > 1
@@ -80,12 +80,12 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
                 sum(strat.hps[i - 1][get_other_agent(j)])
                 color = colors[static_s[j][
                     strat.activeMons[i-1][j]].fastMove.moveType]
-                scatter!(plt2, [i], [-j], markershape = :square, alpha = 0.5,
+                scatter!(plt2, [i], [-Int64(j)], markershape = :square, alpha = 0.5,
                     color = color)
             end
             if count(iszero, strat.hps[i][j]) >
                 count(iszero, strat.hps[i - 1][j])
-                scatter!(plt2, [i], [-j], markershape = :xcross, alpha = 0.5,
+                scatter!(plt2, [i], [-Int64(j)], markershape = :xcross, alpha = 0.5,
                     markersize = 10, color = :red)
             end
         end
