@@ -63,8 +63,8 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
                 alpha = 0.5, color = color)
         elseif strat.decisions[i][j] == 0x07 || strat.decisions[i][j] == 0x08
             color = colors[strat.decisions[i][j] == 0x07 ? static_s[j][
-                strat.activeMons[i][j]].charged_move_1 : static_s[j][
-                    strat.activeMons[i][j]].charged_move_2]
+                strat.activeMons[i][j]].charged_move_1.moveType : static_s[j][
+                    strat.activeMons[i][j]].charged_move_2.moveType]
             scatter!(plt2, [i], [-j], markershape = :circle, markersize = 10,
                 alpha = 0.5, color = color)
         elseif i > 1 && sum(strat.hps[i][get_other_agent(j)]) < sum(
