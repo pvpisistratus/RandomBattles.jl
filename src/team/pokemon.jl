@@ -1,5 +1,3 @@
-using StaticArrays
-
 """
     StaticPokemon(types, stats, fastMove, chargedMoves)
 
@@ -8,10 +6,12 @@ throughout the battle: types, stats, and moves. Note that like moves, this
 struct is agnostic to the actual identity/dex/species of the mon.
 """
 struct StaticPokemon
-    types::SVector{2,Int8}
+    primary_type::Int8
+    secondary_type::Int8
     stats::Stats
     fastMove::FastMove
-    chargedMoves::SVector{2,ChargedMove}
+    charged_move_1::ChargedMove
+    charged_move_2::ChargedMove
 end
 
 """
@@ -25,7 +25,8 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
     rankings = get_rankings(cup == "open" ? league : cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
-    types = typings[convert(Array{String}, gm["types"])[1]], typings[convert(Array{String}, gm["types"])[2]]
+    types = typings[convert(Array{String}, gm["types"])[1]],
+        typings[convert(Array{String}, gm["types"])[2]]
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
         level, atk, def, hp = parse.(Int8, custom_stats)
@@ -33,11 +34,14 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
             function get_cp(lvl)
                 attack = (atk + gm["baseStats"]["atk"]) * cpm[lvl]
                 defense = (def + gm["baseStats"]["def"]) * cpm[lvl]
-                hitpoints = floor(Int16, (hp + gm["baseStats"]["hp"]) * cpm[lvl])
-                cp = floor(max(10, (attack * sqrt(defense) * sqrt(hitpoints)) / 10.0))
+                hitpoints = floor(Int16,
+                    (hp + gm["baseStats"]["hp"]) * cpm[lvl])
+                cp = floor(max(10,
+                    (attack * sqrt(defense) * sqrt(hitpoints)) / 10.0))
                 return cp
             end
-            level = (1:0.5:40)[findfirst(x -> get_cp(x) > cp_limit, 1:0.5:40) - 1]
+            level = (1:0.5:40)[findfirst(x -> get_cp(x) > cp_limit,
+                1:0.5:40) - 1]
         end
     elseif league == "master"
         level, atk, def, hp = 40, 15, 15, 15
@@ -47,15 +51,20 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
         def = gm["defaultIVs"]["cp$(cp_limit)"][3]
         hp = gm["defaultIVs"]["cp$(cp_limit)"][4]
     end
-    attack = haskey(gm, "tags") && "shadow" in gm["tags"] ? floor(UInt16, (6/5 * atk + gm["baseStats"]["atk"]) * cpm[level] * 100) : floor(UInt16, (atk + gm["baseStats"]["atk"]) * cpm[level] * 100)
-    defense = haskey(gm, "tags") && "shadow" in gm["tags"] ? floor(UInt16, (5/6 * def + gm["baseStats"]["def"]) * cpm[level] * 100) : floor(UInt16, (def + gm["baseStats"]["def"]) * cpm[level] * 100)
+    attack = haskey(gm, "tags") && "shadow" in gm["tags"] ? floor(UInt16,
+        (6/5 * atk + gm["baseStats"]["atk"]) * cpm[level] * 100) :
+        floor(UInt16, (atk + gm["baseStats"]["atk"]) * cpm[level] * 100)
+    defense = haskey(gm, "tags") && "shadow" in gm["tags"] ? floor(UInt16,
+        (5/6 * def + gm["baseStats"]["def"]) * cpm[level] * 100) :
+        floor(UInt16, (def + gm["baseStats"]["def"]) * cpm[level] * 100)
     hitpoints = floor(Int16, (hp + gm["baseStats"]["hp"]) * cpm[level])
     stats = Stats(attack, defense, hitpoints)
     if haskey(rankings[i], "moveStr")
         moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
         fastMovesAvailable = gm["fastMoves"]
         sort!(fastMovesAvailable)
-        fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(fastMovesAvailable[moves[1]+1],)]
+        fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(
+            fastMovesAvailable[moves[1]+1],)]
         fastMove = Move(fastMoveGm, types)
         chargedMovesAvailable = gm["chargedMoves"]
         if haskey(gm, "tags") &&
@@ -65,21 +74,26 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
             push!(chargedMovesAvailable, "FRUSTRATION")
         end
         sort!(chargedMovesAvailable)
-        chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[2]],)]
-        chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(chargedMovesAvailable[moves[3]],)]
+        chargedMove1Gm = gamemaster["moves"][get_gamemaster_move_id(
+            chargedMovesAvailable[moves[2]],)]
+        chargedMove2Gm = gamemaster["moves"][get_gamemaster_move_id(
+            chargedMovesAvailable[moves[3]],)]
         chargedMove1 = Move(chargedMove1Gm, types)
         chargedMove2 = Move(chargedMove2Gm, types)
-        chargedMoves = chargedMove1.energy <= chargedMove2.energy ? [chargedMove1, chargedMove2] : [chargedMove2, chargedMove1]
     else
-        moveset = custom_moveset == ["none"] ? rankings[i]["moveset"] : custom_moveset
+        moveset = custom_moveset == ["none"] ?
+            rankings[i]["moveset"] : custom_moveset
         fastMove = FastMove(moveset[1]::String, types)
-        chargedMoves = [ChargedMove(moveset[2]::String, types), ChargedMove(moveset[3]::String, types)]
+        chargedMove1 = ChargedMove(moveset[2]::String, types)
+        chargedMove2 = ChargedMove(moveset[3]::String, types)
     end
     return StaticPokemon(
-        types,
+        types[1],
+        types[2]
         stats,
         fastMove,
-        chargedMoves,
+        chargedMove1.energy > chargedMove2.energy ? chargedMove2 : chargedMove1,
+        chargedMove1.energy > chargedMove2.energy ? chargedMove1 : chargedMove2
     )
 end
 
@@ -94,19 +108,23 @@ function StaticPokemon(mon::String; league = "great", cup = "open")
     if occursin(",", mon)
         mon_arr = split(mon, ",")
         if length(mon_arr) == 4
-            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1]), league = league, cup = cup),
-                league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]))
+            return StaticPokemon(get_rankings_mon_id(convert(String,
+                mon_arr[1]), league = league, cup = cup), league = league,
+                cup = cup, custom_moveset = convert.(String, mon_arr[2:4]))
         elseif length(mon_arr) == 7
-            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1])),
-                league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
+            return StaticPokemon(get_rankings_mon_id(convert(String,
+                mon_arr[1])), league = league, cup = cup,
+                custom_moveset = convert.(String, mon_arr[2:4]),
                 custom_stats = ("0", mon_arr[5], mon_arr[6], mon_arr[7]))
         elseif length(mon_arr) == 8
-            return StaticPokemon(get_rankings_mon_id(convert(String, mon_arr[1])),
-                league = league, cup = cup, custom_moveset = convert.(String, mon_arr[2:4]),
+            return StaticPokemon(get_rankings_mon_id(convert(String,
+                mon_arr[1])), league = league, cup = cup,
+                custom_moveset = convert.(String, mon_arr[2:4]),
                 custom_stats = (mon_arr[5], mon_arr[6], mon_arr[7], mon_arr[8]))
         end
     else
-        return StaticPokemon(get_rankings_mon_id(mon, league = league, cup = cup),
+        return StaticPokemon(get_rankings_mon_id(
+            mon, league = league, cup = cup),
             league = league, cup = cup)
     end
 end

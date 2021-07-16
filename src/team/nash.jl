@@ -76,8 +76,9 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
             state.data - chance * 0x0f50)
         active = get_active(state)
         agent = chance < 0x0003 ? 0x01 : 0x02
-        move = static_state[agent][active[agent]].chargedMoves[
-            isodd(chance) ? 1 : 2]
+        move = isodd(chance) ? static_state[agent][
+            active[agent]].charged_move_1 : static_state[agent][
+                active[agent]].charged_move_2
         a_data = state[agent].data
         d_data = state[get_other_agent(agent)].data
         a_data, d_data = apply_buff(a_data, d_data, move)

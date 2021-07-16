@@ -88,8 +88,9 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
     else
         active = get_active(state)
         agent = chance < 0x0003 ? 0x01 : 0x02
-        move = static_state[agent][active[agent]].chargedMoves[
-            isodd(chance) ? 1 : 2]
+        move = isodd(chance) ?
+            static_state[agent][active[agent]].charged_move_1 :
+            static_state[agent][active[agent]].charged_move_2
         if rand(Int8(0):Int8(99)) < move.buffChance
             a_data = state[agent].data
             d_data = state[get_other_agent(agent)].data
