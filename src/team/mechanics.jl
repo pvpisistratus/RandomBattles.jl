@@ -284,9 +284,9 @@ function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
     end
 
     return DynamicState(
-        DynamicTeam(state[0x01][0x0001],
-            state[0x01][0x0002], state[0x01][0x0003], max(Int8(0),
-            state[0x01].switchCooldown - Int8(1)), state[0x01].data),
+        DynamicTeam(state[0x01][0x0001], state[0x01][0x0002],
+            state[0x01][0x0003], max(Int8(0), state[0x01].switchCooldown -
+            Int8(1)), state[0x01].data),
         DynamicTeam(state[0x02][0x0001], state[0x02][0x0002],
             state[0x02][0x0003], max(Int8(0), state[0x02].switchCooldown -
             Int8(1)), state[0x02].data),
@@ -302,8 +302,8 @@ altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
 function get_min_score(state::DynamicState, static_state::StaticState)
-    return 0.5 * mapreduce(x -> get_hp(x), +, state[0x02]) /
-        mapreduce(x -> x.stats.hitpoints, +, static_state[0x02])
+    return 0.5 * mapreduce(x -> get_hp(state[0x02][x]), +, 0x0001:0x0003) /
+        mapreduce(x -> static_state[0x02][x].stats.hitpoints, +, 0x0001:0x0003)
 end
 
 """
@@ -315,8 +315,9 @@ altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
 function get_max_score(state::DynamicState, static_state::StaticState)
-    return 0.5 + 0.5 * mapreduce(x -> get_hp(x), +, state[0x01]) /
-        mapreduce(x -> x.stats.hitpoints, +, static_state[0x01])
+    return 0.5 * mapreduce(x -> get_hp(state[0x01][x]), +, 0x0001:0x0003) /
+        mapreduce(x -> static_state[0x01][x].stats.hitpoints, +,
+        0x0001:0x0003) + 0.5
     end
 
 """
