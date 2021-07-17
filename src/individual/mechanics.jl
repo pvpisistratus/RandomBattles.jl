@@ -120,7 +120,7 @@ function evaluate_charged_move(state::DynamicIndividualState,
     static_state::StaticIndividualState, cmp::UInt32, move_id::UInt8,
     charge::UInt8, shielding::Bool)
     next_state = state
-    agent = isodd(cmp) ? 1 : 2
+    agent = isodd(cmp) ? 0x01 : 0x02
     d_agent = get_other_agent(agent)
     data = next_state.data
     move = move_id == 0x01 ? static_state[agent].charged_move_1 :
