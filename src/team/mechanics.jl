@@ -327,4 +327,4 @@ the PvPoke-like score for the battle. Note that this can also be computed for
 battles in progress, and thus differs from PvPoke's use cases
 """
 battle_score(s::DynamicState, static_s::StaticState) =
-    get_min_score(s, static_s) + get_max_score(s, static_s) - 0.5
+    min_score(s, static_s) + max_score(s, static_s) - 0.5
