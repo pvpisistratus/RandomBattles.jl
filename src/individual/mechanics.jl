@@ -10,7 +10,7 @@ be between -4 and 4.
 julia> get_buff_modifier(Int8(0))
 12
 """
-function get_buff_modifier(i::UInt32, agent::Int64)
+function get_buff_modifier(i::UInt32, agent::UInt8)
     a, d = agent == 1 ?
         (UInt8((i ÷ UInt32(13230))   % 9),
         UInt8((i ÷ UInt32(119070))   % 9)) :
