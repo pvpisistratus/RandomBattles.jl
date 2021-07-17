@@ -101,6 +101,6 @@ function play_battle(starting_state::DynamicIndividualState,
     end
 end
 
-function get_battle_scores(starting_state::DynamicIndividualState, static_state::StaticIndividualState, N::Int64)
+function battle_scores(starting_state::DynamicIndividualState, static_state::StaticIndividualState, N::Int64)
     return map(x -> play_battle(starting_state, static_state), 1:N)
 end

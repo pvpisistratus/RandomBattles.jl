@@ -124,18 +124,18 @@ function play_battle(state::DynamicState, static_state::StaticState;
             allow_nothing = allow_nothing,
             allow_overfarming = allow_overfarming)
         (iszero(d1) || iszero(d2)) &&
-            return get_battle_score(state, static_state)
+            return battle_score(state, static_state)
         state = play_turn(state, static_state, select_random_decision(d1, d2))
     end
 end
 
 """
-    get_battle_scores(state, static_state, N)
+    battle_scores(state, static_state, N)
 
 Play through N battles, starting from the inputted state with random,
 equally weighted decisions.
 """
-function get_battle_scores(starting_state::DynamicState,
+function battle_scores(starting_state::DynamicState,
   static_state::StaticState, N::Int64)
     return map(x -> play_battle(starting_state, static_state), 1:N)
 end

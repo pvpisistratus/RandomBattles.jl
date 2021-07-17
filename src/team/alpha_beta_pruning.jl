@@ -34,7 +34,7 @@ function SMAB(state::DynamicState, static_state::StaticState, α₀::Float64,
   β₀::Float64, depth::Int64; allow_waiting::Bool = false, sim_to_end::Bool = false, ϵ = 0.001)
     A, B = get_simultaneous_decisions(state, static_state, allow_waiting = allow_waiting)
     (length(A) == 0 || depth == 0) &&
-        return sim_to_end ? NashResult(sum(get_battle_scores(state, static_state, 100) / 100) - 0.5,
+        return sim_to_end ? NashResult(sum(battle_scores(state, static_state, 100) / 100) - 0.5,
         no_strat, no_strat) : NashResult(get_battle_score(state, static_state) - 0.5,
         no_strat, no_strat)
 

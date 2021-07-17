@@ -7,7 +7,7 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState, 
 
     (Base.ctpop_int(A) == 0x00 || Base.ctpop_int(B) == 0x00 || depth == 0) &&
         return sim_to_end ?
-            NashResult(sum(get_battle_scores(state, static_state, 100)
+            NashResult(sum(battle_scores(state, static_state, 100)
                 / 100) - 0.5, no_strat, no_strat) :
             NashResult(get_battle_score(state, static_state) - 0.5,
                 no_strat, no_strat)

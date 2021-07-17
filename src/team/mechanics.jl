@@ -160,8 +160,8 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     if buff_chance == Int8(100)
         a_data, d_data = apply_buff(a_data, d_data, move)
     elseif buff_chance != Int8(0)
-        data += agent == 1 ? (move_id == 0x01 ? 0x0f50 : 0x1ea0) :
-                             (move_id == 0x01 ? 0x2df0 : 0x3d40)
+        data += agent == 0x01 ? (move_id == 0x01 ? 0x0f50 : 0x1ea0) :
+            (move_id == 0x01 ? 0x2df0 : 0x3d40)
     end
 
     attacking_team = DynamicTeam(
@@ -172,7 +172,8 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         active[agent] == 0x0003 ? subtract_energy(next_state[agent][0x0003],
             move.energy) : next_state[agent][0x0003],
         next_state[agent].switchCooldown,
-        a_data)
+        a_data
+    )
 
     damage_dealt = shielding ? 0x0001 : calculate_damage(
         static_state[agent][active[agent]].stats.attack,
@@ -190,7 +191,8 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         active[d_agent] == 0x0003 ? damage(next_state[d_agent][0x0003],
             damage_dealt) : next_state[d_agent][0x0003],
         next_state[d_agent].switchCooldown,
-        d_data - (shielding ? 0x01 : 0x00))
+        d_data - (shielding ? 0x01 : 0x00)
+    )
 
     return DynamicState(
         agent == 0x01 ? attacking_team : defending_team,
@@ -294,40 +296,37 @@ function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
 end
 
 """
-    get_min_score(state, static_state)
+    min_score(state, static_state)
 
 Given the state and the static state (here just for starting hp values), compute
 the PvPoke-like score that would occur if the first agent stopped attacking
 altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
-function get_min_score(state::DynamicState, static_state::StaticState)
-    return 0.5 * mapreduce(x -> get_hp(state[0x02][x]), +, 0x0001:0x0003) /
-        mapreduce(x -> static_state[0x02][x].stats.hitpoints, +, 0x0001:0x0003)
+min_score(s::DynamicState, static_s::StaticState) = 0.5 *
+    mapreduce(x -> get_hp(s[0x02][x]), +, UInt16(1:3)) /
+    mapreduce(x -> static_s[0x02][x].stats.hitpoints, +, UInt16(1:3))
 end
 
 """
-    get_max_score(state, static_state)
+    max_score(state, static_state)
 
 Given the state and the static state (here just for starting hp values), compute
 the PvPoke-like score that would occur if the second agent stopped attacking
 altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
-function get_max_score(state::DynamicState, static_state::StaticState)
-    return 0.5 * mapreduce(x -> get_hp(state[0x01][x]), +, 0x0001:0x0003) /
-        mapreduce(x -> static_state[0x01][x].stats.hitpoints, +,
-        0x0001:0x0003) + 0.5
-    end
+max_score(s::DynamicState, static_s::StaticState) = 0.5 +
+    0.5 * mapreduce(x -> get_hp(s[0x01][x]), +, UInt16(1:3)) /
+    mapreduce(x -> static_s[0x01][x].stats.hitpoints, +, UInt16(1:3))
 
 """
-    get_battle_score(state, static_state)
+    battle_score(state, static_state)
 
 Given the state and the static state (here just for starting hp values), compute
 the PvPoke-like score for the battle. Note that this can also be computed for
 battles in progress, and thus differs from PvPoke's use cases
 """
-function get_battle_score(state::DynamicState, static_state::StaticState)
-    return get_min_score(state, static_state) +
-        get_max_score(state, static_state) - 0.5
+battle_score(s::DynamicState, static_s::StaticState) =
+    min_score(s, static_s) + max_score(s, static_s) - 0.5
 end
