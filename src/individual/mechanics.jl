@@ -150,8 +150,8 @@ function evaluate_charged_move(state::DynamicIndividualState,
             ))
     end
     return DynamicIndividualState(
-        @SVector[agent == 1 ? attacking_team : defending_team,
-                 agent == 2 ? attacking_team : defending_team],
+        agent == 1 ? attacking_team : defending_team,
+        agent == 2 ? attacking_team : defending_team,
         # go from cmp 4 (2 then 1) to cmp 1
         # or go from cmp 3 (1 then 2) to cmp 2
         # or go from cmp 2 to 0
