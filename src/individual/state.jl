@@ -29,7 +29,7 @@ Base.size(d::DynamicIndividualState) = (2,)
 Base.IndexStyle(::Type{<:DynamicIndividualState}) = IndexLinear()
 Base.getindex(d::DynamicIndividualState, i::UInt8) = i == 0x01 ? d.mon1 : d.mon2
 
-has_shield(state::DynamicIndividualState, agent::Int64) = agent == 1 ?
+has_shield(state::DynamicIndividualState, agent::UInt8) = agent == 0x01 ?
   !iszero(state.data % UInt32(3)) :
   !iszero((state.data ÷ UInt32(3)) % UInt32(3))
 

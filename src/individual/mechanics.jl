@@ -164,7 +164,7 @@ function evaluate_charged_move(state::DynamicIndividualState,
     )
 end
 
-function apply_buff(data::UInt32, move::ChargedMove, agent::Int64)
+function apply_buff(data::UInt32, move::ChargedMove, agent::UInt8)
     buffs1 = get_buffs(data, 1)
     buffs2 = get_buffs(data, 2)
      return agent == 1 ? data + Int32(13230) * clamp(
