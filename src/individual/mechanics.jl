@@ -40,7 +40,7 @@ move
 function calculate_damage(
     attack::UInt16,
     buff_data::UInt32,
-    agent::Int64,
+    agent::UInt8,
     defender::StaticPokemon,
     move::FastMove
 )
@@ -70,7 +70,7 @@ move
 function calculate_damage(
     attack::UInt16,
     buff_data::UInt32,
-    agent::Int64,
+    agent::UInt8,
     defender::StaticPokemon,
     move::ChargedMove,
     charge::Int8,
