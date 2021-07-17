@@ -11,7 +11,7 @@ julia> get_buff_modifier(Int8(0))
 12
 """
 function get_buff_modifier(i::UInt32, agent::UInt8)
-    a, d = agent == 1 ?
+    a, d = agent == 0x01 ?
         (UInt8((i ÷ UInt32(13230))   % 9),
         UInt8((i ÷ UInt32(119070))   % 9)) :
         (UInt8((i ÷ UInt32(1071630)) % 9),
