@@ -14,5 +14,5 @@ using Test, BenchmarkTools
     @test res.allocs == 0
     N = 100000
     @test sum(battle_scores(dynamic_state1, static_state1, N)) +
-        sum(battle_scores(dynamic_state2, static_state2, N)) ≈ N atol=0.01*N
+        sum(battle_scores(dynamic_state2, static_state2, N)) ≈ N atol=0.02*N
 end
