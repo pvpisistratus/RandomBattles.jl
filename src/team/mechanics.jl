@@ -304,8 +304,8 @@ altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
 min_score(s::DynamicState, static_s::StaticState) = 0.5 *
-    mapreduce(x -> get_hp(s[0x02][x]), +, UInt16(1:3)) /
-    mapreduce(x -> static_s[0x02][x].stats.hitpoints, +, UInt16(1:3))
+    mapreduce(x -> get_hp(s[0x02][x]), +, 0x0001:0x0003) /
+    mapreduce(x -> static_s[0x02][x].stats.hitpoints, +, 0x0001:0x0003)
 
 """
     max_score(state, static_state)
@@ -316,8 +316,8 @@ altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
 max_score(s::DynamicState, static_s::StaticState) = 0.5 +
-    0.5 * mapreduce(x -> get_hp(s[0x01][x]), +, UInt16(1:3)) /
-    mapreduce(x -> static_s[0x01][x].stats.hitpoints, +, UInt16(1:3))
+    0.5 * mapreduce(x -> get_hp(s[0x01][x]), +, 0x0001:0x0003) /
+    mapreduce(x -> static_s[0x01][x].stats.hitpoints, +, 0x0001:0x0003)
 
 """
     battle_score(state, static_state)
