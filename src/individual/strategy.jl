@@ -40,8 +40,9 @@ function plot_strategy(strat::IndividualStrategy,
             scatter!(plt2, [i], [-Int64(j)], markershape = :hexagon,
                 markersize = 12, alpha = 0.5, color = shieldColor)
         elseif strat.decisions[i][j] == 0x05 || strat.decisions[i][j] == 0x06
-            color = colors[static_s[j].chargedMoves[
-                strat.decisions[i][j] - 0x04].moveType]
+            color = colors[strat.decisions[i][j] == 0x05 ?
+                static_s[j].charged_move_1.moveType :
+                static_s[j].charged_move_2.moveType]
             scatter!(plt2, [i], [-Int64(j)], markershape = :circle,
                 markersize = 10, alpha = 0.5, color = color)
         end

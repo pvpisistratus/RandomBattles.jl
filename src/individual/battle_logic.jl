@@ -81,7 +81,8 @@ function resolve_chance(state::DynamicIndividualState,
                 state.data - UInt32(9261))
     else
         agent = chance < UInt32(3) ? 0x01 : 0x02
-        move = static_state[agent].chargedMoves[isodd(chance) ? 1 : 2]
+        move = isodd(chance) ? static_state[agent].charged_move_1 :
+            static_state[agent].charged_move_2
         if rand(Int8(0):Int8(99)) < move.buffChance
             data = apply_buff(state.data, move, agent)
             return DynamicIndividualState(state[0x01], state[0x02],

@@ -24,7 +24,8 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState,
         odds = 0.5
     else
         agent = chance < UInt32(3) ? 0x01 : 0x02
-        move = static_state[agent].chargedMoves[isodd(chance) ? 1 : 2]
+        move = isodd(chance) ? static_state[agent].charged_move_1 :
+            static_state[agent].charged_move_2
         data = apply_buff(state.data, move, agent)
         state_1 = DynamicIndividualState(state[0x01], state[0x02],
             data - chance * UInt32(2205))

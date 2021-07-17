@@ -17,12 +17,12 @@ function get_possible_decisions(state::DynamicIndividualState,
     cmp = get_cmp(state)
     if isodd(cmp) # if team 1 is using a charged move and has cmp
          return (get_energy(state[0x01]) >=
-            static_state[0x01].chargedMoves[2].energy ?
+            static_state[0x01].charged_move_2.energy ?
             0x30 : 0x10, has_shield(state, 2) ? 0x03 : 0x02)
     elseif !iszero(cmp) # if team 2 is using a charged move and has cmp
          return (has_shield(state, 1) ? 0x03 : 0x02,
             get_energy(state[0x02]) >=
-            static_state[0x02].chargedMoves[2].energy ?
+            static_state[0x02].charged_move_2.energy ?
             0x30 : 0x10)
     end
 
@@ -34,7 +34,7 @@ function get_possible_decisions(state::DynamicIndividualState,
                  d = i == 0x01 ? (d[1] + 0x04, d[2]) : (d[1], d[2] + 0x04)
             end
              if get_energy(state[i]) >=
-                static_state[i].chargedMoves[1].energy
+                static_state[i].charged_move_1.energy
                  d = i == 0x01 ? (d[1] + 0x08, d[2]) : (d[1], d[2] + 0x08)
             end
             if allow_nothing

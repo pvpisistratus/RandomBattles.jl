@@ -47,7 +47,8 @@ function calculate_damage(
     a, d = get_buff_modifier(buff_data, agent)
     return UInt16((Int64(move.power) * Int64(move.stab) *
         Int64(attack) * Int64(a) *
-        floor(Int64, get_effectiveness(defender.types, move.moveType) *
+        floor(Int64, get_effectiveness(defender.primary_type,
+        defender.secondary_type, move.moveType) *
         12_800) * 65) ÷ (Int64(defender.stats.defense) *
         Int64(d) * 12_800_000) + 1)
 end
@@ -77,7 +78,8 @@ function calculate_damage(
     a, d = get_buff_modifier(buff_data, agent)
     return UInt16((Int64(move.power) * Int64(move.stab) *
         Int64(attack) * Int64(a) *
-        floor(Int64, get_effectiveness(defender.types, move.moveType) *
+        floor(Int64, get_effectiveness(defender.primary_type,
+        defender.secondary_type, move.moveType) *
         12_800) * Int64(charge) * 65) ÷ (Int64(defender.stats.defense) *
         Int64(d) * 1_280_000_000) + 1)
 end
@@ -121,7 +123,8 @@ function evaluate_charged_move(state::DynamicIndividualState,
     agent = isodd(cmp) ? 1 : 2
     d_agent = get_other_agent(agent)
     data = next_state.data
-    move = static_state[agent].chargedMoves[move_id]
+    move = move_id == 0x01 : static_state[agent].charged_move_1 :
+        static_state[agent].charged_move_2
 
     buff_chance = move.buffChance
     if buff_chance == Int8(100)
