@@ -123,7 +123,7 @@ function evaluate_charged_move(state::DynamicIndividualState,
     agent = isodd(cmp) ? 1 : 2
     d_agent = get_other_agent(agent)
     data = next_state.data
-    move = move_id == 0x01 : static_state[agent].charged_move_1 :
+    move = move_id == 0x01 ? static_state[agent].charged_move_1 :
         static_state[agent].charged_move_2
 
     buff_chance = move.buffChance
