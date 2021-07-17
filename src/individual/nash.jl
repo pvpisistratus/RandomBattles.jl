@@ -1,6 +1,7 @@
 using JuMP, GLPK
 
-function SM(state::DynamicIndividualState, static_state::StaticIndividualState, depth::Int64; allow_nothing::Bool = false,
+function SM(state::DynamicIndividualState, static_state::StaticIndividualState,
+    depth::Int64; allow_nothing::Bool = false,
     allow_overfarming::Bool = false, sim_to_end::Bool = false)
     A, B = get_possible_decisions(state, static_state,
         allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
@@ -9,7 +10,7 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState, 
         return sim_to_end ?
             NashResult(sum(battle_scores(state, static_state, 100)
                 / 100) - 0.5, no_strat, no_strat) :
-            NashResult(get_battle_score(state, static_state) - 0.5,
+            NashResult(battle_score(state, static_state) - 0.5,
                 no_strat, no_strat)
 
     payoffs = zeros(Float64, Base.ctpop_int(A), Base.ctpop_int(B))
@@ -18,15 +19,17 @@ function SM(state::DynamicIndividualState, static_state::StaticIndividualState, 
     odds = 1.0
     chance = get_chance(state)
     if chance == UInt32(5)
-        state_1 = DynamicIndividualState(state.teams, state.data - UInt32(9702))
-        state_2 = DynamicIndividualState(state.teams, state.data - UInt32(9261))
+        state_1 = DynamicIndividualState(state[0x01], state[0x02], state.data - UInt32(9702))
+        state_2 = DynamicIndividualState(state[0x01], state[0x02], state.data - UInt32(9261))
         odds = 0.5
     else
-        agent = chance < UInt32(3) ? 1 : 2
-        move = static_state.teams[agent].chargedMoves[isodd(chance) ? 1 : 2]
+        agent = chance < UInt32(3) ? 0x01 : 0x02
+        move = static_state[agent].chargedMoves[isodd(chance) ? 1 : 2]
         data = apply_buff(state.data, move, agent)
-        state_1 = DynamicIndividualState(state.teams, data - chance * UInt32(2205))
-        state_2 = DynamicIndividualState(state.teams, state.data - chance * UInt32(2205))
+        state_1 = DynamicIndividualState(state[0x01], state[0x02],
+            data - chance * UInt32(2205))
+        state_2 = DynamicIndividualState(state[0x01], state[0x02],
+            state.data - chance * UInt32(2205))
         odds = move.buffChance / 100
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
@@ -93,6 +96,6 @@ function solve_battle(s::DynamicIndividualState, static_s::StaticIndividualState
         s = play_turn(s, static_s, decision)
         push!(strat.decisions, decision)
         push!(strat.scores, value + 0.5)
-        push!(strat.hps, (get_hp(s.teams[1]), get_hp(s.teams[2])))
+        push!(strat.hps, (get_hp(s[0x01]), get_hp(s[0x02])))
     end
 end

@@ -6,7 +6,7 @@ In the example below, flying is super-effective against a pure fighting type.
 
 # Examples
 ```jldoctest
-julia> using StaticArrays; get_effectiveness(@SVector[Int8(2), Int8(19)], Int8(3))
+julia> get_effectiveness(Int8(2), Int8(19), Int8(3))
 1.6
 """
 function get_effectiveness(defender_primary::Int8, defender_secondary::Int8,

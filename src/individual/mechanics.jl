@@ -1,10 +1,9 @@
-using StaticArrays
-
 """
     get_buff_modifier(buff)
 
-Compute the mulitplier associated with stat buffs (multiplied by 12 to return an integer).
-As a result, the multiplier for no buff effect is 0. Inputs should be between -4 and 4.
+Compute the mulitplier associated with stat buffs (multiplied by 12 to return
+an integer). As a result, the multiplier for no buff effect is 0. Inputs should
+be between -4 and 4.
 
 # Examples
 ```jldoctest
@@ -34,7 +33,8 @@ end
         charge::Int8,
     )
 
-Calculate the damage a particular pokemon does against another using its fast move
+Calculate the damage a particular pokemon does against another using its fast
+move
 
 """
 function calculate_damage(
@@ -62,7 +62,8 @@ end
         charge::Int8,
     )
 
-Calculate the damage a particular pokemon does against another using a charged move
+Calculate the damage a particular pokemon does against another using a charged
+move
 
 """
 function calculate_damage(
@@ -81,23 +82,32 @@ function calculate_damage(
         Int64(d) * 1_280_000_000) + 1)
 end
 
-function evaluate_fast_moves(state::DynamicIndividualState,
-    static_state::StaticIndividualState, using_fm::Tuple{Bool, Bool})
-    @inbounds new_mons = @SVector [
-                    add_energy(damage(state.teams[i],
-                    using_fm[get_other_agent(i)] ? calculate_damage(
-                        static_state.teams[get_other_agent(i)].stats.attack,
-                        state.data,
-                        get_other_agent(i),
-                        static_state.teams[i],
-                        static_state.teams[get_other_agent(i)].fastMove,
-                    ) : 0x0000), (using_fm[i] ?
-                    static_state.teams[i].fastMove.energy : Int8(0))) for i = 1:2]
-    return DynamicIndividualState(new_mons, state.data)
-end
+evaluate_fast_moves(state::DynamicIndividualState,
+    static_state::StaticIndividualState, using_fm::Tuple{Bool, Bool}) =
+    DynamicIndividualState(
+        add_energy(damage(state[0x01],
+            using_fm[0x02] ? calculate_damage(
+                static_state[0x02].stats.attack,
+                state.data,
+                0x02,
+                static_state[0x01],
+                static_state[0x02].fastMove,
+            ) : 0x0000), (using_fm[i] ?
+            static_state[0x01].fastMove.energy : Int8(0))),
+        add_energy(damage(state[0x02],
+            using_fm[0x01] ? calculate_damage(
+                static_state[0x01].stats.attack,
+                state.data,
+                0x01,
+                static_state[0x02],
+                static_state[0x01].fastMove,
+            ) : 0x0000), (using_fm[i] ?
+            static_state[0x02].fastMove.energy : Int8(0))),
+        state.data)
 
 """
-    evaluate_charged_move(state, static_state, cmp, move_id, charge, shielding, buffs_applied)
+    evaluate_charged_move(state, static_state, cmp, move_id, charge,
+        shielding, buffs_applied)
 
 Takes in the dynamic state, the static state, the attacking agent, the move,
 the charge, whether or not the opponent shields, and whether or not buffs are
@@ -111,27 +121,27 @@ function evaluate_charged_move(state::DynamicIndividualState,
     agent = isodd(cmp) ? 1 : 2
     d_agent = get_other_agent(agent)
     data = next_state.data
-    move = static_state.teams[agent].chargedMoves[move_id]
+    move = static_state[agent].chargedMoves[move_id]
 
     buff_chance = move.buffChance
     if buff_chance == Int8(100)
         data = apply_buff(data, move, agent)
     elseif buff_chance != Int8(0)
-        data += agent == 1 ? (move_id == 0x01 ? UInt32(2205) : UInt32(4410)) :
-                             (move_id == 0x01 ? UInt32(6615) : UInt32(8820))
+        data += agent == 0x01 ? move_id == 0x01 ? UInt32(2205) : UInt32(4410) :
+                             move_id == 0x01 ? UInt32(6615) : UInt32(8820)
     end
 
-    attacking_team = subtract_energy(next_state.teams[agent], move.energy)
+    attacking_team = subtract_energy(next_state[agent], move.energy)
 
     if shielding
-        defending_team = damage(next_state.teams[d_agent], 0x0001)
-        data -= d_agent == 1 ? 1 : 3
+        defending_team = damage(next_state[d_agent], 0x0001)
+        data -= d_agent == 0x01 ? 1 : 3
     else
-        defending_team = damage(next_state.teams[d_agent], calculate_damage(
-                static_state.teams[agent].stats.attack,
+        defending_team = damage(next_state[d_agent], calculate_damage(
+                static_state[agent].stats.attack,
                 state.data,
                 agent,
-                static_state.teams[d_agent],
+                static_state[d_agent],
                 move,
                 Int8(100)
             ))
@@ -154,7 +164,7 @@ end
 function apply_buff(data::UInt32, move::ChargedMove, agent::Int64)
     buffs1 = get_buffs(data, 1)
     buffs2 = get_buffs(data, 2)
-    @inbounds return agent == 1 ? data + Int32(13230) * clamp(
+     return agent == 1 ? data + Int32(13230) * clamp(
         get_atk(move.self_buffs), -Int8(buffs1[1]), 9 - Int8(buffs1[1])) +
         Int32(119070) * clamp(get_def(move.opp_buffs),
         -Int8(buffs1[2]), 9 - Int8(buffs1[2]))  +
@@ -187,45 +197,44 @@ function step_timers(state::DynamicIndividualState, fmCooldown1::Int8,
         data -= 63
     end
 
-    return DynamicIndividualState(state.teams, data)
+    return DynamicIndividualState(state[0x01], state[0x02], data)
 end
 
 """
-    get_min_score(state, static_state)
+    min_score(state, static_state)
 
 Given the state and the static state (here just for starting hp values), compute
 the PvPoke-like score that would occur if the first agent stopped attacking
 altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
-function get_min_score(state::DynamicIndividualState,
+function min_score(state::DynamicIndividualState,
     static_state::StaticIndividualState)
-    @inbounds return 0.5 * (static_state.teams[2].stats.hitpoints -
-        get_hp(state.teams[2])) / static_state.teams[2].stats.hitpoints
+     return 0.5 * (static_state[0x02].stats.hitpoints - get_hp(state[0x02])) /
+        static_state[0x02].stats.hitpoints
 end
 
 """
-    get_max_score(state, static_state)
+    max_score(state, static_state)
 
 Given the state and the static state (here just for starting hp values), compute
 the PvPoke-like score that would occur if the second agent stopped attacking
 altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
-function get_max_score(state::DynamicIndividualState,
+function max_score(state::DynamicIndividualState,
     static_state::StaticIndividualState)
-    @inbounds return 0.5 + (0.5 * get_hp(state.teams[1])) /
-        static_state.teams[1].stats.hitpoints
+     return 0.5 + 0.5 * get_hp(state[0x01]) / static_state[0x01].stats.hitpoints
 end
 
 """
-    get_battle_score(state, static_state)
+    battle_score(state, static_state)
 
 Given the state and the static state (here just for starting hp values), compute
 the PvPoke-like score for the battle. Note that this can also be computed for
 battles in progress, and thus differs from PvPoke's use cases
 """
-function get_battle_score(state::DynamicIndividualState,
+function battle_score(state::DynamicIndividualState,
     static_state::StaticIndividualState)
     return get_min_score(state, static_state) +
         get_max_score(state, static_state) - 0.5
