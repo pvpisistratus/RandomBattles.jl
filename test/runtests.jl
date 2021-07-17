@@ -12,7 +12,7 @@ using Test, BenchmarkTools
     @test isbits(dynamic_state1)
     res = @benchmark play_battle($dynamic_state1, $static_state1)
     @test res.allocs == 0
-    N = 10000
+    N = 100000
     @test sum(battle_scores(dynamic_state1, static_state1, N)) +
         sum(battle_scores(dynamic_state2, static_state2, N)) ≈ N atol=0.01*N
 end
