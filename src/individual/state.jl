@@ -47,7 +47,7 @@ get_buffs(data::UInt32, attacker::Int64) = attacker == 1 ?
 
 DynamicIndividualState(state::StaticIndividualState; shields::Int8 = Int8(2)) =
     DynamicIndividualState(
-        DynamicPokemon(state.teams[0x01]),
-        DynamicPokemon(state.teams[0x02]),
+        DynamicPokemon(state[0x01]),
+        DynamicPokemon(state[0x02]),
         0x04*shields + UInt32(43394400)
     )
