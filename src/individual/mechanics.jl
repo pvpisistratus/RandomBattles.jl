@@ -94,7 +94,7 @@ evaluate_fast_moves(state::DynamicIndividualState,
                 0x02,
                 static_state[0x01],
                 static_state[0x02].fastMove,
-            ) : 0x0000), (using_fm[i] ?
+            ) : 0x0000), (using_fm[0x01] ?
             static_state[0x01].fastMove.energy : Int8(0))),
         add_energy(damage(state[0x02],
             using_fm[0x01] ? calculate_damage(
@@ -103,7 +103,7 @@ evaluate_fast_moves(state::DynamicIndividualState,
                 0x01,
                 static_state[0x02],
                 static_state[0x01].fastMove,
-            ) : 0x0000), (using_fm[i] ?
+            ) : 0x0000), (using_fm[0x02] ?
             static_state[0x02].fastMove.energy : Int8(0))),
         state.data)
 
