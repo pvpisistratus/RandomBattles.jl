@@ -303,8 +303,8 @@ the PvPoke-like score that would occur if the first agent stopped attacking
 altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
-min_score(s::DynamicState, static_s::StaticState) = 0.5 *
-    mapreduce(x -> get_hp(s[0x02][x]), +, 0x0001:0x0003) /
+min_score(s::DynamicState, static_s::StaticState) = 0.5 * mapreduce(x ->
+    static_s[0x02][x].stats.hitpoints - get_hp(s[0x02][x]), +, 0x0001:0x0003) /
     mapreduce(x -> static_s[0x02][x].stats.hitpoints, +, 0x0001:0x0003)
 
 """
@@ -327,4 +327,5 @@ the PvPoke-like score for the battle. Note that this can also be computed for
 battles in progress, and thus differs from PvPoke's use cases
 """
 battle_score(s::DynamicState, static_s::StaticState) =
-    min_score(s, static_s) + max_score(s, static_s) - 0.5
+    get_min_score(state, static_state) +
+        get_max_score(state, static_state) - 0.5
