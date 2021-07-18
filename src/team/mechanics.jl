@@ -101,34 +101,36 @@ the dynamic state after the fast move has occurred, with precisely one copy
 """
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
         using_fm::Tuple{Bool, Bool})
-    active = get_active(state)
-    active_mon_1 = add_energy(damage(state[0x01][active[1]],
+    active1, active2 = get_active(state)
+    static_mon_1 = static_state[0x01][active1]
+    static_mon_2 = static_state[0x02][active2]
+    active_mon_1 = add_energy(damage(state[0x01][active1],
             using_fm[0x02] ? calculate_damage(
-                static_state[0x02][active[2]].stats.attack,
+                static_mon_2.stats.attack,
                 state[0x02].data,
-                static_state[0x01][active[1]],
-                static_state[0x02][active[2]].fastMove,
+                static_mon_1,
+                static_mon_2.fastMove,
             ) : 0x0000), (using_fm[0x01] ?
-            static_state[0x01][active[1]].fastMove.energy : Int8(0)))
-    active_mon_2 = add_energy(damage(state[0x02][active[2]],
+            static_mon_1.fastMove.energy : Int8(0)))
+    active_mon_2 = add_energy(damage(state[0x02][active2],
             using_fm[0x01] ? calculate_damage(
-                static_state[0x01][active[1]].stats.attack,
+                static_mon_1.stats.attack,
                 state[0x01].data,
-                static_state[0x02][active[2]],
-                static_state[0x01][active[1]].fastMove,
+                static_mon_2,
+                static_mon_1.fastMove,
             ) : 0x0000), (using_fm[0x02] ?
-            static_state[0x02][active[2]].fastMove.energy : Int8(0)))
+            static_mon_2.fastMove.energy : Int8(0)))
     return DynamicState(
         DynamicTeam(
-            active[1] == 0x0001 ? active_mon_1 : state[0x01][0x0001],
-            active[1] == 0x0002 ? active_mon_1 : state[0x01][0x0002],
-            active[1] == 0x0003 ? active_mon_1 : state[0x01][0x0003],
+            active1 == 0x0001 ? active_mon_1 : state[0x01][0x0001],
+            active1 == 0x0002 ? active_mon_1 : state[0x01][0x0002],
+            active1 == 0x0003 ? active_mon_1 : state[0x01][0x0003],
             state[0x01].switchCooldown,
             state[0x01].data
         ), DynamicTeam(
-            active[2] == 0x0001 ? active_mon_2 : state[0x02][0x0001],
-            active[2] == 0x0002 ? active_mon_2 : state[0x02][0x0002],
-            active[2] == 0x0003 ? active_mon_2 : state[0x02][0x0003],
+            active2 == 0x0001 ? active_mon_2 : state[0x02][0x0001],
+            active2 == 0x0002 ? active_mon_2 : state[0x02][0x0002],
+            active2 == 0x0003 ? active_mon_2 : state[0x02][0x0003],
             state[0x02].switchCooldown,
             state[0x02].data
         ), state.data
