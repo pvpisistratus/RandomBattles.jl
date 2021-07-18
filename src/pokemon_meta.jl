@@ -1,4 +1,4 @@
-using JSON, Memoize, Downloads
+using JSON, Memoize
 
 """
     PokemonMeta(pokemon, weights)
@@ -26,7 +26,7 @@ limits.
     league::String = "great",
 )
     if source == "silph"
-        data = JSON.parsefile(Downloads.download("https://silph.gg/api/cup/" * cup * "/stats/.json"))
+        data = JSON.parsefile(download("https://silph.gg/api/cup/" * cup * "/stats/.json"))
         silph_keys = collect(keys(data[data_key]))
         mons = silph_to_pvpoke.(silph_keys)
         meta_weights = map(x -> data[data_key][x]["percent"], silph_keys)

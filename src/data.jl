@@ -1,8 +1,8 @@
-using JSON, Colors, Memoize, Downloads
+using JSON, Colors, Memoize
 
 # Grabbing the open league rankings from PvPoke. These are common enough that
 # automatically downloading these and making them constant makes sense.
-const gamemaster =     JSON.parsefile(Downloads.download(
+const gamemaster =     JSON.parsefile(download(
     "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/" *
     "gamemaster.json"))
 
@@ -29,7 +29,7 @@ that is not great league. This function is memoized to avoid downloading the
 same file multiple times.
 """
 @memoize function get_rankings(cup::String; league = "great")
-    return JSON.parsefile(Downloads.download(
+    return JSON.parsefile(download(
         "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/" *
         "data/rankings/$(cup)/overall/rankings-$(get_cp_limit(league)).json"))
 end
@@ -45,7 +45,7 @@ to avoid downloading the same file multiple times.
     cup == "great" && return get_overrides("overall", league = "great")
     cup == "ultra" && return get_overrides("overall", league = "ultra")
     cup == "master" && return get_overrides("overall", league = "master")
-    return JSON.parsefile(Downloads.download(
+    return JSON.parsefile(download(
         "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/" *
         "overrides/$(cup)/overall/$(get_cp_limit(league)).json"))
 end
