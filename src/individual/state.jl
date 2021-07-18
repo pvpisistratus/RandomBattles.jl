@@ -7,13 +7,13 @@ Base.size(s::StaticIndividualState) = (2,)
 Base.IndexStyle(::Type{<:StaticIndividualState}) = IndexLinear()
 Base.getindex(s::StaticIndividualState, i::UInt8) = i == 0x01 ? s.mon1 : s.mon2
 
-StaticIndividualState(teams::Array{Int64}; league = "great", cup = "open") =
+StaticIndividualState(teams::Array{Int64}; league = "great", cup = "all") =
     StaticIndividualState(
         StaticPokemon(teams[1], league = league, cup = cup),
         StaticPokemon(teams[2], league = league, cup = cup)
     )
 
-StaticIndividualState(teams::Array{String}; league = "great", cup = "open") =
+StaticIndividualState(teams::Array{String}; league = "great", cup = "all") =
     StaticIndividualState(
         StaticPokemon(teams[1], league = league, cup = cup),
         StaticPokemon(teams[2], league = league, cup = cup)

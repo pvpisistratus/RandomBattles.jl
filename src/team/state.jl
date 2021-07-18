@@ -7,11 +7,11 @@ Base.size(s::StaticState) = (2,)
 Base.IndexStyle(::Type{<:StaticState}) = IndexLinear()
 Base.getindex(s::StaticState, i::UInt8) = i == 0x01 ? s.team1 : s.team2
 
-StaticState(teams::Array{Int64}; league = "great", cup = "open") =
+StaticState(teams::Array{Int64}; league = "great", cup = "all") =
     StaticState(StaticTeam(teams[1:3], league = league, cup = cup),
         StaticTeam(teams[4:6], league = league, cup = cup))
 
-StaticState(teams::Array{String}; league = "great", cup = "open") =
+StaticState(teams::Array{String}; league = "great", cup = "all") =
     StaticState(StaticTeam(teams[1:3], league = league, cup = cup),
         StaticTeam(teams[4:6], league = league, cup = cup))
 

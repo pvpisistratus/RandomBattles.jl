@@ -11,8 +11,8 @@ julia> get_effectiveness(Int8(2), Int8(19), Int8(3))
 """
 function get_effectiveness(defender_primary::Int8, defender_secondary::Int8,
     moveType::Int8)
-    return type_effectiveness[defender_primary, moveType] *
-            type_effectiveness[defender_secondary, moveType]
+    return get_effectiveness(moveType, defender_primary) *
+        get_effectiveness(moveType, defender_secondary)
 end
 
 """

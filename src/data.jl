@@ -1,28 +1,25 @@
-using JSON, StaticArrays, Colors, Memoize, Downloads
+using JSON, Colors, Memoize, Downloads
 
 # Grabbing the open league rankings from PvPoke. These are common enough that
 # automatically downloading these and making them constant makes sense.
 const gamemaster =     JSON.parsefile(Downloads.download(
-    "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/gamemaster.json"))
-const greatRankings =  JSON.parsefile(Downloads.download(
-    "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-1500.json"))
-const ultraRankings =  JSON.parsefile(Downloads.download(
-    "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-2500.json"))
-const masterRankings = JSON.parsefile(Downloads.download(
-    "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/all/overall/rankings-10000.json"))
+    "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/" *
+    "gamemaster.json"))
 
 """
     get_cp_limit(league)
 
-Given a league ("great", "ultra", "master") return its cp limit (1500, 2500, 10000).
-Masters has no cp limit but is signified in PvPoke with the arbitrarily large 10000.
+Given a league ("great", "ultra", "master") return its cp limit
+(1500, 2500, 10000). Masters has no cp limit but is signified in PvPoke with the
+arbitrarily large 10000.
 
 # Examples
 ```jldoctest
 julia> get_cp_limit("great")
 1500
 """
-get_cp_limit(league::String) = league == "master" ? 10_000 : league == "ultra" ? 2_500 : 1_500
+get_cp_limit(league::String) = league == "master" ? 10_000 :
+    league == "ultra" ? 2_500 : 1_500
 
 """
     get_rankings(cup; league = "great")
@@ -32,12 +29,9 @@ that is not great league. This function is memoized to avoid downloading the
 same file multiple times.
 """
 @memoize function get_rankings(cup::String; league = "great")
-    cup == "great" && return greatRankings
-    cup == "ultra" && return ultraRankings
-    cup == "master" && return masterRankings
     return JSON.parsefile(Downloads.download(
-        "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/rankings/" *
-        "$(cup)/overall/rankings-$(get_cp_limit(league)).json"))
+        "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/" *
+        "data/rankings/$(cup)/overall/rankings-$(get_cp_limit(league)).json"))
 end
 
 """
@@ -51,7 +45,9 @@ to avoid downloading the same file multiple times.
     cup == "great" && return get_overrides("overall", league = "great")
     cup == "ultra" && return get_overrides("overall", league = "ultra")
     cup == "master" && return get_overrides("overall", league = "master")
-    return JSON.parsefile(Downloads.download("https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/overrides/$(cup)/overall/$(get_cp_limit(league)).json"))
+    return JSON.parsefile(Downloads.download(
+        "https://raw.githubusercontent.com/pvpoke/pvpoke/master/src/data/" *
+        "overrides/$(cup)/overall/$(get_cp_limit(league)).json"))
 end
 
 """
@@ -77,19 +73,22 @@ function get_gamemaster_move_id(name::String)
 end
 
 """
-    get_rankings_mon_id(name; league = "great", cup = "open")
+    get_rankings_mon_id(name; league = "great", cup = "all")
 
 Given a mon's PvPoke id, find its location within a particular meta's rankings
 """
-function get_rankings_mon_id(name::String; league::String = "great", cup::String = "open")
-    rankings = get_rankings(cup == "open" ? league : cup, league = league)
+function get_rankings_mon_id(name::String;
+    league::String = "great", cup::String = "all")
+    rankings = get_rankings(cup, league = league)
     for i = 1:length(rankings)
         rankings[i]["speciesId"] == name && return i
     end
     return 0
 end
 
-# types of pokemon matching the Silph Arena graphic in order
+# Types and effectiveness adapted from Silph Arena graphic
+# https://storage.googleapis.com/silphroad-publishing/silph-wp/
+# 3d94d185-type-chart_v4.png
 const typings = Dict{String, Int8}(
     "normal"   => Int8(1),  "fighting" => Int8(2),  "flying"   => Int8(3),
     "poison"   => Int8(4),  "ground"   => Int8(5),  "rock"     => Int8(6),
@@ -99,32 +98,59 @@ const typings = Dict{String, Int8}(
     "dragon"   => Int8(16), "dark"     => Int8(17), "fairy"    => Int8(18),
     "none"     => Int8(19))
 
-
-# Type effectiveness array ripped straight from Silph Arena graphic
-# https://storage.googleapis.com/silphroad-publishing/silph-wp/3d94d185-type-chart_v4.png
-𛲜 = 1.6      # weakness
-Θ = 1 / 𛲜    # resistance
-✗ = Θ^2      # "immunity"
-const type_effectiveness = (@SMatrix [
-    1 1 1 1 1 Θ 1 ✗ Θ 1 1 1 1 1 1 1 1 1 1                  # normal
-    𛲜 1 Θ Θ 1 𛲜 Θ ✗ 𛲜 1 1 1 1 Θ 𛲜 1 𛲜 Θ 1                  # fighting
-    1 𛲜 1 1 1 Θ 𛲜 1 Θ 1 1 𛲜 Θ 1 1 1 1 1 1                  # flying
-    1 1 1 Θ Θ Θ 1 Θ ✗ 1 1 𛲜 1 1 1 1 1 𛲜 1                  # poison
-    1 1 ✗ 𛲜 1 𛲜 Θ 1 𛲜 𛲜 1 Θ 𛲜 1 1 1 1 1 1                  # ground
-    1 Θ 𛲜 1 Θ 1 𛲜 1 Θ 𛲜 1 1 1 1 𛲜 1 1 1 1                  # rock
-    1 Θ Θ Θ 1 1 1 Θ Θ Θ 1 𛲜 1 𛲜 1 1 𛲜 Θ 1                  # bug
-    ✗ 1 1 1 1 1 1 𛲜 1 1 1 1 1 𛲜 1 1 Θ 1 1                  # ghost
-    1 1 1 1 1 𛲜 1 1 Θ Θ Θ 1 Θ 1 𛲜 1 1 𛲜 1                  # steel
-    1 1 1 1 1 Θ 𛲜 1 𛲜 Θ Θ 𛲜 1 1 𛲜 Θ 1 1 1                  # fire
-    1 1 1 1 𛲜 𛲜 1 1 1 𛲜 Θ Θ 1 1 1 Θ 1 1 1                  # water
-    1 1 Θ Θ 𛲜 𛲜 Θ 1 Θ Θ 𛲜 Θ 1 1 1 Θ 1 1 1                  # grass
-    1 1 𛲜 1 ✗ 1 1 1 1 1 𛲜 Θ Θ 1 1 Θ 1 1 1                  # electric
-    1 𛲜 1 𛲜 1 1 1 1 Θ 1 1 1 1 Θ 1 1 ✗ 1 1                  # psychic
-    1 1 𛲜 1 𛲜 1 1 1 Θ Θ Θ 𛲜 1 1 Θ 𛲜 1 1 1                  # ice
-    1 1 1 1 1 1 1 1 Θ 1 1 1 1 1 1 𛲜 1 ✗ 1                  # dragon
-    1 Θ 1 1 1 1 1 𛲜 1 1 1 1 1 𛲜 1 1 Θ Θ 1                  # dark
-    1 𛲜 1 Θ 1 1 1 1 Θ Θ 1 1 1 1 1 𛲜 𛲜 1 1                  # fairy
-])'
+function get_effectiveness(a::Int8, d::Int8)
+    𛲜 = 1.6      # weakness
+    Θ = 1 / 𛲜    # resistance
+    ✗ = Θ^2      # "immunity"
+    if a == 1
+        return d == 6 || d == 9 ? Θ : d == 8 ? ✗ : 1.
+    elseif a == 2
+        return d == 1 || d == 6 || d == 9 || d == 15 || d == 17 ? 𛲜 :
+            d == 3 || d == 4 || d == 7 || d == 14 || d == 18 ? Θ :
+            d == 8 ? ✗ : 1.
+    elseif a == 3
+        return d == 2 || d == 7 || d == 12 ? 𛲜 :
+            d == 6 || d == 9 || d == 13 ? Θ : 1.
+    elseif a == 4
+        return 3 < d < 7 || d == 8 ? Θ : d == 12 || d == 18 ? 𛲜 :
+            d == 9 ? ✗ : 1.
+    elseif a == 5
+        return d == 4 || d == 6 || d == 9 || d == 10 || d == 13 ? 𛲜 :
+            d == 7 || d == 12 ? Θ : d == 3 ? ✗ : 1.
+    elseif a == 6
+        return d == 3 || d == 7 || d == 10 || d == 15 ? 𛲜 :
+            d == 2 || d == 5 || d == 9 ? Θ : 1.
+    elseif a == 7
+        return d == 12 || d == 14 || d == 17 ? 𛲜 :
+            1 < d < 5 || 7 < d < 11 || d == 18 ? Θ : 1.
+    elseif a == 8
+        return d == 8 || d == 14 ? 𛲜 : d == 17 ? Θ : d == 1 ? ✗ : 1.
+    elseif a == 9
+        return d == 6 || d == 15 || d == 18 ? 𛲜 : 8 < d < 12 || d == 13 ? Θ : 1.
+    elseif a == 10
+        return d == 7 || d == 9 || d == 12 || d == 15 ? 𛲜 :
+            d == 6 || d == 10 || d == 11 || d == 16 ? Θ : 1.
+    elseif a == 11
+        return 4 < d < 7 || d == 10 ? 𛲜 : 10 < d < 13 || d == 16 ? Θ : 1.
+    elseif a == 12
+        return d == 5 || d == 6 || d == 11 ? 𛲜 :
+            2 < d < 5 || d == 7 || 8 < d < 11 || d == 12 || d == 16 ? Θ : 1.
+    elseif a == 13
+        return d == 3 || d == 11 ? 𛲜 : d == 12 || d == 13 || d == 16 ? Θ :
+            d == 5 ? ✗ : 1.
+    elseif a == 14
+        return d == 2 || d == 4 ? 𛲜 : d == 9 || d == 14 ? Θ : d == 17 ? ✗ : 1.
+    elseif a == 15
+        return d == 3 || d == 5 || d == 12 || d == 16 ? 𛲜 :
+            8 < d < 12 || d == 15 ? Θ : 1.
+    elseif a == 16
+        return d == 16 ? 𛲜 : d == 9 ? Θ : d == 18 ? ✗ : 1.
+    elseif a == 17
+        return d == 8 || d == 14 ? 𛲜 : d == 2 || 16 < d < 19 ? Θ : 1.
+    else
+        return d == 2 || 15 < d < 18 ? 𛲜 : d == 4 || d == 9 || d == 10 ? Θ : 1.
+    end
+end
 
 # CP multipliers from PvPoke
 const cpm = Dict(
@@ -181,15 +207,24 @@ const cpm = Dict(
 )
 
 # Color scheme to match PvPoke
-const colors = [RGBA(153/255, 159/255, 161/255, 1.0), RGBA(213/255,  63/255,  91/255, 1.0),
-                RGBA(148/255, 171/255, 225/255, 1.0), RGBA(193/255,  98/255, 212/255, 1.0),
-                RGBA(212/255, 141/255,  91/255, 1.0), RGBA(208/255, 196/255, 142/255, 1.0),
-                RGBA(158/255, 195/255,  49/255, 1.0), RGBA( 89/255, 107/255, 181/255, 1.0),
-                RGBA( 82/255, 142/255, 160/255, 1.0), RGBA(254/255, 163/255,  84/255, 1.0),
-                RGBA( 86/255, 158/255, 222/255, 1.0), RGBA( 94/255, 189/255,  91/255, 1.0),
-                RGBA(246/255, 215/255,  75/255, 1.0), RGBA(245/255, 126/255, 121/255, 1.0),
-                RGBA(120/255, 212/255, 192/255, 1.0), RGBA( 14/255, 104/255, 184/255, 1.0),
-                RGBA( 86/255,  86/255,  99/255, 1.0), RGBA(240/255, 152/255, 228/255, 1.0)]
+const colors = [RGBA(153/255, 159/255, 161/255, 1.0),
+                RGBA(213/255,  63/255,  91/255, 1.0),
+                RGBA(148/255, 171/255, 225/255, 1.0),
+                RGBA(193/255,  98/255, 212/255, 1.0),
+                RGBA(212/255, 141/255,  91/255, 1.0),
+                RGBA(208/255, 196/255, 142/255, 1.0),
+                RGBA(158/255, 195/255,  49/255, 1.0),
+                RGBA( 89/255, 107/255, 181/255, 1.0),
+                RGBA( 82/255, 142/255, 160/255, 1.0),
+                RGBA(254/255, 163/255,  84/255, 1.0),
+                RGBA( 86/255, 158/255, 222/255, 1.0),
+                RGBA( 94/255, 189/255,  91/255, 1.0),
+                RGBA(246/255, 215/255,  75/255, 1.0),
+                RGBA(245/255, 126/255, 121/255, 1.0),
+                RGBA(120/255, 212/255, 192/255, 1.0),
+                RGBA( 14/255, 104/255, 184/255, 1.0),
+                RGBA( 86/255,  86/255,  99/255, 1.0),
+                RGBA(240/255, 152/255, 228/255, 1.0)]
 
 # Purple-ish shield color to match game
 const shieldColor = RGBA(235/255,13/255,199/255, 1.0)

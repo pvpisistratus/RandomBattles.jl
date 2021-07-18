@@ -15,15 +15,15 @@ struct StaticPokemon
 end
 
 """
-    StaticPokemon(i; league = "great", cup = "open",
+    StaticPokemon(i; league = "great", cup = "all",
         custom_moveset = ["none"], custom_stats = ())
 
 Construct a StaticPokemon from the index of a mon within its rankings
 (optionally specified). Other optional inputs are a custom moveset or IVs.
 """
-function StaticPokemon(i::Int64; league::String = "great", cup = "open",
+function StaticPokemon(i::Int64; league::String = "great", cup = "all",
   custom_moveset = ["none"], custom_stats = ())
-    rankings = get_rankings(cup == "open" ? league : cup, league = league)
+    rankings = get_rankings(cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
     types = typings[convert(Array{String}, gm["types"])[1]],
@@ -97,13 +97,13 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "open",
 end
 
 """
-    StaticPokemon(mon; league = "great", cup = "open")
+    StaticPokemon(mon; league = "great", cup = "all")
 
 Construct a StaticPokemon from the name of the pokemon, and the meta it is
 within. Movesets and IVs can also be specified by comma-separating the string
 being passed in.
 """
-function StaticPokemon(mon::String; league = "great", cup = "open")
+function StaticPokemon(mon::String; league = "great", cup = "all")
     if occursin(",", mon)
         mon_arr = split(mon, ",")
         if length(mon_arr) == 4
