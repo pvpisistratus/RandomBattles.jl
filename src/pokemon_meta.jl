@@ -1,5 +1,3 @@
-using JSON, Memoize
-
 """
     PokemonMeta(pokemon, weights)
 
@@ -15,18 +13,16 @@ end
     PokemonMeta(cup; data_key = "all", source = "silph", league = "great")
 
 Construct a PokemonMeta for a particular meta using either Silph Arena
-frequency data, or PvPoke weights as the distribution. This function is
-memoized to avoid downloading multiple times and approaching Silph Arena API
-limits.
+frequency data, or PvPoke weights as the distribution.
 """
-@memoize function PokemonMeta(
+function PokemonMeta(
     cup::String;
     data_key::String = "all",
     source::String = "silph",
     league::String = "great",
 )
     if source == "silph"
-        data = JSON.parsefile(download("https://silph.gg/api/cup/" * cup * "/stats/.json"))
+        data = get_silph_usage(cup)
         silph_keys = collect(keys(data[data_key]))
         mons = silph_to_pvpoke.(silph_keys)
         meta_weights = map(x -> data[data_key][x]["percent"], silph_keys)

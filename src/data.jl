@@ -50,6 +50,9 @@ to avoid downloading the same file multiple times.
         "overrides/$(cup)/overall/$(get_cp_limit(league)).json"))
 end
 
+@memoize get_silph_usage(cup::String) =
+    JSON.parsefile(download("https://silph.gg/api/cup/" * cup * "/stats/.json"))
+
 """
     get_gamemaster_mon_id(name)
 
