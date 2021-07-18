@@ -74,9 +74,18 @@ function ChargedMove(gm_move::Dict{String,Any}, types)
         (typings[gm_move["type"]] in types) ? Int8(12) : Int8(10),
         UInt8(gm_move["power"]),
         Int8(gm_move["energy"]),
-        haskey(gm_move, "buffs") ? round(Int8, parse(Float64, gm_move["buffApplyChance"]) * 100) : Int8(0),
-        StatBuffs(haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent" ? Int8(gm_move["buffs"][2]) : Int8(0)),
-        StatBuffs(haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") && gm_move["buffTarget"] == "self" ? Int8(gm_move["buffs"][2]) : Int8(0))
+        haskey(gm_move, "buffs") ? round(Int8, parse(Float64,
+            gm_move["buffApplyChance"]) * 100) : Int8(0),
+        StatBuffs(haskey(gm_move, "buffs") &&
+            gm_move["buffTarget"] == "opponent" ?
+                Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") &&
+            gm_move["buffTarget"] == "opponent" ?
+                Int8(gm_move["buffs"][2]) : Int8(0)),
+        StatBuffs(haskey(gm_move, "buffs") &&
+            gm_move["buffTarget"] == "self" ?
+                Int8(gm_move["buffs"][1]) : Int8(0), haskey(gm_move, "buffs") &&
+            gm_move["buffTarget"] == "self" ?
+                Int8(gm_move["buffs"][2]) : Int8(0))
     )
 end
 
@@ -88,7 +97,8 @@ using it (to determing STAB, same type attack bonus)
 """
 function ChargedMove(move_name::String, types)
     if move_name == "NONE"
-        return ChargedMove(Int8(0), Int8(0), UInt8(0), Int8(0), Int8(0), defaultBuff, defaultBuff)
+        return ChargedMove(Int8(0), Int8(0), UInt8(0), Int8(0), Int8(0),
+            defaultBuff, defaultBuff)
     end
     move_index = findfirst(isequal(move_name), map(x ->
         gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))

@@ -48,8 +48,8 @@ function PokemonMeta(
         return PokemonMeta(mons, weights ./ sum(weights))
     else
         rankings = get_rankings(cup, league = league)
-        mons = map(x -> StaticPokemon(x["speciesId"], cup = cup, league = league),
-            rankings)
+        mons = map(x -> StaticPokemon(x["speciesId"],
+            cup = cup, league = league), rankings)
         PokemonMeta(mons, ones(length(mons)) ./ length(mons))
     end
 end

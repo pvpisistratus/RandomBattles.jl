@@ -1,6 +1,7 @@
 module RandomBattles
 
-if isdefined(Base, :Experimental) && isdefined(Base.Experimental, Symbol("@optlevel"))
+if isdefined(Base, :Experimental) && isdefined(Base.Experimental,
+      Symbol("@optlevel"))
       @eval Base.Experimental.@optlevel 3
 end
 

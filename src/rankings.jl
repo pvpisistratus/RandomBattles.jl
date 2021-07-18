@@ -42,7 +42,8 @@ function get_theoretical_teams(numMons::Int64; league = "great")
     end
     dexDict = Dict{Int16,Array{Int64,1}}()
     for i = 1:numMons
-        @inbounds dex = gamemaster["pokemon"][get_gamemaster_mon_id(theoreticalMons[i])]["dex"]
+        @inbounds dex = gamemaster["pokemon"][
+            get_gamemaster_mon_id(theoreticalMons[i])]["dex"]
         if haskey(dexDict, dex)
             push!(dexDict[dex], i)
         else
@@ -55,9 +56,9 @@ function get_theoretical_teams(numMons::Int64; league = "great")
         for j in Iterators.flatten((1:(i-1), (i+1):length(dexKeys)))
             for k = (j+1):length(dexKeys)
                 if i != k
-                    @inbounds @fastmath toAdd = length(dexDict[dexKeys[i]]) *
-                                                length(dexDict[dexKeys[j]]) *
-                                                length(dexDict[dexKeys[k]])
+                    @inbounds toAdd = length(dexDict[dexKeys[i]]) *
+                                        length(dexDict[dexKeys[j]]) *
+                                        length(dexDict[dexKeys[k]])
                     index += toAdd
                 end
             end
@@ -71,13 +72,13 @@ function get_theoretical_teams(numMons::Int64; league = "great")
         for j in Iterators.flatten((1:(i-1), (i+1):length(dexKeys)))
             for k = (j+1):length(dexKeys)
                 if i != k
-                    @inbounds @fastmath toAdd = length(dexDict[dexKeys[i]]) *
-                                                length(dexDict[dexKeys[j]]) *
-                                                length(dexDict[dexKeys[k]])
-                    @inbounds @fastmath theoreticalTeams[index:(index+toAdd-1)] = [StaticTeam(
-                        [l, m, n],
-                        league = league,
-                    ) for l in dexes(i), m in dexes(j), n in dexes(k)]
+                    @inbounds toAdd = length(dexDict[dexKeys[i]]) *
+                                        length(dexDict[dexKeys[j]]) *
+                                        length(dexDict[dexKeys[k]])
+                    @inbounds theoreticalTeams[index:(index+toAdd-1)] = [
+                        StaticTeam(
+                            [l, m, n], league = league
+                        ) for l in dexes(i), m in dexes(j), n in dexes(k)]
                     index += toAdd
                 end
             end
@@ -141,7 +142,11 @@ function get_summary_stats(
     summaryStats = Array{Any}(undef, length(theoreticalTeams), 5)
 
     for i = 1:length(theoreticalTeams)
-        @inbounds summaryStats[i, :] = [expected_wins[i] expected_battle_score[i] get_mon_name(theoreticalTeams[i].mons[1], theoreticalMons) get_mon_name(theoreticalTeams[i].mons[2], theoreticalMons) get_mon_name(theoreticalTeams[i].mons[3], theoreticalMons)]
+        @inbounds summaryStats[i, :] = [expected_wins[i]
+            expected_battle_score[i] get_mon_name(theoreticalTeams[i].mons[1],
+            theoreticalMons) get_mon_name(theoreticalTeams[i].mons[2],
+            theoreticalMons) get_mon_name(theoreticalTeams[i].mons[3],
+            theoreticalMons)]
     end
     return summaryStats
 end;
@@ -150,7 +155,8 @@ function rank(numMons, indigo_file, outfile; league = "great")
     println("Constructing Empirical Teams...")
     empiricalTeams, weights = get_empirical_teams(indigo_file, league = league)
     println("Constructing Theoretical Teams...")
-    theoreticalTeams, theoreticalMons = get_theoretical_teams(numMons, league = league)
+    theoreticalTeams, theoreticalMons = get_theoretical_teams(numMons,
+        league = league)
     println("Running Battles...")
     histograms, expected_wins, expected_battle_score = run_theoretical_teams(
         theoreticalTeams,
