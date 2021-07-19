@@ -102,14 +102,12 @@ the dynamic state after the fast move has occurred, with precisely one copy
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
         fm_damages::Tuple{UInt16, UInt16}, using_fm::Tuple{Bool, Bool})
     active1, active2 = get_active(state)
-    static_mon_1 = static_state[0x01][active1]
-    static_mon_2 = static_state[0x02][active2]
     active_mon_1 = add_energy(damage(state[0x01][active1],
             using_fm[0x02] ? fm_damages[1] : 0x0000), (using_fm[0x01] ?
-            static_mon_1.fastMove.energy : Int8(0)))
+            static_state[0x01][active1].fastMove.energy : Int8(0)))
     active_mon_2 = add_energy(damage(state[0x02][active2],
             using_fm[0x01] ? fm_damages[2] : 0x0000), (using_fm[0x02] ?
-            static_mon_2.fastMove.energy : Int8(0)))
+            static_state[0x02][active2].fastMove.energy : Int8(0)))
     return DynamicState(
         DynamicTeam(
             active1 == 0x0001 ? active_mon_1 : state[0x01][0x0001],
@@ -278,7 +276,7 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
                 min(state[0x02].switchCooldown, time),
             state[0x02].data),
         data)
-    agent1, agent2 = get_active(new_state)
+    active1, active2 = get_active(new_state)
     return new_state, get_fast_move_damages(
         new_state, static_state, active1, active2)
 end
