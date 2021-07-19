@@ -241,14 +241,14 @@ function apply_buff(a_data::UInt8, d_data::UInt8, move::ChargedMove)
 end
 
 """
-    evaluate_switch(state, agent, to_switch, time)
+    evaluate_switch(state, static_state, agent, to_switch, time)
 
 Takes in the dynamic state, the switching agent, which team member they switch to,
 and the time in the switch (only applies in switches after a faint) and returns
 the dynamic state after the switch has occurred, with precisely one copy
 """
-function evaluate_switch(state::DynamicState, agent::UInt8, active::UInt16,
-    to_switch::UInt8, time::UInt8)
+function evaluate_switch(state::DynamicState, static_state::StaticState,
+    agent::UInt8, active::UInt16, to_switch::UInt8, time::UInt8)
     data = state.data
     fmPending = get_fast_moves_pending(state)
     if agent == 0x01
