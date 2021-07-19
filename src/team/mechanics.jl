@@ -100,7 +100,7 @@ Takes in the dynamic state, the static state, and the attacking agent and return
 the dynamic state after the fast move has occurred, with precisely one copy
 """
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
-        fm_damages::::Tuple{UInt16, UInt16}, using_fm::Tuple{Bool, Bool})
+        fm_damages::Tuple{UInt16, UInt16}, using_fm::Tuple{Bool, Bool})
     active1, active2 = get_active(state)
     static_mon_1 = static_state[0x01][active1]
     static_mon_2 = static_state[0x02][active2]
