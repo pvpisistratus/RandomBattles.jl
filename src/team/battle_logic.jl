@@ -84,9 +84,9 @@ function resolve_chance(state::DynamicState, static_state::StaticState,
     elseif chance == 0x0005
         return rand() < 0.5 ?
             # subtract chance, add cmp
-            DynamicState(state[0x01], state[0x02], state.data - 0x4360),
-            fm_damages : DynamicState(state[0x01], state[0x02],
-            state.data - 0x4050), fm_damages
+            (DynamicState(state[0x01], state[0x02],
+            state.data - 0x4360), fm_damages) : (DynamicState(state[0x01],
+            state[0x02], state.data - 0x4050), fm_damages)
     else
         active = get_active(state)
         agent = chance < 0x0003 ? 0x01 : 0x02
