@@ -97,19 +97,19 @@ function resolve_chance(state::DynamicState, static_state::StaticState,
             a_data = state[agent].data
             d_data = state[get_other_agent(agent)].data
             a_data, d_data = apply_buff(a_data, d_data, move)
-            return DynamicState(
+            new_state = DynamicState(
                 DynamicTeam(state[0x01][0x0001], state[0x01][0x0002],
                     state[0x01][0x0003], state[0x01].switchCooldown,
                     agent == 0x01 ? a_data : d_data),
                 DynamicTeam(state[0x02][0x0001], state[0x02][0x0002],
                     state[0x02][0x0003], state[0x02].switchCooldown,
                     agent == 0x02 ? a_data : d_data),
-                state.data - chance * 0x0f50), get_fast_move_damages(
+                state.data - chance * 0x0f50)
+            return new_state, get_fast_move_damages(
                     new_state, static_state, active[1], active[2])
         else
-            new_state = DynamicState(state[0x01], state[0x02],
-                state.data - chance * 0x0f50)
-            return new_state, fm_damages
+            return DynamicState(state[0x01], state[0x02],
+                state.data - chance * 0x0f50), fm_damages
         end
     end
 end
