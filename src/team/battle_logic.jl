@@ -80,7 +80,7 @@ function resolve_chance(state::DynamicState, static_state::StaticState,
     fm_damages::Tuple{UInt16, UInt16})
     chance = get_chance(state)
     if chance == 0x0000
-        return state
+        return state, fm_damages
     elseif chance == 0x0005
         return rand() < 0.5 ?
             # subtract chance, add cmp
