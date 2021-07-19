@@ -218,7 +218,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
             (cmp == 0x0002 ? 0x0620 : 0x0310)))
     )
 
-    if buffChance == Int8(100)
+    if buff_chance == Int8(100)
         fm_damages = get_fast_move_damages(
             new_state, static_state, active1, active2)
     end
