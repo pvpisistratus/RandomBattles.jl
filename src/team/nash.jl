@@ -135,7 +135,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
     value = 0.0
     decision = 0, 0
     strat = Strategy([], [], [], [])
-    active1, active2 = get_active(state)
+    active1, active2 = get_active(s)
     fm_damages = get_fast_move_damages(s, static_s, active1, active2)
     while true
         s, fm_damages = resolve_chance(s, static_s)

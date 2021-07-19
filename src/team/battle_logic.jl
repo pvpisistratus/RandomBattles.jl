@@ -73,6 +73,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
         end
     end
 
+    println(fm_damages)
     return next_state, fm_damages
 end
 
