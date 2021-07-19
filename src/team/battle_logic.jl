@@ -28,7 +28,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
                 get_hp(next_state[0x02][active[2]]) != 0x0000))
         end
 
-        next_state, fm_damages = step_timers(next_state,
+        next_state = step_timers(next_state,
             decision[1] == 0x03 ?
                 static_state[0x01][active[1]].fastMove.cooldown :
                 Int8(0),
