@@ -100,25 +100,15 @@ Takes in the dynamic state, the static state, and the attacking agent and return
 the dynamic state after the fast move has occurred, with precisely one copy
 """
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
-        using_fm::Tuple{Bool, Bool})
+        fm_damages::::Tuple{UInt16, UInt16}, using_fm::Tuple{Bool, Bool})
     active1, active2 = get_active(state)
     static_mon_1 = static_state[0x01][active1]
     static_mon_2 = static_state[0x02][active2]
     active_mon_1 = add_energy(damage(state[0x01][active1],
-            using_fm[0x02] ? calculate_damage(
-                static_mon_2.stats.attack,
-                state[0x02].data,
-                static_mon_1,
-                static_mon_2.fastMove,
-            ) : 0x0000), (using_fm[0x01] ?
+            using_fm[0x02] ? fm_damages[1] : 0x0000), (using_fm[0x01] ?
             static_mon_1.fastMove.energy : Int8(0)))
     active_mon_2 = add_energy(damage(state[0x02][active2],
-            using_fm[0x01] ? calculate_damage(
-                static_mon_1.stats.attack,
-                state[0x01].data,
-                static_mon_2,
-                static_mon_1.fastMove,
-            ) : 0x0000), (using_fm[0x02] ?
+            using_fm[0x01] ? fm_damages[2] : 0x0000), (using_fm[0x02] ?
             static_mon_2.fastMove.energy : Int8(0)))
     return DynamicState(
         DynamicTeam(
@@ -137,6 +127,23 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
     )
 end
 
+function get_fast_move_damages(state::DynamicState, static_state::StaticState,
+    active1::UInt16, active2::UInt16)
+    static_mon_1 = static_state[0x01][active1]
+    static_mon_2 = static_state[0x02][active2]
+    return calculate_damage(
+        static_mon_2.stats.attack,
+        state[0x02].data,
+        static_mon_1,
+        static_mon_2.fastMove,
+    ), calculate_damage(
+        static_mon_1.stats.attack,
+        state[0x01].data,
+        static_mon_2,
+        static_mon_1.fastMove,
+    )
+end
+
 
 """
     evaluate_charged_move(state, static_state, cmp, move_id, charge, shielding, buffs_applied)
@@ -147,16 +154,20 @@ applied (say in the case of a random buff move) and returns
 the dynamic state after the charged move has occurred, with precisely one copy
 """
 function evaluate_charged_move(state::DynamicState, static_state::StaticState,
-    cmp::UInt16, move_id::UInt8, charge::UInt8, shielding::Bool)
+    cmp::UInt16, move_id::UInt8, charge::UInt8, shielding::Bool,
+    fm_damages::Tuple{UInt16, UInt16})
     next_state = state
-    active = get_active(next_state)
-    agent = isodd(cmp) ? 0x01 : 0x02
-    d_agent = get_other_agent(agent)
+    active1, active2 = get_active(next_state)
+    if isodd(cmp)
+        a_active, d_active, agent, d_agent = active1, active2, 0x01, 0x02
+    else
+        a_active, d_active, agent, d_agent = active1, active2, 0x02, 0x01
+    end
     data = next_state.data
     a_data = next_state[agent].data
     d_data = next_state[d_agent].data
-    move = move_id == 0x01 ? static_state[agent][active[agent]].charged_move_1 :
-        static_state[agent][active[agent]].charged_move_2
+    move = move_id == 0x01 ? static_state[agent][a_active].charged_move_1 :
+        static_state[agent][a_active].charged_move_2
     buff_chance = move.buffChance
 
     if buff_chance == Int8(100)
@@ -167,50 +178,53 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     end
 
     attacking_team = DynamicTeam(
-        active[agent] == 0x0001 ? subtract_energy(next_state[agent][0x0001],
+        a_active == 0x0001 ? subtract_energy(next_state[agent][0x0001],
             move.energy) : next_state[agent][0x0001],
-        active[agent] == 0x0002 ? subtract_energy(next_state[agent][0x0002],
+        a_active == 0x0002 ? subtract_energy(next_state[agent][0x0002],
             move.energy) : next_state[agent][0x0002],
-        active[agent] == 0x0003 ? subtract_energy(next_state[agent][0x0003],
+        a_active == 0x0003 ? subtract_energy(next_state[agent][0x0003],
             move.energy) : next_state[agent][0x0003],
         next_state[agent].switchCooldown,
         a_data
     )
 
     damage_dealt = shielding ? 0x0001 : calculate_damage(
-        static_state[agent][active[agent]].stats.attack,
+        static_state[agent][a_active].stats.attack,
         state[agent].data,
-        static_state[d_agent][active[d_agent]],
+        static_state[d_agent][d_active],
         move,
         Int8(100)
     )
 
     defending_team = DynamicTeam(
-        active[d_agent] == 0x0001 ? damage(next_state[d_agent][0x0001],
+        d_active == 0x0001 ? damage(next_state[d_agent][0x0001],
             damage_dealt) : next_state[d_agent][0x0001],
-        active[d_agent] == 0x0002 ? damage(next_state[d_agent][0x0002],
+        d_active == 0x0002 ? damage(next_state[d_agent][0x0002],
             damage_dealt) : next_state[d_agent][0x0002],
-        active[d_agent] == 0x0003 ? damage(next_state[d_agent][0x0003],
+        d_active == 0x0003 ? damage(next_state[d_agent][0x0003],
             damage_dealt) : next_state[d_agent][0x0003],
         next_state[d_agent].switchCooldown,
         d_data - (shielding ? 0x01 : 0x00)
     )
 
-    return DynamicState(
+    new_state = DynamicState(
         agent == 0x01 ? attacking_team : defending_team,
         agent == 0x01 ? defending_team : attacking_team,
         # go from cmp 4 (2 then 1) to cmp 1
         # or go from cmp 3 (1 then 2) to cmp 2
         # or go from cmp 2 to 0
         # or go from cmp 1 to 0
-        data  - (cmp == 0x0004 ?
-                    (get_hp(defending_team[active[d_agent]]) != 0x0000 ?
-                        0x0930 : 0x0c40) :
-                (cmp == 0x0003 ?
-                    (get_hp(defending_team[active[d_agent]]) != 0x0000 ?
-                        0x0130 : 0x0930) :
-                (cmp == 0x0002 ? 0x0620 : 0x0310)))
+        data  - (cmp == 0x0004 ? (get_hp(defending_team[d_active]) != 0x0000 ?
+            0x0930 : 0x0c40) : (cmp == 0x0003 ?
+            (get_hp(defending_team[d_active]) != 0x0000 ? 0x0130 : 0x0930) :
+            (cmp == 0x0002 ? 0x0620 : 0x0310)))
     )
+
+    if buffChance == Int8(100)
+        fm_damages = get_fast_move_damages(
+            new_state, static_state, active1, active2)
+    end
+    return new_state, fm_damages
 end
 
 function apply_buff(a_data::UInt8, d_data::UInt8, move::ChargedMove)
@@ -248,7 +262,7 @@ function evaluate_switch(state::DynamicState, agent::UInt8, active::UInt16,
                                    to_switch == 0x01 ? Int16(-8) : Int16(-8)
         data -= fmPending[2] * 0x0070
     end
-    return DynamicState(
+    new_state = DynamicState(
         DynamicTeam(state[0x01][0x0001],
             state[0x01][0x0002],
             state[0x01][0x0003],
@@ -264,6 +278,9 @@ function evaluate_switch(state::DynamicState, agent::UInt8, active::UInt16,
                 min(state[0x02].switchCooldown, time),
             state[0x02].data),
         data)
+    agent1, agent2 = get_active(new_state)
+    return new_state, get_fast_move_damages(
+        new_state, static_state, active1, active2)
 end
 
 """

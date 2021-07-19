@@ -52,6 +52,16 @@ end
 function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     allow_nothing::Bool = false, allow_overfarming::Bool = false,
     sim_to_end::Bool = false)
+    active1, active2 = get_active(state)
+    fm_damages = get_fast_move_damages(state, static_state, active1, active2)
+    return SM(state, static_state, depth,
+        get_fast_move_damages(state, static_state, active1, active2);
+        allow_nothing, allow_overfarming, sim_to_end)
+end
+
+function SM(state::DynamicState, static_state::StaticState, depth::Int64,
+    fm_damages::Tuple{UInt16, UInt16}; allow_nothing::Bool = false,
+    allow_overfarming::Bool = false, sim_to_end::Bool = false)
     A, B = get_possible_decisions(state, static_state,
         allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
 
@@ -70,7 +80,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     if chance == 0x0005
         state_1 = DynamicState(state[0x01], state[0x02], state.data - 0x4360)
         state_2 = DynamicState(state[0x01], state[0x02], state.data - 0x4050)
-        odds = 0.5
+        odds = Int8(50)
     else
         state_2 = DynamicState(state[0x01], state[0x02],
             state.data - chance * 0x0f50)
@@ -90,24 +100,28 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
                 state[0x02][0x0003], state[0x02].switchCooldown,
                 agent == 0x0002 ? a_data : d_data),
             state.data - chance * 0x0f50)
-        odds = move.buffChance / 100
+        odds = move.buffChance
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
-        if odds > 0.99
-            @inbounds payoffs[i, j] = SM(play_turn(state_1, static_state,
-                get_decision(A, B, i, j)), static_state, depth - 1,
+        if odds == Int8(100)
+            state, fm_damages = play_turn(state_1, static_state,
+                get_decision(A, B, i, j))
+            @inbounds payoffs[i, j] = SM(state, static_state, fm_damages,
+                depth - 1,
                 allow_nothing = allow_nothing,
                 allow_overfarming = allow_overfarming,
                 sim_to_end = sim_to_end).payoff
         else
-            @inbounds payoffs[i, j] = odds * SM(play_turn(state_1, static_state,
-                get_decision(A, B, i, j)), static_state, depth - 1,
-                allow_nothing = allow_nothing,
+            state_1, fm_damages_1 = play_turn(state_1,
+                static_state, get_decision(A, B, i, j))
+            state_2, fm_damages_2 = play_turn(state_2,
+                static_state, get_decision(A, B, i, j))
+            @inbounds payoffs[i, j] = odds / 100 * SM(state_1, static_state,
+                depth - 1, fm_damages_1, allow_nothing = allow_nothing,
                 allow_overfarming = allow_overfarming,
                 sim_to_end = sim_to_end).payoff +
-                (1 - odds) * SM(play_turn(state_2, static_state,
-                get_decision(A, B, i, j)), static_state, depth - 1,
-                allow_nothing = allow_nothing,
+                (100 - odds) / 100 * SM(state_2, static_state, depth - 1,
+                fm_damages_2, allow_nothing = allow_nothing,
                 allow_overfarming = allow_overfarming,
                 sim_to_end = sim_to_end).payoff
         end
@@ -121,8 +135,10 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
     value = 0.0
     decision = 0, 0
     strat = Strategy([], [], [], [])
+    active1, active2 = get_active(state)
+    fm_damages = get_fast_move_damages(s, static_s, active1, active2)
     while true
-        s = resolve_chance(s, static_s)
+        s, fm_damages = resolve_chance(s, static_s)
         A, B = get_possible_decisions(s, static_s,
             allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
 
@@ -131,7 +147,8 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
         if Base.ctpop_int(A) == 0x01 && Base.ctpop_int(B) == 0x01
             decision = get_decision(A, B, 0x01, 0x01)
         else
-            nash_result = SM(s, static_s, depth, sim_to_end = sim_to_end)
+            nash_result = SM(s, static_s, depth, fm_damages,
+                sim_to_end = sim_to_end)
             value = nash_result.payoff
             d1, d2 = rand(), rand()
             decision1, decision2 = UInt8(length(nash_result.row_strategy)),
@@ -154,7 +171,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
             end
             decision = get_decision(A, B, decision1, decision2)
         end
-        s = play_turn(s, static_s, decision)
+        s, fm_damages = play_turn(s, static_s, decision)
         push!(strat.decisions, decision)
         push!(strat.scores, value + 0.5)
         push!(strat.activeMons, get_active(s))
