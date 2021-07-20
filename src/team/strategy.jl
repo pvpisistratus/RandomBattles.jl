@@ -12,7 +12,7 @@ mutable struct Strategy
     decisions::Array{Tuple{UInt8,UInt8}}
     scores::Array{Float64}
     hps::Array{Tuple{Tuple{UInt16, UInt16, UInt16}, Tuple{UInt16, UInt16, UInt16}}}
-    activeMons::Array{Tuple{UInt16, UInt16}}
+    activeMons::Array{Tuple{UInt8, UInt8}}
 end
 
 """
@@ -28,22 +28,22 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
         ylabel = "Battle Score", xlabel = "Decisions", size = (950, 400))
     plot!(plt1, 1:length(strat.scores),
         map(i -> strat.hps[i][1][1], 1:length(strat.scores)) ./
-        static_s[0x01][0x0001].stats.hitpoints, color = :green, label = "")
+        static_s[0x01][0x01].stats.hitpoints, color = :green, label = "")
     plot!(plt1, 1:length(strat.scores),
         map(i -> strat.hps[i][1][2], 1:length(strat.scores)) ./
-        static_s[0x01][0x0002].stats.hitpoints, color = :green, label = "")
+        static_s[0x01][0x02].stats.hitpoints, color = :green, label = "")
     plot!(plt1, 1:length(strat.scores),
         map(i -> strat.hps[i][1][3], 1:length(strat.scores)) ./
-        static_s[0x01][0x0003].stats.hitpoints, color = :green, label = "")
+        static_s[0x01][0x03].stats.hitpoints, color = :green, label = "")
     plot!(plt1, 1:length(strat.scores),
         map(i -> strat.hps[i][2][1], 1:length(strat.scores)) ./
-        static_s[0x02][0x0001].stats.hitpoints, color = :purple, label = "")
+        static_s[0x02][0x01].stats.hitpoints, color = :purple, label = "")
     plot!(plt1, 1:length(strat.scores),
         map(i -> strat.hps[i][2][2], 1:length(strat.scores)) ./
-        static_s[0x02][0x0002].stats.hitpoints, color = :purple, label = "")
+        static_s[0x02][0x02].stats.hitpoints, color = :purple, label = "")
     plot!(plt1, 1:length(strat.scores),
         map(i -> strat.hps[i][2][3], 1:length(strat.scores)) ./
-        static_s[0x02][0x0003].stats.hitpoints, color = :purple, label = "")
+        static_s[0x02][0x03].stats.hitpoints, color = :purple, label = "")
 
     hline!(plt1, [0.5], label = "win/loss")
     plt2 = plot(xlims = [0, length(strat.scores)], ylims = [-3, 0],
