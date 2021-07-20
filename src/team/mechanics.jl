@@ -141,7 +141,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     if isodd(cmp)
         a_active, d_active, agent, d_agent = active1, active2, 0x01, 0x02
     else
-        a_active, d_active, agent, d_agent = active1, active2, 0x02, 0x01
+        a_active, d_active, agent, d_agent = active2, active1, 0x02, 0x01
     end
     data = next_state.data
     a_data = next_state[agent].data
@@ -177,12 +177,12 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     )
 
     defending_team = DynamicTeam(
-        d_active == 0x01 ? damage(next_state[d_agent][0x01],
-            damage_dealt) : next_state[d_agent][0x01],
-        d_active == 0x02 ? damage(next_state[d_agent][0x02],
-            damage_dealt) : next_state[d_agent][0x02],
-        d_active == 0x03 ? damage(next_state[d_agent][0x03],
-            damage_dealt) : next_state[d_agent][0x03],
+        d_active == 0x01 ? damage(next_state[d_agent][0x01], damage_dealt) :
+            next_state[d_agent][0x01],
+        d_active == 0x02 ? damage(next_state[d_agent][0x02], damage_dealt) :
+            next_state[d_agent][0x02],
+        d_active == 0x03 ? damage(next_state[d_agent][0x03], damage_dealt) :
+            next_state[d_agent][0x03],
         next_state[d_agent].switchCooldown,
         d_data - (shielding ? 0x01 : 0x00)
     )
