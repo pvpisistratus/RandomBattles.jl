@@ -103,12 +103,23 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
     using_fm::Tuple{Bool, Bool})
     active1, active2 = get_active(state)
     fm_dmg1, fm_dmg2 = get_fm_damage(state)
-    active_mon_1 = add_energy(damage(state[0x01][active1],
-            using_fm[2] ? fm_dmg1 : 0x0000), (using_fm[1] ?
-            static_state[0x01][active1].fastMove.energy : Int8(0)))
-    active_mon_2 = add_energy(damage(state[0x02][active2],
-            using_fm[1] ? fm_dmg2 : 0x0000), (using_fm[2] ?
-            static_state[0x02][active2].fastMove.energy : Int8(0)))
+    if using_fm[1]
+        if using_fm[2]
+            active_mon_1 = add_energy(damage(state[0x01][active1], fm_dmg1),
+                static_state[0x01][active1].fastMove.energy)
+            active_mon_2 = add_energy(damage(state[0x02][active2], fm_dmg2),
+                static_state[0x02][active2].fastMove.energy)
+        else
+            active_mon_1 = add_energy(state[0x01][active1],
+                static_state[0x01][active1].fastMove.energy)
+            active_mon_2 = damage(state[0x02][active2], fm_dmg2)
+        end
+    else
+        active_mon_1 = damage(state[0x01][active1], fm_dmg1)
+        active_mon_2 = add_energy(state[0x02][active2],
+            static_state[0x02][active2].fastMove.energy)
+    end
+
     return DynamicState(
         DynamicTeam(
             active1 == 0x01 ? active_mon_1 : state[0x01][0x01],
@@ -138,11 +149,8 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     cmp::UInt8, move_id::UInt8, charge::UInt8, shielding::Bool)
     next_state = state
     active1, active2 = get_active(next_state)
-    if isodd(cmp)
-        a_active, d_active, agent, d_agent = active1, active2, 0x01, 0x02
-    else
-        a_active, d_active, agent, d_agent = active2, active1, 0x02, 0x01
-    end
+    a_active, d_active, agent, d_agent = isodd(cmp) ?
+        active1, active2, 0x01, 0x02 : active2, active1, 0x02, 0x01
     data = next_state.data
     a_data = next_state[agent].data
     d_data = next_state[d_agent].data
@@ -244,16 +252,14 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
         data -= fmPending[2] * 0x0070
     end
     next_state = DynamicState(
-        DynamicTeam(state[0x01][0x01],
-            state[0x01][0x02],
-            state[0x01][0x03],
+        DynamicTeam(
+            state[0x01][0x01], state[0x01][0x02], state[0x01][0x03],
             agent == 0x01 && time == 0x00 ? Int8(120) :
                 state[0x01].switchCooldown -
                 min(state[0x01].switchCooldown, time),
             state[0x01].data),
-        DynamicTeam(state[0x02][0x01],
-            state[0x02][0x02],
-            state[0x02][0x03],
+        DynamicTeam(
+            state[0x02][0x01], state[0x02][0x02], state[0x02][0x03],
             agent == 0x02 && time == 0x00 ? Int8(120) :
                 state[0x02].switchCooldown -
                 min(state[0x02].switchCooldown, time),
@@ -286,12 +292,12 @@ function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
     end
 
     return DynamicState(
-        DynamicTeam(state[0x01][0x01], state[0x01][0x02],
-            state[0x01][0x03], max(Int8(0), state[0x01].switchCooldown -
-            Int8(1)), state[0x01].data),
-        DynamicTeam(state[0x02][0x01], state[0x02][0x02],
-            state[0x02][0x03], max(Int8(0), state[0x02].switchCooldown -
-            Int8(1)), state[0x02].data),
+        DynamicTeam(state[0x01][0x01], state[0x01][0x02], state[0x01][0x03],
+            max(Int8(0), state[0x01].switchCooldown - Int8(1)),
+            state[0x01].data),
+        DynamicTeam(state[0x02][0x01], state[0x02][0x02], state[0x02][0x03],
+            max(Int8(0), state[0x02].switchCooldown - Int8(1)),
+            state[0x02].data),
         data)
 end
 
