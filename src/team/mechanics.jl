@@ -103,22 +103,16 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
     using_fm::Tuple{Bool, Bool})
     active1, active2 = get_active(state)
     fm_dmg1, fm_dmg2 = get_fm_damage(state)
-    if using_fm[1]
-        if using_fm[2]
-            active_mon_1 = add_energy(damage(state[0x01][active1], fm_dmg1),
-                static_state[0x01][active1].fastMove.energy)
-            active_mon_2 = add_energy(damage(state[0x02][active2], fm_dmg2),
-                static_state[0x02][active2].fastMove.energy)
-        else
-            active_mon_1 = add_energy(state[0x01][active1],
-                static_state[0x01][active1].fastMove.energy)
-            active_mon_2 = damage(state[0x02][active2], fm_dmg2)
-        end
-    else
-        active_mon_1 = damage(state[0x01][active1], fm_dmg1)
-        active_mon_2 = add_energy(state[0x02][active2],
-            static_state[0x02][active2].fastMove.energy)
-    end
+    active_mon_1, active_mon_2 = using_fm[1] ? (using_fm[2] ? (add_energy(
+            damage(state[0x01][active1], fm_dmg1),
+            static_state[0x01][active1].fastMove.energy),
+        add_energy(damage(state[0x02][active2], fm_dmg2),
+            static_state[0x02][active2].fastMove.energy)) : (add_energy(
+            state[0x01][active1],
+            static_state[0x01][active1].fastMove.energy),
+        damage(state[0x02][active2], fm_dmg2))) : (damage(
+            state[0x01][active1], fm_dmg1), add_energy(state[0x02][active2],
+            static_state[0x02][active2].fastMove.energy))
 
     return DynamicState(
         DynamicTeam(
@@ -239,15 +233,16 @@ the dynamic state after the switch has occurred, with precisely one copy
 function evaluate_switch(state::DynamicState, static_state::StaticState,
     agent::UInt8, active::UInt8, to_switch::UInt8, time::UInt8)
     data = state.data
+    active1, active2 = get_active(state)
     fmPending = get_fast_moves_pending(state)
     if agent == 0x01
-        data += active == 0x01 ? to_switch == 0x01 ? Int16(1)  : Int16(2) :
-                active == 0x02 ? to_switch == 0x01 ? Int16(-1) : Int16(1) :
+        data += active1 == 0x01 ? to_switch == 0x01 ? Int16(1)  : Int16(2) :
+                active1 == 0x02 ? to_switch == 0x01 ? Int16(-1) : Int16(1) :
                                  to_switch == 0x01 ? Int16(-2) : Int16(-1)
         data -= fmPending[1] * 0x0010
     else
-        data += active == 0x01 ? to_switch == 0x01 ? Int16(4)  : Int16(8) :
-                active == 0x02 ? to_switch == 0x01 ? Int16(-4) : Int16(4) :
+        data += active2 == 0x01 ? to_switch == 0x01 ? Int16(4)  : Int16(8) :
+                active2 == 0x02 ? to_switch == 0x01 ? Int16(-4) : Int16(4) :
                                  to_switch == 0x01 ? Int16(-8) : Int16(-8)
         data -= fmPending[2] * 0x0070
     end
