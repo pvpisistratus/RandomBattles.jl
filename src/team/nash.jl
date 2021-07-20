@@ -67,7 +67,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     state_1, state_2 = state, state
     odds = 1.0
     chance = get_chance(state)
-    if chance == 0x0005
+    if chance == 0x05
         state_1 = DynamicState(state[0x01], state[0x02], state.data - 0x4360)
         state_2 = DynamicState(state[0x01], state[0x02], state.data - 0x4050)
         odds = Int8(50)
@@ -77,7 +77,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
         active = get_active(state)
         state_2 = update_fm_damage(state_2, get_fast_move_damages(
             state_2, static_state, active[1], active[2]))
-        agent = chance < 0x0003 ? 0x01 : 0x02
+        agent = chance < 0x03 ? 0x01 : 0x02
         move = isodd(chance) ? static_state[agent][
             active[agent]].charged_move_1 : static_state[agent][
                 active[agent]].charged_move_2
@@ -85,12 +85,12 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
         d_data = state[get_other_agent(agent)].data
         a_data, d_data = apply_buff(a_data, d_data, move)
         state_1 = DynamicState(
-            DynamicTeam(state[0x01][0x0001], state[0x01][0x0002],
-                state[0x01][0x0003], state[0x01].switchCooldown,
-                agent == 0x0001 ? a_data : d_data),
-            DynamicTeam(state[0x02][0x0001], state[0x02][0x0002],
-                state[0x02][0x0003], state[0x02].switchCooldown,
-                agent == 0x0002 ? a_data : d_data),
+            DynamicTeam(state[0x01][0x01], state[0x01][0x02],
+                state[0x01][0x03], state[0x01].switchCooldown,
+                agent == 0x01 ? a_data : d_data),
+            DynamicTeam(state[0x02][0x01], state[0x02][0x02],
+                state[0x02][0x03], state[0x02].switchCooldown,
+                agent == 0x02 ? a_data : d_data),
             state.data - chance * 0x0f50)
         odds = move.buffChance
     end
@@ -158,15 +158,12 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
             end
             decision = get_decision(A, B, decision1, decision2)
         end
-        s = play_turn(s, static_s, fm_damages, decision)
+        s = play_turn(s, static_s, decision)
         push!(strat.decisions, decision)
         push!(strat.scores, value + 0.5)
         push!(strat.activeMons, get_active(s))
-        push!(strat.hps, ((get_hp(s[0x01][0x0001]),
-                           get_hp(s[0x01][0x0002]),
-                           get_hp(s[0x01][0x0003])),
-                          (get_hp(s[0x02][0x0001]),
-                           get_hp(s[0x02][0x0002]),
-                           get_hp(s[0x02][0x0003]))))
+        push!(strat.hps, ((get_hp(s[0x01][0x01]), get_hp(s[0x01][0x02]),
+                           get_hp(s[0x01][0x03])), (get_hp(s[0x02][0x01]),
+                           get_hp(s[0x02][0x02]), get_hp(s[0x02][0x03]))))
     end
 end

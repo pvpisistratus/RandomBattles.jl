@@ -20,11 +20,11 @@ function play_turn(state::DynamicState, static_state::StaticState,
             next_state.data - fm_pending[agent] *
             (agent == 0x01 ? 0x0010 : 0x0070))
     else
-        if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
+        if fm_pending[1] == 0x01 || fm_pending[2] == 0x01
             next_state = evaluate_fast_moves(next_state, static_state,
-                (fm_pending[1] == 0x0001 &&
+                (fm_pending[1] == 0x01 &&
                 get_hp(next_state[0x01][active[1]]) != 0x0000,
-                fm_pending[2] == 0x0001 &&
+                fm_pending[2] == 0x01 &&
                 get_hp(next_state[0x02][active[2]]) != 0x0000))
         end
 
@@ -76,9 +76,9 @@ end
 
 function resolve_chance(state::DynamicState, static_state::StaticState)
     chance = get_chance(state)
-    if chance == 0x0000
+    if chance == 0x00
         return state
-    elseif chance == 0x0005
+    elseif chance == 0x05
         return rand() < 0.5 ?
             # subtract chance, add cmp
             DynamicState(state[0x01], state[0x02],
@@ -86,7 +86,7 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
             state[0x02], state.data - 0x4050)
     else
         active = get_active(state)
-        agent = chance < 0x0003 ? 0x01 : 0x02
+        agent = chance < 0x03 ? 0x01 : 0x02
         move = isodd(chance) ?
             static_state[agent][active[agent]].charged_move_1 :
             static_state[agent][active[agent]].charged_move_2
@@ -95,11 +95,11 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
             d_data = state[get_other_agent(agent)].data
             a_data, d_data = apply_buff(a_data, d_data, move)
             next_state = DynamicState(
-                DynamicTeam(state[0x01][0x0001], state[0x01][0x0002],
-                    state[0x01][0x0003], state[0x01].switchCooldown,
+                DynamicTeam(state[0x01][0x01], state[0x01][0x02],
+                    state[0x01][0x03], state[0x01].switchCooldown,
                     agent == 0x01 ? a_data : d_data),
-                DynamicTeam(state[0x02][0x0001], state[0x02][0x0002],
-                    state[0x02][0x0003], state[0x02].switchCooldown,
+                DynamicTeam(state[0x02][0x01], state[0x02][0x02],
+                    state[0x02][0x03], state[0x02].switchCooldown,
                     agent == 0x02 ? a_data : d_data),
                 state.data - chance * 0x0f50)
             return update_fm_damage(next_state, get_fast_move_damages(

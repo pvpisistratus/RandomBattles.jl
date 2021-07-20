@@ -104,22 +104,22 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
     active1, active2 = get_active(state)
     fm_dmg1, fm_dmg2 = get_fm_damage(state)
     active_mon_1 = add_energy(damage(state[0x01][active1],
-            using_fm[0x02] ? fm_dmg1 : 0x0000), (using_fm[0x01] ?
+            using_fm[2] ? fm_dmg1 : 0x0000), (using_fm[1] ?
             static_state[0x01][active1].fastMove.energy : Int8(0)))
     active_mon_2 = add_energy(damage(state[0x02][active2],
-            using_fm[0x01] ? fm_dmg2 : 0x0000), (using_fm[0x02] ?
+            using_fm[1] ? fm_dmg2 : 0x0000), (using_fm[2] ?
             static_state[0x02][active2].fastMove.energy : Int8(0)))
     return DynamicState(
         DynamicTeam(
-            active1 == 0x0001 ? active_mon_1 : state[0x01][0x0001],
-            active1 == 0x0002 ? active_mon_1 : state[0x01][0x0002],
-            active1 == 0x0003 ? active_mon_1 : state[0x01][0x0003],
+            active1 == 0x01 ? active_mon_1 : state[0x01][0x01],
+            active1 == 0x02 ? active_mon_1 : state[0x01][0x02],
+            active1 == 0x03 ? active_mon_1 : state[0x01][0x03],
             state[0x01].switchCooldown,
             state[0x01].data
         ), DynamicTeam(
-            active2 == 0x0001 ? active_mon_2 : state[0x02][0x0001],
-            active2 == 0x0002 ? active_mon_2 : state[0x02][0x0002],
-            active2 == 0x0003 ? active_mon_2 : state[0x02][0x0003],
+            active2 == 0x01 ? active_mon_2 : state[0x02][0x01],
+            active2 == 0x02 ? active_mon_2 : state[0x02][0x02],
+            active2 == 0x03 ? active_mon_2 : state[0x02][0x03],
             state[0x02].switchCooldown,
             state[0x02].data
         ), state.data
@@ -158,12 +158,12 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     end
 
     attacking_team = DynamicTeam(
-        a_active == 0x0001 ? subtract_energy(next_state[agent][0x0001],
-            move.energy) : next_state[agent][0x0001],
-        a_active == 0x0002 ? subtract_energy(next_state[agent][0x0002],
-            move.energy) : next_state[agent][0x0002],
-        a_active == 0x0003 ? subtract_energy(next_state[agent][0x0003],
-            move.energy) : next_state[agent][0x0003],
+        a_active == 0x01 ? subtract_energy(next_state[agent][0x01],
+            move.energy) : next_state[agent][0x01],
+        a_active == 0x02 ? subtract_energy(next_state[agent][0x02],
+            move.energy) : next_state[agent][0x02],
+        a_active == 0x03 ? subtract_energy(next_state[agent][0x03],
+            move.energy) : next_state[agent][0x03],
         next_state[agent].switchCooldown,
         a_data
     )
@@ -177,12 +177,12 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     )
 
     defending_team = DynamicTeam(
-        d_active == 0x0001 ? damage(next_state[d_agent][0x0001],
-            damage_dealt) : next_state[d_agent][0x0001],
-        d_active == 0x0002 ? damage(next_state[d_agent][0x0002],
-            damage_dealt) : next_state[d_agent][0x0002],
-        d_active == 0x0003 ? damage(next_state[d_agent][0x0003],
-            damage_dealt) : next_state[d_agent][0x0003],
+        d_active == 0x01 ? damage(next_state[d_agent][0x01],
+            damage_dealt) : next_state[d_agent][0x01],
+        d_active == 0x02 ? damage(next_state[d_agent][0x02],
+            damage_dealt) : next_state[d_agent][0x02],
+        d_active == 0x03 ? damage(next_state[d_agent][0x03],
+            damage_dealt) : next_state[d_agent][0x03],
         next_state[d_agent].switchCooldown,
         d_data - (shielding ? 0x01 : 0x00)
     )
@@ -194,10 +194,10 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         # or go from cmp 3 (1 then 2) to cmp 2
         # or go from cmp 2 to 0
         # or go from cmp 1 to 0
-        data  - (cmp == 0x0004 ? (get_hp(defending_team[d_active]) != 0x0000 ?
-            0x0930 : 0x0c40) : (cmp == 0x0003 ?
+        data  - (cmp == 0x04 ? (get_hp(defending_team[d_active]) != 0x0000 ?
+            0x0930 : 0x0c40) : (cmp == 0x03 ?
             (get_hp(defending_team[d_active]) != 0x0000 ? 0x0130 : 0x0930) :
-            (cmp == 0x0002 ? 0x0620 : 0x0310)))
+            (cmp == 0x02 ? 0x0620 : 0x0310)))
     )
 
     if buff_chance == Int8(100)
@@ -233,27 +233,27 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
     data = state.data
     fmPending = get_fast_moves_pending(state)
     if agent == 0x01
-        data += active == 0x0001 ? to_switch == 0x01 ? Int16(1)  : Int16(2) :
-                active == 0x0002 ? to_switch == 0x01 ? Int16(-1) : Int16(1) :
-                                   to_switch == 0x01 ? Int16(-2) : Int16(-1)
+        data += active == 0x01 ? to_switch == 0x01 ? Int16(1)  : Int16(2) :
+                active == 0x02 ? to_switch == 0x01 ? Int16(-1) : Int16(1) :
+                                 to_switch == 0x01 ? Int16(-2) : Int16(-1)
         data -= fmPending[1] * 0x0010
     else
-        data += active == 0x0001 ? to_switch == 0x01 ? Int16(4)  : Int16(8) :
-                active == 0x0002 ? to_switch == 0x01 ? Int16(-4) : Int16(4) :
-                                   to_switch == 0x01 ? Int16(-8) : Int16(-8)
+        data += active == 0x01 ? to_switch == 0x01 ? Int16(4)  : Int16(8) :
+                active == 0x02 ? to_switch == 0x01 ? Int16(-4) : Int16(4) :
+                                 to_switch == 0x01 ? Int16(-8) : Int16(-8)
         data -= fmPending[2] * 0x0070
     end
     next_state = DynamicState(
-        DynamicTeam(state[0x01][0x0001],
-            state[0x01][0x0002],
-            state[0x01][0x0003],
+        DynamicTeam(state[0x01][0x01],
+            state[0x01][0x02],
+            state[0x01][0x03],
             agent == 0x01 && time == 0x00 ? Int8(120) :
                 state[0x01].switchCooldown -
                 min(state[0x01].switchCooldown, time),
             state[0x01].data),
-        DynamicTeam(state[0x02][0x0001],
-            state[0x02][0x0002],
-            state[0x02][0x0003],
+        DynamicTeam(state[0x02][0x01],
+            state[0x02][0x02],
+            state[0x02][0x03],
             agent == 0x02 && time == 0x00 ? Int8(120) :
                 state[0x02].switchCooldown -
                 min(state[0x02].switchCooldown, time),
@@ -276,21 +276,21 @@ function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
     data = state.data
     if fmCooldown1 != Int8(0)
         data += (UInt16(fmCooldown1) - fmPending[1]) * 0x0010
-    elseif fmPending[1] != 0x0000
+    elseif fmPending[1] != 0x00
         data -= 0x0010
     end
     if fmCooldown2 != Int8(0)
         data += (UInt16(fmCooldown2) - fmPending[2]) * 0x0070
-    elseif fmPending[2] != 0x0000
+    elseif fmPending[2] != 0x00
         data -= 0x0070
     end
 
     return DynamicState(
-        DynamicTeam(state[0x01][0x0001], state[0x01][0x0002],
-            state[0x01][0x0003], max(Int8(0), state[0x01].switchCooldown -
+        DynamicTeam(state[0x01][0x01], state[0x01][0x02],
+            state[0x01][0x03], max(Int8(0), state[0x01].switchCooldown -
             Int8(1)), state[0x01].data),
-        DynamicTeam(state[0x02][0x0001], state[0x02][0x0002],
-            state[0x02][0x0003], max(Int8(0), state[0x02].switchCooldown -
+        DynamicTeam(state[0x02][0x01], state[0x02][0x02],
+            state[0x02][0x03], max(Int8(0), state[0x02].switchCooldown -
             Int8(1)), state[0x02].data),
         data)
 end
@@ -304,8 +304,8 @@ altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
 min_score(s::DynamicState, static_s::StaticState) = 0.5 * mapreduce(x ->
-    static_s[0x02][x].stats.hitpoints - get_hp(s[0x02][x]), +, 0x0001:0x0003) /
-    mapreduce(x -> static_s[0x02][x].stats.hitpoints, +, 0x0001:0x0003)
+    static_s[0x02][x].stats.hitpoints - get_hp(s[0x02][x]), +, 0x01:0x03) /
+    mapreduce(x -> static_s[0x02][x].stats.hitpoints, +, 0x01:0x03)
 
 """
     max_score(state, static_state)
@@ -316,8 +316,8 @@ altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
 max_score(s::DynamicState, static_s::StaticState) = 0.5 +
-    0.5 * mapreduce(x -> get_hp(s[0x01][x]), +, 0x0001:0x0003) /
-    mapreduce(x -> static_s[0x01][x].stats.hitpoints, +, 0x0001:0x0003)
+    0.5 * mapreduce(x -> get_hp(s[0x01][x]), +, 0x01:0x03) /
+    mapreduce(x -> static_s[0x01][x].stats.hitpoints, +, 0x01:0x03)
 
 """
     battle_score(state, static_state)

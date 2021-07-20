@@ -42,44 +42,42 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
         d = 0x00, 0x00
         for i = 0x01:0x02
             if get_hp(state[i][active[i]]) == 0x0000
-                if get_hp(state[i][(active[i] == 0x0001 ?
-                    0x0002 : 0x0001)]) != 0x0000
-                    d = i == 0x0001 ? (d[1] + 0x10, d[2]) : (d[1], d[2] + 0x10)
+                if get_hp(state[i][(active[i] == 0x01 ? 0x02 : 0x01)]) != 0x0000
+                    d = i == 0x01 ? (d[1] + 0x10, d[2]) : (d[1], d[2] + 0x10)
                 end
-                if get_hp(state[i][(active[i] == 0x0003 ?
-                    0x0002 : 0x0003)]) != 0x0000
-                    d = i == 0x0001 ? (d[1] + 0x20, d[2]) : (d[1], d[2] + 0x20)
+                if get_hp(state[i][(active[i] == 0x03 ? 0x02 : 0x03)]) != 0x0000
+                    d = i == 0x01 ? (d[1] + 0x20, d[2]) : (d[1], d[2] + 0x20)
                 end
             else
-                if fast_moves_pending[i] <= 0x0001
+                if fast_moves_pending[i] <= 0x01
                     if allow_overfarming ||
                         get_energy(state[i][active[i]]) != 0x0064
-                        d = i == 0x0001 ? (d[1] + 0x04, d[2]) :
+                        d = i == 0x01 ? (d[1] + 0x04, d[2]) :
                             (d[1], d[2] + 0x04)
                     end
                     if get_energy(state[i][active[i]]) >=
                         static_state[i][active[i]].charged_move_1.energy
-                        d = i == 0x0001 ? (d[1] + 0x08, d[2]) :
+                        d = i == 0x01 ? (d[1] + 0x08, d[2]) :
                             (d[1], d[2] + 0x08)
                     end
-                    if get_hp(state[i][active[i] == 0x0001 ?
-                        0x0002 : 0x0001]) != 0x0000 && state[
-                        i].switchCooldown == Int8(0)
-                        d = i == 0x0001 ? (d[1] + 0x10, d[2]) :
+                    if get_hp(state[i][active[i] == 0x01 ?
+                        0x02 : 0x01]) != 0x0000 &&
+                        state[i].switchCooldown == Int8(0)
+                        d = i == 0x01 ? (d[1] + 0x10, d[2]) :
                             (d[1], d[2] + 0x10)
                     end
-                    if get_hp(state[i][active[i] == 0x0003 ?
-                        0x0002 : 0x0003]) != 0x0000 && state[
-                        i].switchCooldown == Int8(0)
-                        d = i == 1 ? (d[1] + 0x20, d[2]) :
+                    if get_hp(state[i][active[i] == 0x03 ?
+                        0x02 : 0x03]) != 0x0000 &&
+                        state[i].switchCooldown == Int8(0)
+                        d = i == 0x01 ? (d[1] + 0x20, d[2]) :
                             (d[1], d[2] + 0x20)
                     end
                     if allow_nothing
-                        d = i == 0x0001 ? (d[1] + 0x02, d[2]) :
+                        d = i == 0x01 ? (d[1] + 0x02, d[2]) :
                             (d[1], d[2] + 0x02)
                     end
                 else
-                    d = i == 0x0001 ? (d[1] + 0x02, d[2]) : (d[1], d[2] + 0x02)
+                    d = i == 0x01 ? (d[1] + 0x02, d[2]) : (d[1], d[2] + 0x02)
                 end
             end
         end
