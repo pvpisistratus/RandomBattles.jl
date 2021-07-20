@@ -126,24 +126,6 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
     )
 end
 
-function get_fast_move_damages(state::DynamicState, static_state::StaticState,
-    active1::UInt16, active2::UInt16)
-    static_mon_1 = static_state[0x01][active1]
-    static_mon_2 = static_state[0x02][active2]
-    return calculate_damage(
-        static_mon_2.stats.attack,
-        state[0x02].data,
-        static_mon_1,
-        static_mon_2.fastMove,
-    ), calculate_damage(
-        static_mon_1.stats.attack,
-        state[0x01].data,
-        static_mon_2,
-        static_mon_1.fastMove,
-    )
-end
-
-
 """
     evaluate_charged_move(state, static_state, cmp, move_id, charge, shielding, buffs_applied)
 

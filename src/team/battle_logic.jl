@@ -121,7 +121,7 @@ function play_battle(state::DynamicState, static_state::StaticState;
   allow_nothing::Bool = false, allow_overfarming::Bool = false)
     active1, active2 = get_active(state)
     while true
-        state = resolve_chance(state, static_state, fm_damages)
+        state = resolve_chance(state, static_state)
         d1, d2 = get_possible_decisions(state, static_state,
             allow_nothing = allow_nothing,
             allow_overfarming = allow_overfarming)

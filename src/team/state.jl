@@ -25,9 +25,6 @@ Base.size(d::DynamicState) = (2,)
 Base.IndexStyle(::Type{<:DynamicState}) = IndexLinear()
 Base.getindex(d::DynamicState, i::UInt8) = i == 0x01 ? d.team1 : d.team2
 
-DynamicState(state::StaticState) = DynamicState(
-    DynamicTeam(state[0x01]), DynamicTeam(state[0x02]), 0x0085)
-
 get_active(state::DynamicState) = UInt16(state.data & UInt32(3)),
     UInt16((state.data >> UInt32(2)) & UInt32(3))
 get_fast_moves_pending(state::DynamicState) =
@@ -39,6 +36,23 @@ get_chance(state::DynamicState) =
 get_fm_damage(state::DynamicState) =
     UInt16((state.data ÷ UInt32(23520)) % UInt32(425)),
     UInt16(state.data ÷ UInt32(9996000))
+
+function get_fast_move_damages(state::DynamicState, static_state::StaticState,
+    active1::UInt16, active2::UInt16)
+    static_mon_1 = static_state[0x01][active1]
+    static_mon_2 = static_state[0x02][active2]
+    return calculate_damage(
+        static_mon_2.stats.attack,
+        state[0x02].data,
+        static_mon_1,
+        static_mon_2.fastMove,
+    ), calculate_damage(
+        static_mon_1.stats.attack,
+        state[0x01].data,
+        static_mon_2,
+        static_mon_1.fastMove,
+    )
+end
 
 function update_fm_damage(state::DynamicState,
     fm_damages::Tuple{UInt16, UInt16})
@@ -56,3 +70,9 @@ function update_fm_damage(state::DynamicState,
     end
     return DynamicState(state[0x01], state[0x02], data)
 end
+
+function DynamicState(state::StaticState)
+    d_state = DynamicState(DynamicTeam(state[0x01]), DynamicTeam(state[0x02]),
+        0x0085)
+    return update_fm_damage(d_state, get_fast_move_damages(d_state, state,
+        0x0001, 0x0001))
