@@ -76,3 +76,4 @@ function DynamicState(state::StaticState)
         0x0085)
     return update_fm_damage(d_state, get_fast_move_damages(d_state, state,
         0x0001, 0x0001))
+end
