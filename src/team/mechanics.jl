@@ -135,7 +135,7 @@ applied (say in the case of a random buff move) and returns
 the dynamic state after the charged move has occurred, with precisely one copy
 """
 function evaluate_charged_move(state::DynamicState, static_state::StaticState,
-    cmp::UInt16, move_id::UInt8, charge::UInt8, shielding::Bool)
+    cmp::UInt8, move_id::UInt8, charge::UInt8, shielding::Bool)
     next_state = state
     active1, active2 = get_active(next_state)
     if isodd(cmp)
@@ -229,7 +229,7 @@ and the time in the switch (only applies in switches after a faint) and returns
 the dynamic state after the switch has occurred, with precisely one copy
 """
 function evaluate_switch(state::DynamicState, static_state::StaticState,
-    agent::UInt8, active::UInt16, to_switch::UInt8, time::UInt8)
+    agent::UInt8, active::UInt8, to_switch::UInt8, time::UInt8)
     data = state.data
     fmPending = get_fast_moves_pending(state)
     if agent == 0x01
