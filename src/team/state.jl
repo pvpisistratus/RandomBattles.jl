@@ -54,7 +54,7 @@ function get_fast_move_damages(state::DynamicState, static_state::StaticState,
 end
 
 function update_fm_damage(state::DynamicState, static_state::StaticState)
-    active1, active2 = active(state)
+    active1, active2 = get_active(state)
     new_fm_dmg1, new_fm_dmg2 = get_fast_move_damages(
         state, static_state, active1, active2)
     fm_dmg1, fm_dmg2 = get_fm_damage(state)
