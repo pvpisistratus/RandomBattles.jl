@@ -150,7 +150,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     next_state = state
     active1, active2 = get_active(next_state)
     a_active, d_active, agent, d_agent = isodd(cmp) ?
-        active1, active2, 0x01, 0x02 : active2, active1, 0x02, 0x01
+        (active1, active2, 0x01, 0x02) : (active2, active1, 0x02, 0x01)
     data = next_state.data
     a_data = next_state[agent].data
     d_data = next_state[d_agent].data
