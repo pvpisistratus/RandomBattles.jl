@@ -74,10 +74,9 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     else
         state_2 = DynamicState(state[0x01], state[0x02],
             state.data - chance * 0x0f50)
-        active = get_active(state)
-        state_2 = update_fm_damage(state_2, get_fast_move_damages(
-            state_2, static_state, active[1], active[2]))
+        state_2 = update_fm_damage(state_2, static_state)
         agent = chance < 0x03 ? 0x01 : 0x02
+        active = get_active(state)
         move = isodd(chance) ? static_state[agent][
             active[agent]].charged_move_1 : static_state[agent][
                 active[agent]].charged_move_2

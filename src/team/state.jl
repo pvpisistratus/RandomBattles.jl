@@ -53,24 +53,26 @@ function get_fast_move_damages(state::DynamicState, static_state::StaticState,
     )
 end
 
-function update_fm_damage(state::DynamicState,
-    fm_damages::Tuple{UInt16, UInt16})
+function update_fm_damage(state::DynamicState, static_state::StaticState)
+    active1, active2 = active(state)
+    new_fm_dmg1, new_fm_dmg2 = get_fast_move_damages(
+        state, static_state, active1, active2)
     fm_dmg1, fm_dmg2 = get_fm_damage(state)
     data = state.data
-    if fm_damages[1] > fm_dmg1
-        data += UInt32(fm_damages[1] - fm_dmg1) * UInt32(23520)
+    if new_fm_dmg1 > fm_dmg1
+        data += UInt32(new_fm_dmg1 - fm_dmg1) * UInt32(23520)
     else
-        data -= UInt32(fm_dmg1 - fm_damages[1]) * UInt32(23520)
+        data -= UInt32(fm_dmg1 - new_fm_dmg1) * UInt32(23520)
     end
-    if fm_damages[2] > fm_dmg2
-        data += UInt32(fm_damages[2] - fm_dmg2) * UInt32(9996000)
+    if new_fm_dmg2 > fm_dmg2
+        data += UInt32(new_fm_dmg2 - fm_dmg2) * UInt32(9996000)
     else
-        data -= UInt32(fm_dmg2 - fm_damages[2]) * UInt32(9996000)
+        data -= UInt32(fm_dmg2 - new_fm_dmg2) * UInt32(9996000)
     end
     return DynamicState(state[0x01], state[0x02], data)
 end
 
 function DynamicState(s::StaticState)
     d = DynamicState(DynamicTeam(s[0x01]), DynamicTeam(s[0x02]), UInt32(133))
-    return update_fm_damage(d, get_fast_move_damages(d, s, 0x01, 0x01))
+    return update_fm_damage(d, s)
 end

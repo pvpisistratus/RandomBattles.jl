@@ -203,8 +203,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     )
 
     if buff_chance == Int8(100)
-        return update_fm_damage(next_state, get_fast_move_damages(
-            next_state, static_state, active1, active2))
+        return update_fm_damage(next_state, static_state)
     else
         return next_state
     end
@@ -246,7 +245,7 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
                                  to_switch == 0x01 ? Int16(-8) : Int16(-8)
         data -= fmPending[2] * 0x0070
     end
-    next_state = DynamicState(
+    return update_fm_damage(DynamicState(
         DynamicTeam(
             state[0x01][0x01], state[0x01][0x02], state[0x01][0x03],
             agent == 0x01 && time == 0x00 ? Int8(120) :
@@ -259,10 +258,7 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
                 state[0x02].switchCooldown -
                 min(state[0x02].switchCooldown, time),
             state[0x02].data),
-        data)
-    active1, active2 = get_active(next_state)
-    return update_fm_damage(next_state, get_fast_move_damages(
-        next_state, static_state, active1, active2))
+        data), static_state)
 end
 
 """
