@@ -1,5 +1,5 @@
 function play_turn(state::DynamicState, static_state::StaticState,
-    fm_damages::Tuple{UInt16, UInt16}, decision::Tuple{UInt8, UInt8})
+    decision::Tuple{UInt8, UInt8})
     next_state = state
 
     fm_pending = get_fast_moves_pending(state)
@@ -8,9 +8,9 @@ function play_turn(state::DynamicState, static_state::StaticState,
 
     if !iszero(cmp)
         agent = isodd(cmp) ? 0x01 : 0x02
-        next_state, fm_damages = evaluate_charged_move(next_state,
+        next_state = evaluate_charged_move(next_state,
             static_state, cmp, decision[agent] == 0x07 ? 0x01 : 0x02,
-            0x64, decision[get_other_agent(agent)] == 0x01, fm_damages)
+            0x64, decision[get_other_agent(agent)] == 0x01)
         if !iszero(fm_pending[get_other_agent(agent)])
             next_state = DynamicState(next_state[0x01], next_state[0x02],
                 next_state.data - (fm_pending[get_other_agent(agent)] -
@@ -22,7 +22,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
     else
         if fm_pending[1] == 0x0001 || fm_pending[2] == 0x0001
             next_state = evaluate_fast_moves(next_state, static_state,
-                fm_damages, (fm_pending[1] == 0x0001 &&
+                (fm_pending[1] == 0x0001 &&
                 get_hp(next_state[0x01][active[1]]) != 0x0000,
                 fm_pending[2] == 0x0001 &&
                 get_hp(next_state[0x02][active[2]]) != 0x0000))
@@ -30,14 +30,12 @@ function play_turn(state::DynamicState, static_state::StaticState,
 
         next_state = step_timers(next_state,
             decision[1] == 0x03 ?
-                static_state[0x01][active[1]].fastMove.cooldown :
-                Int8(0),
+                static_state[0x01][active[1]].fastMove.cooldown : Int8(0),
             decision[2] == 0x03 ?
-                static_state[0x02][active[2]].fastMove.cooldown :
-                Int8(0))
+                static_state[0x02][active[2]].fastMove.cooldown : Int8(0))
         for agent = 0x01:0x02
             if decision[agent] == 0x05 || decision[agent] == 0x06
-                next_state, fm_damages = evaluate_switch(next_state,
+                next_state = evaluate_switch(next_state,
                     static_state, agent, active[agent], decision[agent] - 0x04,
                     iszero(get_hp(state[agent][active[agent]])) ?
                     0x18 : 0x00)
@@ -73,21 +71,19 @@ function play_turn(state::DynamicState, static_state::StaticState,
         end
     end
 
-    println(fm_damages)
-    return next_state, fm_damages
+    return next_state
 end
 
-function resolve_chance(state::DynamicState, static_state::StaticState,
-    fm_damages::Tuple{UInt16, UInt16})
+function resolve_chance(state::DynamicState, static_state::StaticState)
     chance = get_chance(state)
     if chance == 0x0000
-        return state, fm_damages
+        return state
     elseif chance == 0x0005
         return rand() < 0.5 ?
             # subtract chance, add cmp
-            (DynamicState(state[0x01], state[0x02],
-            state.data - 0x4360), fm_damages) : (DynamicState(state[0x01],
-            state[0x02], state.data - 0x4050), fm_damages)
+            DynamicState(state[0x01], state[0x02],
+            state.data - 0x4360) : DynamicState(state[0x01],
+            state[0x02], state.data - 0x4050)
     else
         active = get_active(state)
         agent = chance < 0x0003 ? 0x01 : 0x02
@@ -98,7 +94,7 @@ function resolve_chance(state::DynamicState, static_state::StaticState,
             a_data = state[agent].data
             d_data = state[get_other_agent(agent)].data
             a_data, d_data = apply_buff(a_data, d_data, move)
-            new_state = DynamicState(
+            next_state = DynamicState(
                 DynamicTeam(state[0x01][0x0001], state[0x01][0x0002],
                     state[0x01][0x0003], state[0x01].switchCooldown,
                     agent == 0x01 ? a_data : d_data),
@@ -106,11 +102,11 @@ function resolve_chance(state::DynamicState, static_state::StaticState,
                     state[0x02][0x0003], state[0x02].switchCooldown,
                     agent == 0x02 ? a_data : d_data),
                 state.data - chance * 0x0f50)
-            return new_state, get_fast_move_damages(
-                    new_state, static_state, active[1], active[2])
+            return update_fm_damage(next_state, get_fast_move_damages(
+                next_state, static_state, active[1], active[2]))
         else
             return DynamicState(state[0x01], state[0x02],
-                state.data - chance * 0x0f50), fm_damages
+                state.data - chance * 0x0f50)
         end
     end
 end
@@ -124,17 +120,15 @@ equally weighted decisions.
 function play_battle(state::DynamicState, static_state::StaticState;
   allow_nothing::Bool = false, allow_overfarming::Bool = false)
     active1, active2 = get_active(state)
-    fm_damages = get_fast_move_damages(
-        state, static_state, active1, active2)
     while true
-        state, fm_damages = resolve_chance(state, static_state, fm_damages)
+        state = resolve_chance(state, static_state, fm_damages)
         d1, d2 = get_possible_decisions(state, static_state,
             allow_nothing = allow_nothing,
             allow_overfarming = allow_overfarming)
         (iszero(d1) || iszero(d2)) &&
             return battle_score(state, static_state)
-        state, fm_damages = play_turn(
-            state, static_state, fm_damages, select_random_decision(d1, d2))
+        state = play_turn(
+            state, static_state, select_random_decision(d1, d2))
     end
 end
 

@@ -52,16 +52,6 @@ end
 function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     allow_nothing::Bool = false, allow_overfarming::Bool = false,
     sim_to_end::Bool = false)
-    active1, active2 = get_active(state)
-    fm_damages = get_fast_move_damages(state, static_state, active1, active2)
-    return SM(state, static_state, depth,
-        get_fast_move_damages(state, static_state, active1, active2);
-        allow_nothing, allow_overfarming, sim_to_end)
-end
-
-function SM(state::DynamicState, static_state::StaticState, depth::Int64,
-    fm_damages::Tuple{UInt16, UInt16}; allow_nothing::Bool = false,
-    allow_overfarming::Bool = false, sim_to_end::Bool = false)
     A, B = get_possible_decisions(state, static_state,
         allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
 
@@ -85,6 +75,8 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64,
         state_2 = DynamicState(state[0x01], state[0x02],
             state.data - chance * 0x0f50)
         active = get_active(state)
+        state_2 = update_fm_damage(state_2, get_fast_move_damages(
+            state_2, static_state, active[1], active[2]))
         agent = chance < 0x0003 ? 0x01 : 0x02
         move = isodd(chance) ? static_state[agent][
             active[agent]].charged_move_1 : static_state[agent][
@@ -104,26 +96,23 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64,
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
         if odds == Int8(100)
-            state, fm_damages = play_turn(state_1, static_state, fm_damages,
-                get_decision(A, B, i, j))
-            @inbounds payoffs[i, j] = SM(state, static_state, fm_damages,
-                depth - 1,
+            state = play_turn(state_1, static_state, get_decision(A, B, i, j))
+            @inbounds payoffs[i, j] = SM(state, static_state, depth - 1,
                 allow_nothing = allow_nothing,
                 allow_overfarming = allow_overfarming,
                 sim_to_end = sim_to_end).payoff
         else
-            state_1, fm_damages_1 = play_turn(state_1, static_state,
-                fm_damages, get_decision(A, B, i, j))
-            state_2, fm_damages_2 = play_turn(state_2, static_state,
-                fm_damages, get_decision(A, B, i, j))
-            @inbounds payoffs[i, j] = odds / 100 * SM(state_1, static_state,
-                depth - 1, fm_damages_1, allow_nothing = allow_nothing,
-                allow_overfarming = allow_overfarming,
-                sim_to_end = sim_to_end).payoff +
-                (100 - odds) / 100 * SM(state_2, static_state, depth - 1,
-                fm_damages_2, allow_nothing = allow_nothing,
-                allow_overfarming = allow_overfarming,
-                sim_to_end = sim_to_end).payoff
+            state_1 = play_turn(state_1, static_state, get_decision(A, B, i, j))
+            state_2 = play_turn(state_2, static_state, get_decision(A, B, i, j))
+            @inbounds payoffs[i, j] = odds / 100 *
+                SM(state_1, static_state, depth - 1,
+                    allow_nothing = allow_nothing,
+                    allow_overfarming = allow_overfarming,
+                    sim_to_end = sim_to_end).payoff + (100 - odds) / 100 *
+                SM(state_2, static_state, depth - 1,
+                    allow_nothing = allow_nothing,
+                    allow_overfarming = allow_overfarming,
+                    sim_to_end = sim_to_end).payoff
         end
     end
     return nash(payoffs)
@@ -135,12 +124,11 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
     value = 0.0
     decision = 0, 0
     strat = Strategy([], [], [], [])
-    active1, active2 = get_active(s)
-    fm_damages = get_fast_move_damages(s, static_s, active1, active2)
     while true
-        s, fm_damages = resolve_chance(s, static_s)
+        s = resolve_chance(s, static_s)
         A, B = get_possible_decisions(s, static_s,
-            allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
+            allow_nothing = allow_nothing,
+            allow_overfarming = allow_overfarming)
 
         (Base.ctpop_int(A) == 0x00 || Base.ctpop_int(B) == 0x00) &&
             return value, strat
@@ -171,7 +159,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
             end
             decision = get_decision(A, B, decision1, decision2)
         end
-        s, fm_damages = play_turn(s, static_s, fm_damages, decision)
+        s = play_turn(s, static_s, fm_damages, decision)
         push!(strat.decisions, decision)
         push!(strat.scores, value + 0.5)
         push!(strat.activeMons, get_active(s))

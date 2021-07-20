@@ -33,7 +33,7 @@ function get_buff_modifier(i::UInt8)
         (UInt8(4), UInt8(8) - a)
     d1, d2 = d > UInt8(3) ? (d, UInt8(4)) :
         (UInt8(4), UInt8(8) - d)
-    return a1*d2, a2*d1
+    return a1 * d2, a2 * d1
 end
 
 """
@@ -100,13 +100,14 @@ Takes in the dynamic state, the static state, and the attacking agent and return
 the dynamic state after the fast move has occurred, with precisely one copy
 """
 function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
-        fm_damages::Tuple{UInt16, UInt16}, using_fm::Tuple{Bool, Bool})
+    using_fm::Tuple{Bool, Bool})
     active1, active2 = get_active(state)
+    fm_dmg1, fm_dmg2 = get_fm_damage(state)
     active_mon_1 = add_energy(damage(state[0x01][active1],
-            using_fm[0x02] ? fm_damages[1] : 0x0000), (using_fm[0x01] ?
+            using_fm[0x02] ? fm_dmg1 : 0x0000), (using_fm[0x01] ?
             static_state[0x01][active1].fastMove.energy : Int8(0)))
     active_mon_2 = add_energy(damage(state[0x02][active2],
-            using_fm[0x01] ? fm_damages[2] : 0x0000), (using_fm[0x02] ?
+            using_fm[0x01] ? fm_dmg2 : 0x0000), (using_fm[0x02] ?
             static_state[0x02][active2].fastMove.energy : Int8(0)))
     return DynamicState(
         DynamicTeam(
@@ -152,8 +153,7 @@ applied (say in the case of a random buff move) and returns
 the dynamic state after the charged move has occurred, with precisely one copy
 """
 function evaluate_charged_move(state::DynamicState, static_state::StaticState,
-    cmp::UInt16, move_id::UInt8, charge::UInt8, shielding::Bool,
-    fm_damages::Tuple{UInt16, UInt16})
+    cmp::UInt16, move_id::UInt8, charge::UInt8, shielding::Bool)
     next_state = state
     active1, active2 = get_active(next_state)
     if isodd(cmp)
@@ -205,7 +205,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         d_data - (shielding ? 0x01 : 0x00)
     )
 
-    new_state = DynamicState(
+    next_state = DynamicState(
         agent == 0x01 ? attacking_team : defending_team,
         agent == 0x01 ? defending_team : attacking_team,
         # go from cmp 4 (2 then 1) to cmp 1
@@ -219,10 +219,11 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     )
 
     if buff_chance == Int8(100)
-        fm_damages = get_fast_move_damages(
-            new_state, static_state, active1, active2)
+        return update_fm_damage(next_state, get_fast_move_damages(
+            next_state, static_state, active1, active2))
+    else
+        return next_state
     end
-    return new_state, fm_damages
 end
 
 function apply_buff(a_data::UInt8, d_data::UInt8, move::ChargedMove)
@@ -260,7 +261,7 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
                                    to_switch == 0x01 ? Int16(-8) : Int16(-8)
         data -= fmPending[2] * 0x0070
     end
-    new_state = DynamicState(
+    next_state = DynamicState(
         DynamicTeam(state[0x01][0x0001],
             state[0x01][0x0002],
             state[0x01][0x0003],
@@ -277,8 +278,8 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
             state[0x02].data),
         data)
     active1, active2 = get_active(new_state)
-    return new_state, get_fast_move_damages(
-        new_state, static_state, active1, active2)
+    return update_fm_damage(next_state, get_fast_move_damages(
+        next_state, static_state, active1, active2))
 end
 
 """

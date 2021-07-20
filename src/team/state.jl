@@ -18,7 +18,7 @@ StaticState(teams::Array{String}; league = "great", cup = "all") =
 struct DynamicState <: AbstractArray{DynamicTeam, 1}
     team1::DynamicTeam
     team2::DynamicTeam
-    data::UInt16                    # active, fastMovesPending, cmp, chance
+    data::UInt32              # active, fastMovesPending, cmp, chance, fm_damage
 end
 
 Base.size(d::DynamicState) = (2,)
@@ -28,9 +28,31 @@ Base.getindex(d::DynamicState, i::UInt8) = i == 0x01 ? d.team1 : d.team2
 DynamicState(state::StaticState) = DynamicState(
     DynamicTeam(state[0x01]), DynamicTeam(state[0x02]), 0x0085)
 
-get_active(state::DynamicState) = state.data & 0x0003,
-    (state.data >> 0x0002) & 0x0003
-get_fast_moves_pending(state::DynamicState) = (state.data >> 4) % 0x0007,
-    (state.data ÷ 0x0070) % 0x0007
-get_cmp(state::DynamicState) = (state.data ÷ 0x0310) % 0x0005
-get_chance(state::DynamicState) = state.data ÷ 0x0f50
+get_active(state::DynamicState) = UInt16(state.data & UInt32(3)),
+    UInt16((state.data >> UInt32(2)) & UInt32(3))
+get_fast_moves_pending(state::DynamicState) =
+    UInt16((state.data >> UInt32(4)) % UInt32(7)),
+    UInt16((state.data ÷ UInt32(112)) % UInt32(7))
+get_cmp(state::DynamicState) = UInt16((state.data ÷ UInt32(784)) % UInt32(5))
+get_chance(state::DynamicState) =
+    UInt16((state.data ÷ UInt32(3920)) % UInt32(6))
+get_fm_damage(state::DynamicState) =
+    UInt16((state.data ÷ UInt32(23520)) % UInt32(425)),
+    UInt16(state.data ÷ UInt32(9996000))
+
+function update_fm_damage(state::DynamicState,
+    fm_damages::Tuple{UInt16, UInt16})
+    fm_dmg1, fm_dmg2 = get_fm_damage(state)
+    data = state.data
+    if fm_damages[1] > fm_dmg1
+        data += UInt32(fm_damages[1] - fm_dmg1) * UInt32(23520)
+    else
+        data -= UInt32(fm_dmg1 - fm_damages[1]) * UInt32(23520)
+    end
+    if fm_damages[2] > fm_dmg2
+        data += UInt32(fm_damages[2] - fm_dmg2) * UInt32(9996000)
+    else
+        data -= UInt32(fm_dmg2 - fm_damages[2]) * UInt32(9996000)
+    end
+    return DynamicState(state[0x01], state[0x02], data)
+end
