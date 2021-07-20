@@ -135,8 +135,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
         if Base.ctpop_int(A) == 0x01 && Base.ctpop_int(B) == 0x01
             decision = get_decision(A, B, 0x01, 0x01)
         else
-            nash_result = SM(s, static_s, depth, fm_damages,
-                sim_to_end = sim_to_end)
+            nash_result = SM(s, static_s, depth, sim_to_end = sim_to_end)
             value = nash_result.payoff
             d1, d2 = rand(), rand()
             decision1, decision2 = UInt8(length(nash_result.row_strategy)),

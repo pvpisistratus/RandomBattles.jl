@@ -259,7 +259,7 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
                 min(state[0x02].switchCooldown, time),
             state[0x02].data),
         data)
-    active1, active2 = get_active(new_state)
+    active1, active2 = get_active(next_state)
     return update_fm_damage(next_state, get_fast_move_damages(
         next_state, static_state, active1, active2))
 end
