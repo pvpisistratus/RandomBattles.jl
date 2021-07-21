@@ -198,7 +198,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         # or go from cmp 1 to 0
         data  - (cmp == 0x04 ? (get_hp(defending_team[d_active]) != 0x0000 ?
             0x0930 : 0x0c40) : (cmp == 0x03 ?
-            (get_hp(defending_team[d_active]) != 0x0000 ? 0x0130 : 0x0930) :
+            (get_hp(defending_team[d_active]) != 0x0000 ? 0x0310 : 0x0930) :
             (cmp == 0x02 ? 0x0620 : 0x0310)))
     )
 
