@@ -11,13 +11,13 @@ Base.getindex(s::StaticTeam, i::UInt8) =
 
 StaticTeam(mons::Array{String}; league::String = "great", cup::String = "all") =
     StaticTeam(StaticPokemon(mons[1], league = league, cup = cup),
-        StaticPokemon(mons[2], league = league, cup = cup),
-        StaticPokemon(mons[3], league = league, cup = cup))
+               StaticPokemon(mons[2], league = league, cup = cup),
+               StaticPokemon(mons[3], league = league, cup = cup))
 
 StaticTeam(mons::Array{Int64}; league::String = "great", cup::String = "all") =
     StaticTeam(StaticPokemon(mons[1], league = league, cup = cup),
-        StaticPokemon(mons[2], league = league, cup = cup),
-        StaticPokemon(mons[3], league = league, cup = cup))
+               StaticPokemon(mons[2], league = league, cup = cup),
+               StaticPokemon(mons[3], league = league, cup = cup))
 
 struct DynamicTeam <: AbstractArray{DynamicPokemon, 1}
     #These values are initialized, but change throughout the battle
