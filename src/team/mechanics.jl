@@ -142,7 +142,7 @@ the dynamic state after the charged move has occurred, with precisely one copy
 function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     cmp::UInt8, move_id::UInt8, charge::UInt8, shielding::Bool)
     next_state = state
-    fm_pending1 != get_fm_pending(state)
+    fm_pending1 != get_fast_moves_pending(state)
     active1, active2 = get_active(next_state)
     a_active, d_active, agent, d_agent = isodd(cmp) ?
         (active1, active2, 0x01, 0x02) : (active2, active1, 0x02, 0x01)
@@ -203,7 +203,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
             (cmp == 0x02 ? 0x0620 : 0x0310)))
     )
 
-    if fm_pending1 != get_fm_pending(next_state)
+    if fm_pending1 != get_fast_moves_pending(next_state)
         println("Changed in evaluate_charged_moves")
     end
 

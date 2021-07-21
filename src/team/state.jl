@@ -55,7 +55,7 @@ end
 
 function update_fm_damage(state::DynamicState, static_state::StaticState)
     active1, active2 = get_active(state)
-    fm_pending1 = get_fm_pending(state)
+    fm_pending1 = get_fast_moves_pending(state)
 
     new_fm_dmg1, new_fm_dmg2 = get_fast_move_damages(
         state, static_state, active1, active2)
@@ -72,7 +72,7 @@ function update_fm_damage(state::DynamicState, static_state::StaticState)
         data -= UInt32(fm_dmg2 - new_fm_dmg2) * UInt32(9996000)
     end
     next_state = DynamicState(state[0x01], state[0x02], data)
-    if fm_pending1 != get_fm_pending(next_state)
+    if fm_pending1 != get_fast_moves_pending(next_state)
         println("Changed in update_fm_damage")
     end
     return next_state
