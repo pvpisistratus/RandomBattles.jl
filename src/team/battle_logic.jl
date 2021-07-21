@@ -52,21 +52,17 @@ function play_turn(state::DynamicState, static_state::StaticState,
                         static_state[0x01][active1].stats.attack,
                         static_state[0x02][active2].stats.attack
                     )
-                    if atk_cmp == 1
-                        return DynamicState(next_state[0x01],
-                            next_state[0x02], next_state.data + UInt32(2352))
-                    elseif atk_cmp == -1
-                        return DynamicState(next_state[0x01],
-                            next_state[0x02], next_state.data + UInt32(3136))
-                    else
-                        return DynamicState(next_state[0x01],
-                            next_state[0x02], next_state.data + UInt32(19600))
-                    end
+                    return DynamicState(next_state[0x01],
+                        next_state[0x02], next_state.data +
+                        (atk_cmp == 1 ? UInt32(2352) :
+                        atk_cmp == -1 ? UInt32(3136) : UInt32(19600)))
                 else
+                    println("cmp 1")
                     return DynamicState(next_state[0x01],
                         next_state[0x02], next_state.data + UInt32(784))
                 end
             elseif decision[2] == 0x04
+                println("cmp 2")
                 return DynamicState(next_state[0x01],
                     next_state[0x02], next_state.data + UInt32(2*784))
             end
