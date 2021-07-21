@@ -7,16 +7,28 @@ function play_turn(state::DynamicState, static_state::StaticState,
     cmp = get_cmp(state)
 
     if !iszero(cmp)
-        agent, o_agent = isodd(cmp) ? (0x01, 0x02) : (0x02, 0x01)
-        next_state = evaluate_charged_move(next_state, static_state, cmp,
-            decision[agent] - 0x06, 0x64, decision[o_agent] == 0x01)
-        data = next_state.data - UInt32(fm_pending[agent]) *
-            UInt32(agent == 0x01 ? 0x10 : 0x70)
-        if !iszero(fm_pending[o_agent])
-            data -= UInt32(fm_pending[o_agent] - 0x01) *
-                UInt32(o_agent == 0x01 ? 0x10 : 0x70)
+        agent = isodd(cmp) ? 0x01 : 0x02
+        next_state = evaluate_charged_move(next_state,
+            static_state, cmp, decision[agent] == 0x07 ? 0x01 : 0x02,
+            0x64, decision[get_other_agent(agent)] == 0x01)
+        if !iszero(fm_pending[get_other_agent(agent)])
+            next_state = DynamicState(next_state[0x01], next_state[0x02],
+                next_state.data - (fm_pending[get_other_agent(agent)] -
+                0x0001) * (agent == 0x02 ? 0x0010 : 0x0070))
         end
-        next_state = DynamicState(next_state[0x01], next_state[0x02], data)
+        next_state = DynamicState(next_state[0x01], next_state[0x02],
+            next_state.data - fm_pending[agent] *
+            (agent == 0x01 ? 0x0010 : 0x0070))
+        #agent, o_agent = isodd(cmp) ? (0x01, 0x02) : (0x02, 0x01)
+        #next_state = evaluate_charged_move(next_state, static_state, cmp,
+        #    decision[agent] - 0x06, 0x64, decision[o_agent] == 0x01)
+        #data = next_state.data - UInt32(fm_pending[agent]) *
+        #    UInt32(agent == 0x01 ? 0x10 : 0x70)
+        #if !iszero(fm_pending[o_agent])
+        #    data -= UInt32(fm_pending[o_agent] - 0x01) *
+        #        UInt32(o_agent == 0x01 ? 0x10 : 0x70)
+        #end
+        #next_state = DynamicState(next_state[0x01], next_state[0x02], data)
     else
         if fm_pending[1] == 0x01 || fm_pending[2] == 0x01
             next_state = evaluate_fast_moves(next_state, static_state,
