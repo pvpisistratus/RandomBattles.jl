@@ -3,7 +3,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
     next_state = state
 
     fm_pending = get_fast_moves_pending(state)
-    active = get_active(next_state)
+    active1, active2 = get_active(next_state)
     cmp = get_cmp(state)
 
     if !iszero(cmp)
@@ -13,42 +13,46 @@ function play_turn(state::DynamicState, static_state::StaticState,
             0x64, decision[get_other_agent(agent)] == 0x01)
         if !iszero(fm_pending[get_other_agent(agent)])
             next_state = DynamicState(next_state[0x01], next_state[0x02],
-                next_state.data - (fm_pending[get_other_agent(agent)] -
-                0x0001) * (agent == 0x02 ? 0x0010 : 0x0070))
+                next_state.data - UInt32(fm_pending[get_other_agent(agent)] -
+                0x01) * UInt32(agent == 0x02 ? 0x0010 : 0x0070))
         end
         next_state = DynamicState(next_state[0x01], next_state[0x02],
-            next_state.data - fm_pending[agent] *
-            (agent == 0x01 ? 0x0010 : 0x0070))
+            next_state.data - UInt32(fm_pending[agent]) *
+            UInt32(agent == 0x01 ? 0x0010 : 0x0070))
     else
         if fm_pending[1] == 0x01 || fm_pending[2] == 0x01
             next_state = evaluate_fast_moves(next_state, static_state,
                 (fm_pending[1] == 0x01 &&
-                get_hp(next_state[0x01][active[1]]) != 0x0000,
+                get_hp(next_state[0x01][active1]) != 0x0000,
                 fm_pending[2] == 0x01 &&
-                get_hp(next_state[0x02][active[2]]) != 0x0000))
+                get_hp(next_state[0x02][active2]) != 0x0000))
         end
 
         next_state = step_timers(next_state,
             decision[1] == 0x03 ?
-                static_state[0x01][active[1]].fastMove.cooldown : Int8(0),
+                static_state[0x01][active1].fastMove.cooldown : Int8(0),
             decision[2] == 0x03 ?
-                static_state[0x02][active[2]].fastMove.cooldown : Int8(0))
-        for agent = 0x01:0x02
-            if decision[agent] == 0x05 || decision[agent] == 0x06
-                next_state = evaluate_switch(next_state,
-                    static_state, agent, decision[agent] - 0x04,
-                    iszero(get_hp(state[agent][active[agent]])) ?
-                    0x18 : 0x00)
-            end
+                static_state[0x02][active2].fastMove.cooldown : Int8(0))
+        if decision[1] == 0x05 || decision[1] == 0x06
+            next_state = evaluate_switch(next_state,
+                static_state, 0x01, decision[1] - 0x04,
+                iszero(get_hp(state[0x01][active1])) ?
+                0x18 : 0x00)
         end
-        new_active = get_active(next_state)
-        if get_hp(next_state[0x01][new_active[1]]) != 0x0000 &&
-            get_hp(next_state[0x02][new_active[2]]) != 0x0000
+        if decision[2] == 0x05 || decision[2] == 0x06
+            next_state = evaluate_switch(next_state,
+                static_state, 0x02, decision[2] - 0x04,
+                iszero(get_hp(state[0x02][active2])) ?
+                0x18 : 0x00)
+        end
+        active1, active2 = get_active(next_state)
+        if get_hp(next_state[0x01][active1]) != 0x0000 &&
+            get_hp(next_state[0x02][active2]) != 0x0000
             if decision[1] == 0x04
                 if decision[2] == 0x04
                     atk_cmp = Base.cmp(
-                        static_state[0x01][active[1]].stats.attack,
-                        static_state[0x02][active[2]].stats.attack
+                        static_state[0x01][active1].stats.attack,
+                        static_state[0x02][active2].stats.attack
                     )
                     if atk_cmp == 1
                         next_state = DynamicState(next_state[0x01],
