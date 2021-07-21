@@ -230,7 +230,7 @@ and the time in the switch (only applies in switches after a faint) and returns
 the dynamic state after the switch has occurred, with precisely one copy
 """
 function evaluate_switch(state::DynamicState, static_state::StaticState,
-    agent::UInt8, active::UInt8, to_switch::UInt8, time::UInt8)
+    agent::UInt8, to_switch::UInt8, time::UInt8)
     data = state.data
     active1, active2 = get_active(state)
     fmPending = get_fast_moves_pending(state)
@@ -242,7 +242,7 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
     else
         data += active2 == 0x01 ? to_switch == 0x01 ? Int16(4)  : Int16(8) :
                 active2 == 0x02 ? to_switch == 0x01 ? Int16(-4) : Int16(4) :
-                                 to_switch == 0x01 ? Int16(-8) : Int16(-8)
+                                 to_switch == 0x01 ? Int16(-8) : Int16(-4)
         data -= fmPending[2] * 0x0070
     end
     next_state =  DynamicState(

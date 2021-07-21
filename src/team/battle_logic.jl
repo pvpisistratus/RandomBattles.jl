@@ -36,7 +36,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
         for agent = 0x01:0x02
             if decision[agent] == 0x05 || decision[agent] == 0x06
                 next_state = evaluate_switch(next_state,
-                    static_state, agent, active[agent], decision[agent] - 0x04,
+                    static_state, agent, decision[agent] - 0x04,
                     iszero(get_hp(state[agent][active[agent]])) ?
                     0x18 : 0x00)
             end
