@@ -87,11 +87,11 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
             state.data - 0x4360) : DynamicState(state[0x01],
             state[0x02], state.data - 0x4050)
     else
-        active = get_active(state)
+        active1, active2 = get_active(state)
         agent = chance < 0x03 ? 0x01 : 0x02
         move = isodd(chance) ?
-            static_state[agent][active[agent]].charged_move_1 :
-            static_state[agent][active[agent]].charged_move_2
+            static_state[agent][active1].charged_move_1 :
+            static_state[agent][active2].charged_move_2
         if rand(Int8(0):Int8(99)) < move.buffChance
             a_data = state[agent].data
             d_data = state[get_other_agent(agent)].data
@@ -103,10 +103,10 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
                 DynamicTeam(state[0x02][0x01], state[0x02][0x02],
                     state[0x02][0x03], state[0x02].switchCooldown,
                     agent == 0x02 ? a_data : d_data),
-                state.data - chance * 0x0f50), static_state)
+                state.data - UInt32(chance) * UInt32(3920)), static_state)
         else
             return DynamicState(state[0x01], state[0x02],
-                state.data - chance * 0x0f50)
+                state.data - UInt32(chance) * UInt32(3920))
         end
     end
 end
