@@ -55,7 +55,7 @@ function reflect(s::DynamicState)
     active = get_active(s)
     new_active = active[2], active[1]
     fm_pending = get_fast_moves_pending(s)
-    new_fm_pending = new_fm_pending[2], new_fm_pending[1]
+    new_fm_pending = fm_pending[2], fm_pending[1]
     cmp = get_cmp(s)
     new_cmp = isodd(cmp) ? cmp + 0x01 : iszero(cmp) ? 0x00 : cmp - 0x01
     chance = get_chance(s)
