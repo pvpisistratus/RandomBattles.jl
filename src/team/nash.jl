@@ -75,13 +75,13 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
         state_2 = DynamicState(state[0x01], state[0x02],
             state.data - chance * 0x0f50)
         state_2 = update_fm_damage(state_2, static_state)
-        agent = chance < 0x03 ? 0x01 : 0x02
+        agent, o_agent = chance < 0x03 ? (0x01, 0x02) : (0x02, 0x01)
         active = get_active(state)
         move = isodd(chance) ? static_state[agent][
             active[agent]].charged_move_1 : static_state[agent][
                 active[agent]].charged_move_2
         a_data = state[agent].data
-        d_data = state[get_other_agent(agent)].data
+        d_data = state[o_agent].data
         a_data, d_data = apply_buff(a_data, d_data, move)
         state_1 = DynamicState(
             DynamicTeam(state[0x01][0x01], state[0x01][0x02],

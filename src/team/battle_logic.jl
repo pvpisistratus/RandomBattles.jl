@@ -6,9 +6,6 @@ function play_turn(state::DynamicState, static_state::StaticState,
     active1, active2 = get_active(next_state)
     cmp = get_cmp(state)
 
-    println("Beginning of play turn: $(decision)")
-    println("Beginning of play turn: $(cmp)")
-
     if !iszero(cmp)
         agent, o_agent = isodd(cmp) ? (0x01, 0x02) : (0x02, 0x01)
         next_state = evaluate_charged_move(next_state, static_state, cmp,
@@ -47,10 +44,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
                 0x18 : 0x00)
         end
         active1, active2 = get_active(next_state)
-        
-        println("Towards end of play turn: $(decision)")
-        println("Towards end of play turn: $(cmp)")
-        println("hp1: $(get_hp(next_state[0x01][active1])) hp2: $(get_hp(next_state[0x02][active2]))")
+
         if get_hp(next_state[0x01][active1]) != 0x0000 &&
             get_hp(next_state[0x02][active2]) != 0x0000
             if decision[1] == 0x04
@@ -89,13 +83,13 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
             state[0x02], state.data - 0x4050)
     else
         active1, active2 = get_active(state)
-        agent = chance < 0x03 ? 0x01 : 0x02
+        agent, o_agent = chance < 0x03 ? (0x01, 0x02) : (0x02, 0x01)
         move = isodd(chance) ?
             static_state[agent][active1].charged_move_1 :
             static_state[agent][active2].charged_move_2
         if rand(Int8(0):Int8(99)) < move.buffChance
             a_data = state[agent].data
-            d_data = state[get_other_agent(agent)].data
+            d_data = state[o_agent].data
             a_data, d_data = apply_buff(a_data, d_data, move)
             return update_fm_damage(DynamicState(
                 DynamicTeam(state[0x01][0x01], state[0x01][0x02],

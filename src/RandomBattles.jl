@@ -17,7 +17,7 @@ include("team/state.jl")
 include("team/mechanics.jl")
 include("team/decisions.jl")
 include("team/battle_logic.jl")
-#include("team/diff.jl")
+include("team/diff.jl")
 include("team/strategy.jl")
 include("team/nash.jl")
 #include("team/alpha_beta_pruning.jl")
@@ -40,7 +40,7 @@ export DynamicState, StaticState, DynamicTeam, StaticTeam, DynamicPokemon,
       StaticPokemon, DynamicIndividualState, StaticIndividualState,
       get_possible_decisions, battle_score, battle_scores, play_turn,
       play_battle, gamemaster, greatRankings, ultraRankings, masterRankings,
-      diff, Strategy, IndividualStrategy, plot_strategy, rank, PokemonMeta,
-      SM, solve_battle
+      diff, reflect, Strategy, IndividualStrategy, plot_strategy, rank,
+      PokemonMeta, SM, solve_battle
 
 end # module
