@@ -237,26 +237,26 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
     if agent == 0x01
         data += active1 == 0x01 ? to_switch == 0x01 ? Int16(1)  : Int16(2) :
                 active1 == 0x02 ? to_switch == 0x01 ? Int16(-1) : Int16(1) :
-                                 to_switch == 0x01 ? Int16(-2) : Int16(-1)
-        data -= fmPending[1] * 0x0010
+                                  to_switch == 0x01 ? Int16(-2) : Int16(-1)
+        data -= fmPending[1] * UInt32(16)
     else
         data += active2 == 0x01 ? to_switch == 0x01 ? Int16(4)  : Int16(8) :
                 active2 == 0x02 ? to_switch == 0x01 ? Int16(-4) : Int16(4) :
-                                 to_switch == 0x01 ? Int16(-8) : Int16(-4)
-        data -= fmPending[2] * 0x0070
+                                  to_switch == 0x01 ? Int16(-8) : Int16(-4)
+        data -= fmPending[2] * UInt32(112)
     end
     next_state =  DynamicState(
         DynamicTeam(
             state[0x01][0x01], state[0x01][0x02], state[0x01][0x03],
-            agent == 0x01 && time == 0x00 ? Int8(120) :
+            ((agent == 0x01 && time == 0x00) ? Int8(120) :
                 state[0x01].switchCooldown -
-                min(state[0x01].switchCooldown, time),
+                min(state[0x01].switchCooldown, time)),
             state[0x01].data),
         DynamicTeam(
             state[0x02][0x01], state[0x02][0x02], state[0x02][0x03],
-            agent == 0x02 && time == 0x00 ? Int8(120) :
+            ((agent == 0x02 && time == 0x00) ? Int8(120) :
                 state[0x02].switchCooldown -
-                min(state[0x02].switchCooldown, time),
+                min(state[0x02].switchCooldown, time)),
             state[0x02].data),
         data)
     next_state = update_fm_damage(next_state, static_state)
