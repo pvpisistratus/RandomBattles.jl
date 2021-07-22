@@ -6,6 +6,9 @@ function play_turn(state::DynamicState, static_state::StaticState,
     active1, active2 = get_active(next_state)
     cmp = get_cmp(state)
 
+    println("Beginning of play turn: $(decision)")
+    println("Beginning of play turn: $(cmp)")
+
     if !iszero(cmp)
         agent, o_agent = isodd(cmp) ? (0x01, 0x02) : (0x02, 0x01)
         next_state = evaluate_charged_move(next_state, static_state, cmp,
@@ -44,6 +47,10 @@ function play_turn(state::DynamicState, static_state::StaticState,
                 0x18 : 0x00)
         end
         active1, active2 = get_active(next_state)
+        
+        println("Towards end of play turn: $(decision)")
+        println("Towards end of play turn: $(cmp)")
+        println("hp1: $(get_hp(next_state[0x01][active1])) hp2: $(get_hp(next_state[0x02][active2]))")
         if get_hp(next_state[0x01][active1]) != 0x0000 &&
             get_hp(next_state[0x02][active2]) != 0x0000
             if decision[1] == 0x04
@@ -57,12 +64,10 @@ function play_turn(state::DynamicState, static_state::StaticState,
                         (atk_cmp == 1 ? UInt32(2352) :
                         atk_cmp == -1 ? UInt32(3136) : UInt32(19600)))
                 else
-                    println("cmp 1")
                     return DynamicState(next_state[0x01],
                         next_state[0x02], next_state.data + UInt32(784))
                 end
             elseif decision[2] == 0x04
-                println("cmp 2")
                 return DynamicState(next_state[0x01],
                     next_state[0x02], next_state.data + UInt32(2*784))
             end
