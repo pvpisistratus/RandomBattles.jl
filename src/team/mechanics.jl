@@ -251,13 +251,13 @@ function evaluate_switch(state::DynamicState, static_state::StaticState,
             ((agent == 0x01 && time == 0x00) ? Int8(120) :
                 state[0x01].switchCooldown -
                 min(state[0x01].switchCooldown, time)),
-            state[0x01].data),
+            0x78 + state[0x01].data % 3),
         DynamicTeam(
             state[0x02][0x01], state[0x02][0x02], state[0x02][0x03],
             ((agent == 0x02 && time == 0x00) ? Int8(120) :
                 state[0x02].switchCooldown -
                 min(state[0x02].switchCooldown, time)),
-            state[0x02].data),
+            0x78 + state[0x02].data % 3),
         data)
     next_state = update_fm_damage(next_state, static_state)
     return next_state
