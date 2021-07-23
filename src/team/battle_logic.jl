@@ -71,6 +71,40 @@ function play_turn(state::DynamicState, static_state::StaticState,
     return next_state
 end
 
+function get_chance_state_1(state::DynamicState, static_state::StaticState,
+    chance::UInt8)
+    if chance == 0x05
+        return DynamicState(state[0x01], state[0x02], state.data - 0x4360)
+    else
+        active1, active2 = get_active(state)
+        agent, o_agent = chance < 0x03 ? (0x01, 0x02) : (0x02, 0x01)
+        move = isodd(chance) ?
+            static_state[agent][active1].charged_move_1 :
+            static_state[agent][active2].charged_move_2
+        a_data = state[agent].data
+        d_data = state[o_agent].data
+        a_data, d_data = apply_buff(a_data, d_data, move)
+        return update_fm_damage(DynamicState(
+            DynamicTeam(state[0x01][0x01], state[0x01][0x02],
+                state[0x01][0x03], state[0x01].switchCooldown,
+                agent == 0x01 ? a_data : d_data),
+            DynamicTeam(state[0x02][0x01], state[0x02][0x02],
+                state[0x02][0x03], state[0x02].switchCooldown,
+                agent == 0x02 ? a_data : d_data),
+            state.data - UInt32(chance) * UInt32(3920)), static_state)
+    end
+end
+
+function get_chance_state_2(state::DynamicState, static_state::StaticState,
+    chance::UInt8)
+    if chance == 0x05
+        return DynamicState(state[0x01], state[0x02], state.data - 0x4050)
+    else
+        return DynamicState(state[0x01], state[0x02],
+            state.data - UInt32(chance) * UInt32(3920))
+    end
+end
+
 function resolve_chance(state::DynamicState, static_state::StaticState)
     chance = get_chance(state)
     if chance == 0x00
@@ -78,31 +112,17 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
     elseif chance == 0x05
         return rand() < 0.5 ?
             # subtract chance, add cmp
-            DynamicState(state[0x01], state[0x02],
-            state.data - 0x4360) : DynamicState(state[0x01],
-            state[0x02], state.data - 0x4050)
+            get_chance_state_1(state, static_state, chance) :
+            get_chance_state_2(state, static_state, chance)
     else
         active1, active2 = get_active(state)
-        agent, o_agent = chance < 0x03 ? (0x01, 0x02) : (0x02, 0x01)
-        move = isodd(chance) ?
-            static_state[agent][active1].charged_move_1 :
-            static_state[agent][active2].charged_move_2
-        if rand(Int8(0):Int8(99)) < move.buffChance
-            a_data = state[agent].data
-            d_data = state[o_agent].data
-            a_data, d_data = apply_buff(a_data, d_data, move)
-            return update_fm_damage(DynamicState(
-                DynamicTeam(state[0x01][0x01], state[0x01][0x02],
-                    state[0x01][0x03], state[0x01].switchCooldown,
-                    agent == 0x01 ? a_data : d_data),
-                DynamicTeam(state[0x02][0x01], state[0x02][0x02],
-                    state[0x02][0x03], state[0x02].switchCooldown,
-                    agent == 0x02 ? a_data : d_data),
-                state.data - UInt32(chance) * UInt32(3920)), static_state)
-        else
-            return DynamicState(state[0x01], state[0x02],
-                state.data - UInt32(chance) * UInt32(3920))
-        end
+        agent = chance < 0x03 ? 0x01 : 0x02
+        buff_chance = isodd(chance) ?
+            static_state[agent][active1].charged_move_1.buffChance :
+            static_state[agent][active2].charged_move_2.buffChance
+        return rand(Int8(0):Int8(99)) < buff_chance ?
+            get_chance_state_1(state, static_state, chance) :
+            get_chance_state_2(state, static_state, chance)
     end
 end
 

@@ -8,7 +8,7 @@ using Test, BenchmarkTools
     dynamic_state2 = DynamicState(static_state2)
     @test sizeof(static_state1) == 168
     @test isbits(static_state1)
-    @test sizeof(dynamic_state1) == 18
+    @test sizeof(dynamic_state1) == 20
     @test isbits(dynamic_state1)
     res = @benchmark play_battle($dynamic_state1, $static_state1)
     @test res.allocs == 0

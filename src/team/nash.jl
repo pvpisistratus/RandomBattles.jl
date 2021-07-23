@@ -65,33 +65,21 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     payoffs = zeros(Float64, Base.ctpop_int(A), Base.ctpop_int(B))
 
     state_1, state_2 = state, state
-    odds = 1.0
+    odds = Int8(100)
+
     chance = get_chance(state)
     if chance == 0x05
-        state_1 = DynamicState(state[0x01], state[0x02], state.data - 0x4360)
-        state_2 = DynamicState(state[0x01], state[0x02], state.data - 0x4050)
         odds = Int8(50)
-    else
-        state_2 = DynamicState(state[0x01], state[0x02],
-            state.data - chance * 0x0f50)
-        state_2 = update_fm_damage(state_2, static_state)
-        agent, o_agent = chance < 0x03 ? (0x01, 0x02) : (0x02, 0x01)
-        active = get_active(state)
-        move = isodd(chance) ? static_state[agent][
-            active[agent]].charged_move_1 : static_state[agent][
-                active[agent]].charged_move_2
-        a_data = state[agent].data
-        d_data = state[o_agent].data
-        a_data, d_data = apply_buff(a_data, d_data, move)
-        state_1 = DynamicState(
-            DynamicTeam(state[0x01][0x01], state[0x01][0x02],
-                state[0x01][0x03], state[0x01].switchCooldown,
-                agent == 0x01 ? a_data : d_data),
-            DynamicTeam(state[0x02][0x01], state[0x02][0x02],
-                state[0x02][0x03], state[0x02].switchCooldown,
-                agent == 0x02 ? a_data : d_data),
-            state.data - chance * 0x0f50)
-        odds = move.buffChance
+        state_1 = get_chance_state_1(state, static_state, chance)
+        state_2 = get_chance_state_2(state, static_state, chance)
+    elseif chance != 0x00
+        active1, active2 = get_active(state)
+        agent = chance < 0x03 ? 0x01 : 0x02
+        odds = isodd(chance) ?
+            static_state[agent][active1].charged_move_1.buffChance :
+            static_state[agent][active2].charged_move_2.buffChance
+        state_1 = get_chance_state_1(state, static_state, chance)
+        state_2 = get_chance_state_2(state, static_state, chance)
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
         if odds == Int8(100)
