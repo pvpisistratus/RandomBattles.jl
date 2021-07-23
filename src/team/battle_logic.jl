@@ -11,10 +11,10 @@ function play_turn(state::DynamicState, static_state::StaticState,
         next_state = evaluate_charged_move(next_state, static_state, cmp,
             decision[agent] - 0x06, 0x64, decision[o_agent] == 0x01)
         data = next_state.data - UInt32(fm_pending[agent]) *
-            UInt32(agent == 0x01 ? 0x10 : 0x70)
+            UInt32(agent == 0x01 ? 16 : 112)
         if !iszero(fm_pending[o_agent])
-            data -= UInt32(fm_pending[o_agent] - 0x01) *
-                UInt32(o_agent == 0x01 ? 0x10 : 0x70)
+            data -= UInt32(fm_pending[o_agent] - 1) *
+                UInt32(o_agent == 0x01 ? 16 : 112)
         end
         next_state = DynamicState(next_state[0x01], next_state[0x02], data)
     else

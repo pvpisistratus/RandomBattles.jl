@@ -93,6 +93,18 @@ function calculate_damage(
         Int64(d) * 1_280_000_000) + 1)
 end
 
+function evaluate_fast_moves(team::DynamicTeam, active::UInt8, damage::UInt16,
+    energy::Int8)
+    active_mon = add_energy(damage(team[active], damage), energy)
+    return DynamicTeam(
+        active == 0x01 ? active_mon : team[0x01],
+        active == 0x02 ? active_mon : team[0x02],
+        active == 0x03 ? active_mon : team[0x03],
+        team.switchCooldown,
+        team.data
+    )
+end
+
 """
     evaluate_fast_moves(state, static_state, agent)
 
@@ -103,31 +115,15 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
     using_fm::Tuple{Bool, Bool})
     active1, active2 = get_active(state)
     fm_dmg1, fm_dmg2 = get_fm_damage(state)
-    active_mon_1, active_mon_2 = using_fm[1] ? (using_fm[2] ? (add_energy(
-            damage(state[0x01][active1], fm_dmg1),
-            static_state[0x01][active1].fastMove.energy),
-        add_energy(damage(state[0x02][active2], fm_dmg2),
-            static_state[0x02][active2].fastMove.energy)) : (add_energy(
-            state[0x01][active1],
-            static_state[0x01][active1].fastMove.energy),
-        damage(state[0x02][active2], fm_dmg2))) : (damage(
-            state[0x01][active1], fm_dmg1), add_energy(state[0x02][active2],
-            static_state[0x02][active2].fastMove.energy))
 
     return DynamicState(
-        DynamicTeam(
-            active1 == 0x01 ? active_mon_1 : state[0x01][0x01],
-            active1 == 0x02 ? active_mon_1 : state[0x01][0x02],
-            active1 == 0x03 ? active_mon_1 : state[0x01][0x03],
-            state[0x01].switchCooldown,
-            state[0x01].data
-        ), DynamicTeam(
-            active2 == 0x01 ? active_mon_2 : state[0x02][0x01],
-            active2 == 0x02 ? active_mon_2 : state[0x02][0x02],
-            active2 == 0x03 ? active_mon_2 : state[0x02][0x03],
-            state[0x02].switchCooldown,
-            state[0x02].data
-        ), state.data
+        evaluate_fast_moves(state[0x01], active1,
+            using_fm[2] ? fm_dmg1 : 0x0000,
+            using_fm[1] ? static_state[0x01][active1].fastMove.energy),
+        evaluate_fast_moves(state[0x02], active2,
+            using_fm[1] ? fm_dmg2 : 0x0000,
+            using_fm[2] ? static_state[0x02][active2].fastMove.energy),
+        state.data
     )
 end
 
