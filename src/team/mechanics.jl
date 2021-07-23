@@ -119,10 +119,12 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
     return DynamicState(
         evaluate_fast_moves(state[0x01], active1,
             using_fm[2] ? fm_dmg1 : 0x0000,
-            using_fm[1] ? static_state[0x01][active1].fastMove.energy),
+            using_fm[1] ? static_state[0x01][active1].fastMove.energy :
+            Int8(0)),
         evaluate_fast_moves(state[0x02], active2,
             using_fm[1] ? fm_dmg2 : 0x0000,
-            using_fm[2] ? static_state[0x02][active2].fastMove.energy),
+            using_fm[2] ? static_state[0x02][active2].fastMove.energy :
+            Int8(0)),
         state.data
     )
 end
