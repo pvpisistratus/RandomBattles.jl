@@ -93,9 +93,9 @@ function calculate_damage(
         Int64(d) * 1_280_000_000) + 1)
 end
 
-function evaluate_fast_moves(team::DynamicTeam, active::UInt8, damage::UInt16,
+function evaluate_fast_moves(team::DynamicTeam, active::UInt8, dmg::UInt16,
     energy::Int8)
-    active_mon = add_energy(damage(team[active], damage), energy)
+    active_mon = add_energy(damage(team[active], dmg), energy)
     return DynamicTeam(
         active == 0x01 ? active_mon : team[0x01],
         active == 0x02 ? active_mon : team[0x02],
