@@ -1,4 +1,4 @@
-using StaticArrays
+using StaticArrays, Distributions, Setfield
 
 struct MCTSNode
     A::UInt8
