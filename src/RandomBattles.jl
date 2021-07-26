@@ -39,8 +39,11 @@ include("rankings.jl")
 export DynamicState, StaticState, DynamicTeam, StaticTeam, DynamicPokemon,
       StaticPokemon, DynamicIndividualState, StaticIndividualState,
       get_possible_decisions, battle_score, battle_scores, play_turn,
-      play_battle, gamemaster, greatRankings, ultraRankings, masterRankings,
-      diff, reflect, Strategy, IndividualStrategy, plot_strategy, rank,
-      PokemonMeta, SM, solve_battle
+      play_battle, gamemaster,
+      diff, reflect,
+      Strategy, IndividualStrategy, plot_strategy, rank,
+      PokemonMeta,
+      SM, solve_battle,
+      MCTSNode, update_tree_MCTS!, select_decisions_MCTS
 
 end # module
