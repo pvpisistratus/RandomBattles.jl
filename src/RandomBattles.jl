@@ -20,6 +20,7 @@ include("team/battle_logic.jl")
 include("team/diff.jl")
 include("team/strategy.jl")
 include("team/nash.jl")
+include("team/mcts.jl")
 #include("team/alpha_beta_pruning.jl")
 
 # individual battles
