@@ -42,7 +42,7 @@ function calculate_damage(
     en, ed = get_effectiveness(defender.primary_type,
         defender.secondary_type, move.moveType)
     return UInt16((13 * attack * move.power * move.stab * a * en) ÷
-        (20 * defender.stats.defense * d * ed) + 1)
+        (200 * defender.stats.defense * d * ed) + 1)
 end
 
 """
@@ -69,7 +69,7 @@ function calculate_damage(
     en, ed = get_effectiveness(defender.primary_type,
         defender.secondary_type, move.moveType)
     return UInt16((13 * attack * move.power * move.stab * a * en * charge) ÷
-        (2000 * defender.stats.defense * d * ed) + 1)
+        (20000 * defender.stats.defense * d * ed) + 1)
 end
 
 function evaluate_fast_moves(team::DynamicTeam, active::UInt8, dmg::UInt16,
