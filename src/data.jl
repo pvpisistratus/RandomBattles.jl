@@ -102,56 +102,73 @@ const typings = Dict{String, Int8}(
     "none"     => Int8(19))
 
 function get_effectiveness(a::Int8, d::Int8)
-    𛲜 = 1.6      # weakness
-    Θ = 1 / 𛲜    # resistance
-    ✗ = Θ^2      # "immunity"
+    𛲜 = 1      # weakness
+    Θ = -1    # resistance
+    ✗ = -2      # "immunity"
     if a == 1
-        return d == 6 || d == 9 ? Θ : d == 8 ? ✗ : 1.
+        return d == 6 || d == 9 ? Θ : d == 8 ? ✗ : 0
     elseif a == 2
         return d == 1 || d == 6 || d == 9 || d == 15 || d == 17 ? 𛲜 :
             d == 3 || d == 4 || d == 7 || d == 14 || d == 18 ? Θ :
-            d == 8 ? ✗ : 1.
+            d == 8 ? ✗ : 0
     elseif a == 3
         return d == 2 || d == 7 || d == 12 ? 𛲜 :
-            d == 6 || d == 9 || d == 13 ? Θ : 1.
+            d == 6 || d == 9 || d == 13 ? Θ : 0
     elseif a == 4
         return 3 < d < 7 || d == 8 ? Θ : d == 12 || d == 18 ? 𛲜 :
-            d == 9 ? ✗ : 1.
+            d == 9 ? ✗ : 0
     elseif a == 5
         return d == 4 || d == 6 || d == 9 || d == 10 || d == 13 ? 𛲜 :
-            d == 7 || d == 12 ? Θ : d == 3 ? ✗ : 1.
+            d == 7 || d == 12 ? Θ : d == 3 ? ✗ : 0
     elseif a == 6
         return d == 3 || d == 7 || d == 10 || d == 15 ? 𛲜 :
-            d == 2 || d == 5 || d == 9 ? Θ : 1.
+            d == 2 || d == 5 || d == 9 ? Θ : 0
     elseif a == 7
         return d == 12 || d == 14 || d == 17 ? 𛲜 :
-            1 < d < 5 || 7 < d < 11 || d == 18 ? Θ : 1.
+            1 < d < 5 || 7 < d < 11 || d == 18 ? Θ : 0
     elseif a == 8
-        return d == 8 || d == 14 ? 𛲜 : d == 17 ? Θ : d == 1 ? ✗ : 1.
+        return d == 8 || d == 14 ? 𛲜 : d == 17 ? Θ : d == 1 ? ✗ : 0
     elseif a == 9
-        return d == 6 || d == 15 || d == 18 ? 𛲜 : 8 < d < 12 || d == 13 ? Θ : 1.
+        return d == 6 || d == 15 || d == 18 ? 𛲜 : 8 < d < 12 || d == 13 ? Θ : 0
     elseif a == 10
         return d == 7 || d == 9 || d == 12 || d == 15 ? 𛲜 :
-            d == 6 || d == 10 || d == 11 || d == 16 ? Θ : 1.
+            d == 6 || d == 10 || d == 11 || d == 16 ? Θ : 0
     elseif a == 11
-        return 4 < d < 7 || d == 10 ? 𛲜 : 10 < d < 13 || d == 16 ? Θ : 1.
+        return 4 < d < 7 || d == 10 ? 𛲜 : 10 < d < 13 || d == 16 ? Θ : 0
     elseif a == 12
         return d == 5 || d == 6 || d == 11 ? 𛲜 :
-            2 < d < 5 || d == 7 || 8 < d < 11 || d == 12 || d == 16 ? Θ : 1.
+            2 < d < 5 || d == 7 || 8 < d < 11 || d == 12 || d == 16 ? Θ : 0
     elseif a == 13
         return d == 3 || d == 11 ? 𛲜 : d == 12 || d == 13 || d == 16 ? Θ :
-            d == 5 ? ✗ : 1.
+            d == 5 ? ✗ : 0
     elseif a == 14
-        return d == 2 || d == 4 ? 𛲜 : d == 9 || d == 14 ? Θ : d == 17 ? ✗ : 1.
+        return d == 2 || d == 4 ? 𛲜 : d == 9 || d == 14 ? Θ : d == 17 ? ✗ : 0
     elseif a == 15
         return d == 3 || d == 5 || d == 12 || d == 16 ? 𛲜 :
-            8 < d < 12 || d == 15 ? Θ : 1.
+            8 < d < 12 || d == 15 ? Θ : 0
     elseif a == 16
-        return d == 16 ? 𛲜 : d == 9 ? Θ : d == 18 ? ✗ : 1.
+        return d == 16 ? 𛲜 : d == 9 ? Θ : d == 18 ? ✗ : 0
     elseif a == 17
-        return d == 8 || d == 14 ? 𛲜 : d == 2 || 16 < d < 19 ? Θ : 1.
+        return d == 8 || d == 14 ? 𛲜 : d == 2 || 16 < d < 19 ? Θ : 0
     else
-        return d == 2 || 15 < d < 18 ? 𛲜 : d == 4 || d == 9 || d == 10 ? Θ : 1.
+        return d == 2 || 15 < d < 18 ? 𛲜 : d == 4 || d == 9 || d == 10 ? Θ : 0
+    end
+end
+
+function get_effectiveness(a::Int8, d1::Int8, d2::Int8)
+    eff = get_effectiveness(a, d1) + get_effectiveness(a, d2)
+    if eff == -3
+        return 125, 512
+    elseif eff == -2
+        return 25,  64
+    elseif eff == -1
+        return 5,   8
+    elseif eff == 0
+        return 1,   1
+    elseif eff == 1
+        return 8,   5
+    else
+        return 64,  25
     end
 end
 

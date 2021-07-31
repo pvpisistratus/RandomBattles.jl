@@ -1,21 +1,4 @@
 """
-    get_effectiveness(defenderTypes, moveType)
-
-Compute the effectiveness of a particular move against a type combination.
-In the example below, flying is super-effective against a pure fighting type.
-
-# Examples
-```jldoctest
-julia> get_effectiveness(Int8(2), Int8(19), Int8(3))
-1.6
-"""
-function get_effectiveness(defender_primary::Int8, defender_secondary::Int8,
-    moveType::Int8)
-    return get_effectiveness(moveType, defender_primary) *
-        get_effectiveness(moveType, defender_secondary)
-end
-
-"""
     get_buff_modifier(buff)
 
 Compute the mulitplier associated with stat buffs (multiplied by 12 to return an integer).
@@ -56,12 +39,10 @@ function calculate_damage(
     move::FastMove
 )
     a, d = get_buff_modifier(buff_data)
-    return UInt16((Int64(move.power) * Int64(move.stab) *
-        Int64(attack) * Int64(a) *
-        floor(Int64, get_effectiveness(defender.primary_type,
-        defender.secondary_type, move.moveType) *
-        12_800) * 65) ÷ (Int64(defender.stats.defense) *
-        Int64(d) * 12_800_000) + 1)
+    en, ed = get_effectiveness(defender.primary_type,
+        defender.secondary_type, move.moveType)
+    return UInt16((13 * attack * move.power * move.stab * a * en) ÷
+        (20 * defender.stats.defense * d * ed) + 1)
 end
 
 """
@@ -85,12 +66,10 @@ function calculate_damage(
     charge::Int8,
 )
     a, d = get_buff_modifier(buff_data)
-    return UInt16((Int64(move.power) * Int64(move.stab) *
-        Int64(attack) * Int64(a) *
-        floor(Int64, get_effectiveness(defender.primary_type,
-        defender.secondary_type, move.moveType) *
-        12_800) * Int64(charge) * 65) ÷ (Int64(defender.stats.defense) *
-        Int64(d) * 1_280_000_000) + 1)
+    en, ed = get_effectiveness(defender.primary_type,
+        defender.secondary_type, move.moveType)
+    return UInt16((13 * attack * move.power * move.stab * a * en * charge) ÷
+        (2000 * defender.stats.defense * d * ed) + 1)
 end
 
 function evaluate_fast_moves(team::DynamicTeam, active::UInt8, dmg::UInt16,
