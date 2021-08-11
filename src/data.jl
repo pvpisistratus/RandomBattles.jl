@@ -164,24 +164,12 @@ const effectivities = Dict{DataType, Union{DataType, Union, Core.TypeofBottom}}(
 )
 
 const immunities = Dict{DataType, Union{DataType, Core.TypeofBottom}}(
-    Normal   => Ghost, 
-    Fighting => Ghost, 
-    Flying   => Union{}, 
-    Poison   => Steel, 
-    Ground   => Flying, 
-    Rock     => Union{}, 
-    Bug      => Union{}, 
-    Ghost    => Normal, 
-    Steel    => Union{}, 
-    Fire     => Union{}, 
-    Water    => Union{}, 
-    Grass    => Union{}, 
-    Electric => Union{}, 
-    Psychic  => Dark, 
-    Ice      => Union{}, 
-    Dragon   => Fairy, 
-    Dark     => Union{}, 
-    Fairy    => Union{}
+    Normal   => Ghost,   Fighting => Ghost,   Flying   => Union{}, 
+    Poison   => Steel,   Ground   => Flying,  Rock     => Union{}, 
+    Bug      => Union{}, Ghost    => Normal,  Steel    => Union{}, 
+    Fire     => Union{}, Water    => Union{}, Grass    => Union{},
+    Electric => Union{}, Psychic  => Dark,    Ice      => Union{}, 
+    Dragon   => Fairy,   Dark     => Union{}, Fairy    => Union{}
 )
 
 # CP multipliers from PvPoke

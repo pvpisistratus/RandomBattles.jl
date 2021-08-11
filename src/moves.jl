@@ -108,7 +108,7 @@ end
 
 get_power(cm::ChargedMove) = 5 * (cm.data & 0x003f)
 get_energy(cm::ChargedMove) = 5 * ((cm.data >> 6) & 0x000f)
-get_STAB(fm::FastMove) = iszero(fm.data >> 12) ? 10 : 12
+get_STAB(cm::ChargedMove) = iszero(cm.data >> 12) ? 10 : 12
 
 function get_buff_chance(cm::ChargedMove)
     buff_chance = (cm.data >> 10) & 0x03ff
