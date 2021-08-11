@@ -94,6 +94,7 @@ abstract type Normal <: PokemonType end
 abstract type Fighting <: PokemonType end
 abstract type Flying <: PokemonType end
 abstract type Poison <: PokemonType end
+abstract type Ground <: PokemonType end
 abstract type Rock <: PokemonType end
 abstract type Bug <: PokemonType end
 abstract type Ghost <: PokemonType end
@@ -110,8 +111,7 @@ abstract type Fairy <: PokemonType end
 abstract type None <: PokemonType end
 
 # Types and effectiveness adapted from Silph Arena graphic
-# https://storage.googleapis.com/silphroad-publishing/silph-wp/
-# 3d94d185-type-chart_v4.png
+# https://storage.googleapis.com/silphroad-publishing/silph-wp/3d94d185-type-chart_v4.png
 const typings = Dict{String, DataType}(
     "normal"   => Normal,   "fighting" => Fighting, "flying"   => Flying,
     "poison"   => Poison,   "ground"   => Ground,   "rock"     => Rock,
