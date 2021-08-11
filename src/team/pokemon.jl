@@ -86,8 +86,8 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
     return StaticPokemon{types[1], types[2]}(
         stats,
         fastMove,
-        chargedMove1.energy > chargedMove2.energy ? chargedMove2 : chargedMove1,
-        chargedMove1.energy > chargedMove2.energy ? chargedMove1 : chargedMove2
+        get_energy(chargedMove1) > get_energy(chargedMove2) ? chargedMove2 : chargedMove1,
+        get_energy(chargedMove1) > get_energy(chargedMove2) ? chargedMove1 : chargedMove2
     )
 end
 

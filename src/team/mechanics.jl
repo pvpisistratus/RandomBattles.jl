@@ -45,11 +45,11 @@ function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
     return DynamicState(
         evaluate_fast_moves(state[0x01], active1,
             using_fm[2] ? fm_dmg1 : 0x0000,
-            using_fm[1] ? static_state[0x01][active1].fastMove.energy :
+            using_fm[1] ? get_energy(static_state[0x01][active1].fastMove) :
             Int8(0)),
         evaluate_fast_moves(state[0x02], active2,
             using_fm[1] ? fm_dmg2 : 0x0000,
-            using_fm[2] ? static_state[0x02][active2].fastMove.energy :
+            using_fm[2] ? get_energy(static_state[0x02][active2].fastMove) :
             Int8(0)),
         state.data
     )
@@ -85,11 +85,11 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
 
     attacking_team = DynamicTeam(
         a_active == 0x01 ? subtract_energy(next_state[agent][0x01],
-            move.energy) : next_state[agent][0x01],
+            get_energy(move)) : next_state[agent][0x01],
         a_active == 0x02 ? subtract_energy(next_state[agent][0x02],
-            move.energy) : next_state[agent][0x02],
+            get_energy(move)) : next_state[agent][0x02],
         a_active == 0x03 ? subtract_energy(next_state[agent][0x03],
-            move.energy) : next_state[agent][0x03],
+            get_energy(move)) : next_state[agent][0x03],
         next_state[agent].switchCooldown,
         a_data
     )

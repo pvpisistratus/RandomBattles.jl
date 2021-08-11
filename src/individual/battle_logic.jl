@@ -31,9 +31,9 @@ function play_turn(state::DynamicIndividualState,
 
          next_state = step_timers(next_state,
             decision[1] == 0x03 ?
-                static_state[0x01].fastMove.cooldown : Int8(0),
+                get_cooldown(static_state[0x01].fastMove) : Int8(0),
             decision[2] == 0x03 ?
-                static_state[0x02].fastMove.cooldown : Int8(0))
+                get_cooldown(static_state[0x02].fastMove) : Int8(0))
 
         if get_hp(next_state[0x01]) != 0x0000 &&
             get_hp(next_state[0x02]) != 0x0000

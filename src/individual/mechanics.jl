@@ -23,67 +23,6 @@ function get_buff_modifier(i::UInt32, agent::UInt8)
     return a1*d2, a2*d1
 end
 
-"""
-    calculate_damage(
-        attacker::StaticPokemon,
-        atkBuff::Int8,
-        defender::StaticPokemon,
-        defBuff::Int8,
-        move::FastMove,
-        charge::Int8,
-    )
-
-Calculate the damage a particular pokemon does against another using its fast
-move
-
-"""
-function calculate_damage(
-    attack::UInt16,
-    buff_data::UInt32,
-    agent::UInt8,
-    defender::StaticPokemon,
-    move::FastMove
-)
-    a, d = get_buff_modifier(buff_data, agent)
-    return UInt16((Int64(move.power) * Int64(move.stab) *
-        Int64(attack) * Int64(a) *
-        floor(Int64, get_effectiveness(defender.primary_type,
-        defender.secondary_type, move.moveType) *
-        12_800) * 65) ÷ (Int64(defender.stats.defense) *
-        Int64(d) * 12_800_000) + 1)
-end
-
-"""
-    calculate_damage(
-        attacker::StaticPokemon,
-        atkBuff::Int8,
-        defender::StaticPokemon,
-        defBuff::Int8,
-        move::ChargedMove,
-        charge::Int8,
-    )
-
-Calculate the damage a particular pokemon does against another using a charged
-move
-
-"""
-function calculate_damage(
-    attack::UInt16,
-    buff_data::UInt32,
-    agent::UInt8,
-    defender::StaticPokemon,
-    move::ChargedMove,
-    charge::Int8,
-)
-    a, d = get_buff_modifier(buff_data, agent)
-    return UInt16((Int64(move.power) * Int64(move.stab) *
-        Int64(attack) * Int64(a) *
-        floor(Int64, get_effectiveness(defender.primary_type,
-        defender.secondary_type, move.moveType) *
-        12_800) * Int64(charge) * 65) ÷ (Int64(defender.stats.defense) *
-        Int64(d) * 1_280_000_000) + 1)
-end
-
 evaluate_fast_moves(state::DynamicIndividualState,
     static_state::StaticIndividualState, using_fm::Tuple{Bool, Bool}) =
     DynamicIndividualState(
@@ -95,7 +34,7 @@ evaluate_fast_moves(state::DynamicIndividualState,
                 static_state[0x01],
                 static_state[0x02].fastMove,
             ) : 0x0000), (using_fm[0x01] ?
-            static_state[0x01].fastMove.energy : Int8(0))),
+            get_energy(static_state[0x01].fastMove) : Int8(0))),
         add_energy(damage(state[0x02],
             using_fm[0x01] ? calculate_damage(
                 static_state[0x01].stats.attack,
@@ -104,7 +43,7 @@ evaluate_fast_moves(state::DynamicIndividualState,
                 static_state[0x02],
                 static_state[0x01].fastMove,
             ) : 0x0000), (using_fm[0x02] ?
-            static_state[0x02].fastMove.energy : Int8(0))),
+            get_energy(static_state[0x02].fastMove) : Int8(0))),
         state.data)
 
 """
@@ -134,7 +73,7 @@ function evaluate_charged_move(state::DynamicIndividualState,
                              move_id == 0x01 ? UInt32(6615) : UInt32(8820)
     end
 
-    attacking_team = subtract_energy(next_state[agent], move.energy)
+    attacking_team = subtract_energy(next_state[agent], get_energy(move))
 
     if shielding
         defending_team = damage(next_state[d_agent], 0x0001)

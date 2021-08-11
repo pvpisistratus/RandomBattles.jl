@@ -28,9 +28,9 @@ function play_turn(state::DynamicState, static_state::StaticState,
 
         next_state = step_timers(next_state,
             decision[1] == 0x03 ?
-                static_state[0x01][active1].fastMove.cooldown : Int8(0),
+                get_cooldown(static_state[0x01][active1].fastMove) : Int8(0),
             decision[2] == 0x03 ?
-                static_state[0x02][active2].fastMove.cooldown : Int8(0))
+                get_cooldown(static_state[0x02][active2].fastMove) : Int8(0))
         if decision[1] == 0x05 || decision[1] == 0x06
             next_state = evaluate_switch(next_state,
                 static_state, 0x01, decision[1] - 0x04,
