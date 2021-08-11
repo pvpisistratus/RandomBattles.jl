@@ -121,7 +121,7 @@ const typings = Dict{String, DataType}(
     "dragon"   => Dragon,   "dark"     => Dark,     "fairy"    => Fairy,
     "none"     => None)
 
-const resistivities = Dict{DataType, Union}(
+const resistivities = Dict{DataType, Union{DataType, Union}}(
     Normal   => Union{Rock, Steel}, 
     Fighting => Union{Flying, Poison, Bug, Psychic, Fairy}, 
     Flying   => Union{Rock, Steel, Electric}, 
@@ -129,7 +129,7 @@ const resistivities = Dict{DataType, Union}(
     Ground   => Union{Bug, Grass}, 
     Rock     => Union{Fighting, Ground, Steel}, 
     Bug      => Union{Fighting, Flying, Poison, Ghost, Steel, Fire, Fairy}, 
-    Ghost    => Union{Dark}, 
+    Ghost    => Dark, 
     Steel    => Union{Steel, Fire, Water, Electric}, 
     Fire     => Union{Rock, Fire, Water, Dragon}, 
     Water    => Union{Water, Grass, Dragon}, 
@@ -137,12 +137,12 @@ const resistivities = Dict{DataType, Union}(
     Electric => Union{Grass, Electric, Dragon}, 
     Psychic  => Union{Steel, Psychic}, 
     Ice      => Union{Steel, Fire, Water, Ice}, 
-    Dragon   => Union{Steel}, 
+    Dragon   => Steel, 
     Dark     => Union{Fighting, Dark, Fairy}, 
     Fairy    => Union{Poison, Steel, Fire}
 )
 
-const effectivities = Dict{DataType, Union}(
+const effectivities = Dict{DataType, Union{DataType, Union, Core.TypeofBottom}}(
     Normal   => Union{}, 
     Fighting => Union{Normal, Rock, Steel, Ice, Dark}, 
     Flying   => Union{Fighting, Bug, Grass}, 
@@ -158,28 +158,28 @@ const effectivities = Dict{DataType, Union}(
     Electric => Union{Flying, Water}, 
     Psychic  => Union{Fighting, Poison}, 
     Ice      => Union{Flying, Ground, Grass, Dragon}, 
-    Dragon   => Union{Dragon}, 
+    Dragon   => Dragon, 
     Dark     => Union{Ghost, Psychic}, 
     Fairy    => Union{Fighting, Dragon, Dark}
 )
 
-const immunities = Dict{DataType, Union}(
-    Normal   => Union{Ghost}, 
-    Fighting => Union{Ghost}, 
+const immunities = Dict{DataType, Union{DataType, Core.TypeofBottom}}(
+    Normal   => Ghost, 
+    Fighting => Ghost, 
     Flying   => Union{}, 
-    Poison   => Union{Steel}, 
-    Ground   => Union{Flying}, 
+    Poison   => Steel, 
+    Ground   => Flying, 
     Rock     => Union{}, 
     Bug      => Union{}, 
-    Ghost    => Union{Normal}, 
+    Ghost    => Normal, 
     Steel    => Union{}, 
     Fire     => Union{}, 
     Water    => Union{}, 
     Grass    => Union{}, 
     Electric => Union{}, 
-    Psychic  => Union{Dark}, 
+    Psychic  => Dark, 
     Ice      => Union{}, 
-    Dragon   => Union{Fairy}, 
+    Dragon   => Fairy, 
     Dark     => Union{}, 
     Fairy    => Union{}
 )
