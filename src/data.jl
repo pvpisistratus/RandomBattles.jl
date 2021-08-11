@@ -89,119 +89,100 @@ function get_rankings_mon_id(name::String;
     return 0
 end
 
+abstract type PokemonType end
+abstract type Normal <: PokemonType end
+abstract type Fighting <: PokemonType end
+abstract type Flying <: PokemonType end
+abstract type Poison <: PokemonType end
+abstract type Rock <: PokemonType end
+abstract type Bug <: PokemonType end
+abstract type Ghost <: PokemonType end
+abstract type Steel <: PokemonType end
+abstract type Fire <: PokemonType end
+abstract type Water <: PokemonType end
+abstract type Grass <: PokemonType end
+abstract type Electric <: PokemonType end
+abstract type Psychic <: PokemonType end
+abstract type Ice <: PokemonType end
+abstract type Dragon <: PokemonType end
+abstract type Dark <: PokemonType end
+abstract type Fairy <: PokemonType end
+abstract type None <: PokemonType end
+
 # Types and effectiveness adapted from Silph Arena graphic
 # https://storage.googleapis.com/silphroad-publishing/silph-wp/
 # 3d94d185-type-chart_v4.png
-const typings = Dict{String, Int8}(
-    "normal"   => Int8(1),  "fighting" => Int8(2),  "flying"   => Int8(3),
-    "poison"   => Int8(4),  "ground"   => Int8(5),  "rock"     => Int8(6),
-    "bug"      => Int8(7),  "ghost"    => Int8(8),  "steel"    => Int8(9),
-    "fire"     => Int8(10), "water"    => Int8(11), "grass"    => Int8(12),
-    "electric" => Int8(13), "psychic"  => Int8(14), "ice"      => Int8(15),
-    "dragon"   => Int8(16), "dark"     => Int8(17), "fairy"    => Int8(18),
-    "none"     => Int8(19))
+const typings = Dict{String, DataType}(
+    "normal"   => Normal,   "fighting" => Fighting, "flying"   => Flying,
+    "poison"   => Poison,   "ground"   => Ground,   "rock"     => Rock,
+    "bug"      => Bug,      "ghost"    => Ghost,    "steel"    => Steel,
+    "fire"     => Fire,     "water"    => Water,    "grass"    => Grass,
+    "electric" => Electric, "psychic"  => Psychic,  "ice"      => Ice,
+    "dragon"   => Dragon,   "dark"     => Dark,     "fairy"    => Fairy,
+    "none"     => None)
 
-function get_effectiveness(a::Int8, d1::Int8, d2::Int8)
-    𛲜 = 1      # weakness
-    Θ = -1    # resistance
-    ✗ = -2      # "immunity"
+const resistivities = Dict{DataType, Union}(
+    Normal   => Union{Rock, Steel}, 
+    Fighting => Union{Flying, Poison, Bug, Psychic, Fairy}, 
+    Flying   => Union{Rock, Steel, Electric}, 
+    Poison   => Union{Poison, Ground, Rock, Ghost}, 
+    Ground   => Union{Bug, Grass}, 
+    Rock     => Union{Fighting, Ground, Steel}, 
+    Bug      => Union{Fighting, Flying, Poison, Ghost, Steel, Fire, Fairy}, 
+    Ghost    => Union{Dark}, 
+    Steel    => Union{Steel, Fire, Water, Electric}, 
+    Fire     => Union{Rock, Fire, Water, Dragon}, 
+    Water    => Union{Water, Grass, Dragon}, 
+    Grass    => Union{Flying, Poison, Rock, Steel, Fire, Grass, Dragon}, 
+    Electric => Union{Grass, Electric, Dragon}, 
+    Psychic  => Union{Steel, Psychic}, 
+    Ice      => Union{Steel, Fire, Water, Ice}, 
+    Dragon   => Union{Steel}, 
+    Dark     => Union{Fighting, Dark, Fairy}, 
+    Fairy    => Union{Poison, Steel, Fire}
+)
 
-    if a == 1
-        eff = (d1 == 6 || d1 == 9 ? Θ : d1 == 8 ? ✗ : 0) +
-            (d2 == 6 || d2 == 9 ? Θ : d2 == 8 ? ✗ : 0)
-    elseif a == 2
-        eff = (d1 == 1 || d1 == 6 || d1 == 9 || d1 == 15 || d1 == 17 ? 𛲜 :
-            d1 == 3 || d1 == 4 || d1 == 7 || d1 == 14 || d1 == 18 ? Θ :
-            d1 == 8 ? ✗ : 0) +
-            (d2 == 1 || d2 == 6 || d2 == 9 || d2 == 15 || d2 == 17 ? 𛲜 :
-            d2 == 3 || d2 == 4 || d2 == 7 || d2 == 14 || d2 == 18 ? Θ :
-            d2 == 8 ? ✗ : 0)
-    elseif a == 3
-        eff = (d1 == 2 || d1 == 7 || d1 == 12 ? 𛲜 :
-            d1 == 6 || d1 == 9 || d1 == 13 ? Θ : 0) +
-            (d2 == 2 || d2 == 7 || d2 == 12 ? 𛲜 :
-            d2 == 6 || d2 == 9 || d2 == 13 ? Θ : 0)
-    elseif a == 4
-        eff = (3 < d1 < 7 || d1 == 8 ? Θ : d1 == 12 || d1 == 18 ? 𛲜 :
-            d1 == 9 ? ✗ : 0) + (3 < d2 < 7 || d2 == 8 ? Θ : d2 == 12 ||
-            d2 == 18 ? 𛲜 : d2 == 9 ? ✗ : 0)
-    elseif a == 5
-        eff = (d1 == 4 || d1 == 6 || d1 == 9 || d1 == 10 || d1 == 13 ? 𛲜 :
-            d1 == 7 || d1 == 12 ? Θ : d1 == 3 ? ✗ : 0) +
-            (d2 == 4 || d2 == 6 || d2 == 9 || d2 == 10 || d2 == 13 ? 𛲜 :
-            d2 == 7 || d2 == 12 ? Θ : d2 == 3 ? ✗ : 0)
-    elseif a == 6
-        eff = (d1 == 3 || d1 == 7 || d1 == 10 || d1 == 15 ? 𛲜 :
-            d1 == 2 || d1 == 5 || d1 == 9 ? Θ : 0) +
-            (d2 == 3 || d2 == 7 || d2 == 10 || d2 == 15 ? 𛲜 :
-            d2 == 2 || d2 == 5 || d2 == 9 ? Θ : 0)
-    elseif a == 7
-        eff = (d1 == 12 || d1 == 14 || d1 == 17 ? 𛲜 :
-            1 < d1 < 5 || 7 < d1 < 11 || d1 == 18 ? Θ : 0) +
-            (d2 == 12 || d2 == 14 || d2 == 17 ? 𛲜 :
-            1 < d2 < 5 || 7 < d2 < 11 || d2 == 18 ? Θ : 0)
-    elseif a == 8
-        eff = (d1 == 8 || d1 == 14 ? 𛲜 : d1 == 17 ? Θ : d1 == 1 ? ✗ : 0) +
-            (d2 == 8 || d2 == 14 ? 𛲜 : d2 == 17 ? Θ : d2 == 1 ? ✗ : 0)
-    elseif a == 9
-        eff = (d1 == 6 || d1 == 15 || d1 == 18 ? 𛲜 : 8 < d1 < 12 ||
-            d1 == 13 ? Θ : 0) + (d2 == 6 || d2 == 15 || d2 == 18 ? 𛲜 :
-            8 < d2 < 12 || d2 == 13 ? Θ : 0)
-    elseif a == 10
-        eff = (d1 == 7 || d1 == 9 || d1 == 12 || d1 == 15 ? 𛲜 :
-            d1 == 6 || d1 == 10 || d1 == 11 || d1 == 16 ? Θ : 0) +
-            (d2 == 7 || d2 == 9 || d2 == 12 || d2 == 15 ? 𛲜 :
-            d2 == 6 || d2 == 10 || d2 == 11 || d2 == 16 ? Θ : 0)
-    elseif a == 11
-        eff = (4 < d1 < 7 || d1 == 10 ? 𛲜 : 10 < d1 < 13 || d1 == 16 ? Θ : 0) +
-            (4 < d2 < 7 || d2 == 10 ? 𛲜 : 10 < d2 < 13 || d2 == 16 ? Θ : 0)
-    elseif a == 12
-        eff = (d1 == 5 || d1 == 6 || d1 == 11 ? 𛲜 :
-            2 < d1 < 5 || d1 == 7 || 8 < d1 < 11 || d1 == 12 || d1 == 16 ? Θ :
-            0) + (d2 == 5 || d2 == 6 || d2 == 11 ? 𛲜 :
-            2 < d2 < 5 || d2 == 7 || 8 < d2 < 11 || d2 == 12 || d2 == 16 ? Θ :
-            0)
-    elseif a == 13
-        eff = (d1 == 3 || d1 == 11 ? 𛲜 : d1 == 12 || d1 == 13 || d1 == 16 ? Θ :
-            d1 == 5 ? ✗ : 0) +
-            (d2 == 3 || d2 == 11 ? 𛲜 : d2 == 12 || d2 == 13 || d2 == 16 ? Θ :
-                d2 == 5 ? ✗ : 0)
-    elseif a == 14
-        eff = (d1 == 2 || d1 == 4 ? 𛲜 : d1 == 9 || d1 == 14 ? Θ :
-            d1 == 17 ? ✗ : 0) +
-            (d2 == 2 || d2 == 4 ? 𛲜 : d2 == 9 || d2 == 14 ? Θ :
-            d2 == 17 ? ✗ : 0)
-    elseif a == 15
-        eff = (d1 == 3 || d1 == 5 || d1 == 12 || d1 == 16 ? 𛲜 :
-            8 < d1 < 12 || d1 == 15 ? Θ : 0) +
-            (d2 == 3 || d2 == 5 || d2 == 12 || d2 == 16 ? 𛲜 :
-            8 < d2 < 12 || d2 == 15 ? Θ : 0)
-    elseif a == 16
-        eff = (d1 == 16 ? 𛲜 : d1 == 9 ? Θ : d1 == 18 ? ✗ : 0) +
-            (d2 == 16 ? 𛲜 : d2 == 9 ? Θ : d2 == 18 ? ✗ : 0)
-    elseif a == 17
-        eff = (d1 == 8 || d1 == 14 ? 𛲜 : d1 == 2 || 16 < d1 < 19 ? Θ : 0) +
-            (d2 == 8 || d2 == 14 ? 𛲜 : d2 == 2 || 16 < d2 < 19 ? Θ : 0)
-    else
-        eff = (d1 == 2 || 15 < d1 < 18 ? 𛲜 : d1 == 4 || d1 == 9 ||
-            d1 == 10 ? Θ : 0) +
-            (d2 == 2 || 15 < d2 < 18 ? 𛲜 : d2 == 4 || d2 == 9 ||
-            d2 == 10 ? Θ : 0)
-    end
-    if eff == -3
-        return 125, 512
-    elseif eff == -2
-        return 25,  64
-    elseif eff == -1
-        return 5,   8
-    elseif eff == 0
-        return 1,   1
-    elseif eff == 1
-        return 8,   5
-    else
-        return 64,  25
-    end
-end
+const effectivities = Dict{DataType, Union}(
+    Normal   => Union{}, 
+    Fighting => Union{Normal, Rock, Steel, Ice, Dark}, 
+    Flying   => Union{Fighting, Bug, Grass}, 
+    Poison   => Union{Grass, Fairy}, 
+    Ground   => Union{Poison, Rock, Steel, Fire, Electric}, 
+    Rock     => Union{Flying, Bug, Fire, Ice}, 
+    Bug      => Union{Grass, Psychic, Dark}, 
+    Ghost    => Union{Ghost, Psychic}, 
+    Steel    => Union{Rock, Ice, Fairy}, 
+    Fire     => Union{Bug, Steel, Grass, Ice}, 
+    Water    => Union{Ground, Rock, Fire}, 
+    Grass    => Union{Ground, Rock, Water}, 
+    Electric => Union{Flying, Water}, 
+    Psychic  => Union{Fighting, Poison}, 
+    Ice      => Union{Flying, Ground, Grass, Dragon}, 
+    Dragon   => Union{Dragon}, 
+    Dark     => Union{Ghost, Psychic}, 
+    Fairy    => Union{Fighting, Dragon, Dark}
+)
+
+const immunities = Dict{DataType, Union}(
+    Normal   => Union{Ghost}, 
+    Fighting => Union{Ghost}, 
+    Flying   => Union{}, 
+    Poison   => Union{Steel}, 
+    Ground   => Union{Flying}, 
+    Rock     => Union{}, 
+    Bug      => Union{}, 
+    Ghost    => Union{Normal}, 
+    Steel    => Union{}, 
+    Fire     => Union{}, 
+    Water    => Union{}, 
+    Grass    => Union{}, 
+    Electric => Union{}, 
+    Psychic  => Union{Dark}, 
+    Ice      => Union{}, 
+    Dragon   => Union{Fairy}, 
+    Dark     => Union{}, 
+    Fairy    => Union{}
+)
 
 # CP multipliers from PvPoke
 const cpm = Dict(

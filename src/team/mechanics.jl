@@ -19,59 +19,6 @@ function get_buff_modifier(i::UInt8)
     return a1 * d2, a2 * d1
 end
 
-"""
-    calculate_damage(
-        attacker::StaticPokemon,
-        atkBuff::Int8,
-        defender::StaticPokemon,
-        defBuff::Int8,
-        move::FastMove,
-        charge::Int8,
-    )
-
-Calculate the damage a particular pokemon does against another using its fast move
-
-"""
-function calculate_damage(
-    attack::UInt16,
-    buff_data::UInt8,
-    defender::StaticPokemon,
-    move::FastMove
-)
-    a, d = get_buff_modifier(buff_data)
-    en, ed = get_effectiveness(defender.primary_type,
-        defender.secondary_type, move.moveType)
-    return UInt16((13 * attack * move.power * move.stab * a * en) ÷
-        (200 * defender.stats.defense * d * ed) + 1)
-end
-
-"""
-    calculate_damage(@inbounds
-        attacker::StaticPokemon,
-        atkBuff::Int8,
-        defender::StaticPokemon,
-        defBuff::Int8,
-        move::ChargedMove,
-        charge::Int8,
-    )
-
-Calculate the damage a particular pokemon does against another using a charged move
-
-"""
-function calculate_damage(
-    attack::UInt16,
-    buff_data::UInt8,
-    defender::StaticPokemon,
-    move::ChargedMove,
-    charge::Int8,
-)
-    a, d = get_buff_modifier(buff_data)
-    en, ed = get_effectiveness(defender.primary_type,
-        defender.secondary_type, move.moveType)
-    return UInt16((13 * attack * move.power * move.stab * a * en * charge) ÷
-        (20000 * defender.stats.defense * d * ed) + 1)
-end
-
 function evaluate_fast_moves(team::DynamicTeam, active::UInt8, dmg::UInt16,
     energy::Int8)
     active_mon = add_energy(damage(team[active], dmg), energy)

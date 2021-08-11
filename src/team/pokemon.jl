@@ -5,9 +5,7 @@ Struct for holding the values associated with the mons that do not change
 throughout the battle: types, stats, and moves. Note that like moves, this
 struct is agnostic to the actual identity/dex/species of the mon.
 """
-struct StaticPokemon
-    primary_type::Int8
-    secondary_type::Int8
+struct StaticPokemon{T1<:PokemonType, T2<:PokemonType}
     stats::Stats
     fastMove::FastMove
     charged_move_1::ChargedMove
@@ -35,17 +33,16 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
             function get_cp(lvl)
                 attack = (atk + gm["baseStats"]["atk"]) * cpm[lvl]
                 defense = (def + gm["baseStats"]["def"]) * cpm[lvl]
-                hitpoints = floor(Int16,
-                    (hp + gm["baseStats"]["hp"]) * cpm[lvl])
-                cp = floor(max(10,
+                hitpoints = floor(Int16, (hp + gm["baseStats"]["hp"]) *
+                    cpm[lvl])
+                return floor(max(10,
                     (attack * sqrt(defense) * sqrt(hitpoints)) / 10.0))
-                return cp
             end
-            level = (1:0.5:40)[findfirst(x -> get_cp(x) > cp_limit,
-                1:0.5:40) - 1]
+            level = (1:0.5:50)[findfirst(x -> get_cp(x) > cp_limit,
+                1:0.5:50) - 1]
         end
     elseif league == "master"
-        level, atk, def, hp = 40, 15, 15, 15
+        level, atk, def, hp = 50, 15, 15, 15
     else
         level = gm["defaultIVs"]["cp$(cp_limit)"][1]
         atk = gm["defaultIVs"]["cp$(cp_limit)"][2]
@@ -65,7 +62,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
         fastMovesAvailable = gm["fastMoves"]
         sort!(fastMovesAvailable)
         fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(
-            fastMovesAvailable[moves[1]+1],)]
+            fastMovesAvailable[moves[1]+1])]
         fastMove = Move(fastMoveGm, types)
         chargedMovesAvailable = gm["chargedMoves"]
         if haskey(gm, "tags") &&
@@ -75,9 +72,9 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
             push!(chargedMovesAvailable, "FRUSTRATION")
         end
         sort!(chargedMovesAvailable)
-        chargedMove1 = Move(gamemaster["moves"][get_gamemaster_move_id(
+        chargedMove1 = ChargedMove(gamemaster["moves"][get_gamemaster_move_id(
             chargedMovesAvailable[moves[2]])], types)
-        chargedMove2 = Move(gamemaster["moves"][get_gamemaster_move_id(
+        chargedMove2 = ChargedMove(gamemaster["moves"][get_gamemaster_move_id(
             chargedMovesAvailable[moves[3]])], types)
     else
         moveset = custom_moveset == ["none"] ?
@@ -86,9 +83,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
         chargedMove1 = ChargedMove(moveset[2]::String, types)
         chargedMove2 = ChargedMove(moveset[3]::String, types)
     end
-    return StaticPokemon(
-        types[1],
-        types[2],
+    return StaticPokemon{types[1], types[2]}(
         stats,
         fastMove,
         chargedMove1.energy > chargedMove2.energy ? chargedMove2 : chargedMove1,
