@@ -20,7 +20,7 @@ be used internally, as generating the move from the name is a lot cleaner.
 """
 function FastMove(gm_move::Dict{String,Any}, types::Tuple{DataType, DataType})
     STAB = (typings[gm_move["type"]] == types[1] ||
-        typings[gm_move["type"]] == types[2]) ? UInt16(1) : UInt16(0)
+        typings[gm_move["type"]] == types[2]) ? 0x0001 : 0x0000
     power = UInt16(gm_move["power"])
     energy = UInt16(gm_move["energyGain"])
     cooldown = UInt16(gm_move["cooldown"] ÷ 500)
@@ -70,18 +70,18 @@ be used internally, as generating the move from the name is a lot cleaner.
 function ChargedMove(gm_move::Dict{String,Any},
     types::Tuple{DataType, DataType})
     STAB = (typings[gm_move["type"]] == types[1] ||
-        typings[gm_move["type"]] == types[2]) ? UInt16(1) : UInt16(0)
-    buff_target = (gm_move["buffTarget"] == "opponent") ? UInt16(1) : UInt16(0)
+        typings[gm_move["type"]] == types[2]) ? 0x0001 : 0x0000
+    buff_target = (haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent") ? 0x0001 : 0x0000
     power = UInt16(gm_move["power"] ÷ 5)
     energy = UInt16(gm_move["energy"] ÷ 5)
     buff = haskey(gm_move, "buffs") ? defaultBuff :
         StatBuffs(Int8(gm_move["buffs"][1]), Int8(gm_move["buffs"][2]))
-    buff_chance = !haskey(gm_move, "buffs")  ?   UInt16(0) :
-        gm_move["buffApplyChance"] == ".1"   ?   UInt16(1) :
-        gm_move["buffApplyChance"] == ".125" ?   UInt16(2) :
-        gm_move["buffApplyChance"] == ".2"   ?   UInt16(3) :
-        gm_move["buffApplyChance"] == ".3"   ?   UInt16(4) :
-        gm_move["buffApplyChance"] == ".5"   ?   UInt16(5) : UInt16(6)
+    buff_chance = !haskey(gm_move, "buffs")  ? 0x0000 :
+        gm_move["buffApplyChance"] == ".1"   ? 0x0001 :
+        gm_move["buffApplyChance"] == ".125" ? 0x0002 :
+        gm_move["buffApplyChance"] == ".2"   ? 0x0003 :
+        gm_move["buffApplyChance"] == ".3"   ? 0x0004 :
+        gm_move["buffApplyChance"] == ".5"   ? 0x0005 : 0x0006
 
     return ChargedMove{typings[gm_move["type"]]}(
         buff,
