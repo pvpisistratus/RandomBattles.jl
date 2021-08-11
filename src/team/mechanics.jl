@@ -19,8 +19,7 @@ function get_buff_modifier(i::UInt8)
     return a1 * d2, a2 * d1
 end
 
-function evaluate_fast_moves(team::DynamicTeam, active::UInt8, dmg::UInt16,
-    energy::Int8)
+function evaluate_fast_moves(team::DynamicTeam, active::UInt8, dmg::UInt16, energy::UInt16)
     active_mon = add_energy(damage(team[active], dmg), energy)
     return DynamicTeam(
         active == 0x01 ? active_mon : team[0x01],
@@ -99,7 +98,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         state[agent].data,
         static_state[d_agent][d_active],
         move,
-        Int8(100)
+        charge = Int8(100)
     )
 
     defending_team = DynamicTeam(
