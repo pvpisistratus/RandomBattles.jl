@@ -74,7 +74,7 @@ function ChargedMove(gm_move::Dict{String,Any},
     buff_target = (haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent") ? 0x0001 : 0x0000
     power = UInt16(gm_move["power"] ÷ 5)
     energy = UInt16(gm_move["energy"] ÷ 5)
-    buff = haskey(gm_move, "buffs") ? defaultBuff :
+    buff = !haskey(gm_move, "buffs") ? defaultBuff :
         StatBuffs(Int8(gm_move["buffs"][1]), Int8(gm_move["buffs"][2]))
     buff_chance = !haskey(gm_move, "buffs")  ? 0x0000 :
         gm_move["buffApplyChance"] == ".1"   ? 0x0001 :
