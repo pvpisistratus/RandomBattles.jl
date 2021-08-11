@@ -51,7 +51,7 @@ function chance_node_in_tree(
     if chance == 0x05
         odds = 0.5
         state_1 = get_chance_state_1(s.state, static_s, chance)
-        state_2 = get_chance_state_2(s.state, static_s, chance)
+        state_2 = get_chance_state_2(s.state, chance)
     elseif chance != 0x00
         active1, active2 = get_active(s.state)
         agent = chance < 0x03 ? 0x01 : 0x02
@@ -59,7 +59,7 @@ function chance_node_in_tree(
             static_s[agent][active1].charged_move_1 :
             static_s[agent][active2].charged_move_2)
         state_1 = get_chance_state_1(s.state, static_s, chance)
-        state_2 = get_chance_state_2(s.state, static_s, chance)
+        state_2 = get_chance_state_2(s.state, chance)
     end
 
     new_i = i

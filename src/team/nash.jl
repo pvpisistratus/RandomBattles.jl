@@ -71,7 +71,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     if chance == 0x05
         odds = 0.5
         state_1 = get_chance_state_1(state, static_state, chance)
-        state_2 = get_chance_state_2(state, static_state, chance)
+        state_2 = get_chance_state_2(state, chance)
     elseif chance != 0x00
         active1, active2 = get_active(state)
         agent = chance < 0x03 ? 0x01 : 0x02
@@ -79,7 +79,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
             static_state[agent][active1].charged_move_1 :
             static_state[agent][active2].charged_move_2)
         state_1 = get_chance_state_1(state, static_state, chance)
-        state_2 = get_chance_state_2(state, static_state, chance)
+        state_2 = get_chance_state_2(state, chance)
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
         if odds == 1.0

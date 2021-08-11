@@ -98,7 +98,7 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
         state[agent].data,
         static_state[d_agent][d_active],
         move,
-        charge = Int8(100)
+        charge = charge
     )
 
     defending_team = DynamicTeam(
@@ -193,7 +193,7 @@ Given the dynamic state and the fast move cooldowns, adjust the times so that
 one turn has elapsed, and reset fast move cooldowns as needed. This returns a
 new DynamicState using precisely one copy
 """
-function step_timers(state::DynamicState, fmCooldown1::Int8, fmCooldown2::Int8)
+function step_timers(state::DynamicState, fmCooldown1::UInt16, fmCooldown2::UInt16)
     fmPending = get_fast_moves_pending(state)
     data = state.data
     if fmCooldown1 != Int8(0)

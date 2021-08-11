@@ -95,8 +95,7 @@ function get_chance_state_1(state::DynamicState, static_state::StaticState,
     end
 end
 
-function get_chance_state_2(state::DynamicState, static_state::StaticState,
-    chance::UInt8)
+function get_chance_state_2(state::DynamicState, chance::UInt8)
     if chance == 0x05
         return DynamicState(state[0x01], state[0x02], state.data - 0x4050)
     else
@@ -113,7 +112,7 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
         return rand() < 0.5 ?
             # subtract chance, add cmp
             get_chance_state_1(state, static_state, chance) :
-            get_chance_state_2(state, static_state, chance)
+            get_chance_state_2(state, chance)
     else
         active1, active2 = get_active(state)
         agent = chance < 0x03 ? 0x01 : 0x02
@@ -122,7 +121,7 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
             static_state[agent][active].charged_move_1 : 
             static_state[agent][active].charged_move_2) ?
             get_chance_state_1(state, static_state, chance) :
-            get_chance_state_2(state, static_state, chance)
+            get_chance_state_2(state, chance)
     end
 end
 
