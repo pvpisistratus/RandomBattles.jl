@@ -149,11 +149,11 @@ function get_hp(p::DynamicPokemon)
     return p.data % 0x0200
 end
 
-function add_energy(p::DynamicPokemon, e::Int8)
+function add_energy(p::DynamicPokemon, e::UInt16)
     return DynamicPokemon(min(0x0064, get_energy(p) + e) << 9 + get_hp(p))
 end
 
-function subtract_energy(p::DynamicPokemon, e::Int8)
+function subtract_energy(p::DynamicPokemon, e::UInt16)
     curr_e = get_energy(p)
     return DynamicPokemon((curr_e - min(curr_e, e)) << 9 + get_hp(p))
 end

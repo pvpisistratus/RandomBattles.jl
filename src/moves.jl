@@ -106,8 +106,8 @@ function ChargedMove(move_name::String, types)
     return ChargedMove(gm_move, types)
 end
 
-get_power(cm::ChargedMove) = 5 * (cm.data & 0x003f)
-get_energy(cm::ChargedMove) = 5 * ((cm.data >> 6) & 0x000f)
+get_power(cm::ChargedMove) = 0x0005 * (cm.data & 0x003f)
+get_energy(cm::ChargedMove) = 0x0005 * ((cm.data >> 6) & 0x000f)
 get_STAB(cm::ChargedMove) = iszero(cm.data >> 12) ? 10 : 12
 
 function get_buff_chance(cm::ChargedMove)
