@@ -45,19 +45,19 @@ function chance_node_in_tree(
     tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}}, s::MCTSNode,
     i::UInt16, static_s::StaticState)
     state_1, state_2 = s.state, s.state
-    odds = Int8(100)
+    odds = 1.0
 
     chance = get_chance(s.state)
     if chance == 0x05
-        odds = Int8(50)
+        odds = 0.5
         state_1 = get_chance_state_1(s.state, static_s, chance)
         state_2 = get_chance_state_2(s.state, static_s, chance)
     elseif chance != 0x00
         active1, active2 = get_active(s.state)
         agent = chance < 0x03 ? 0x01 : 0x02
-        odds = isodd(chance) ?
-            static_s[agent][active1].charged_move_1.buffChance :
-            static_s[agent][active2].charged_move_2.buffChance
+        odds = get_buff_chance(isodd(chance) ?
+            static_s[agent][active1].charged_move_1 :
+            static_s[agent][active2].charged_move_2)
         state_1 = get_chance_state_1(s.state, static_s, chance)
         state_2 = get_chance_state_2(s.state, static_s, chance)
     end
@@ -66,7 +66,7 @@ function chance_node_in_tree(
     while tree[new_i].index != 0x0000
         new_i += 0x0001
     end
-    chance_index = rand() < odds / 100 ? 1 : 2
+    chance_index = rand() < odds ? 1 : 2
     if s.chance_children[chance_index] == 0x0000
         tree[new_i] = MCTSNode(chance_index == 1 ? state_1 : state_2, static_s,
             s.index, new_i, @SVector [0x00, 0x00, UInt8(chance_index)])
@@ -233,7 +233,7 @@ function select_decisions_MCTS(dynamic_state::DynamicState,
             move = isodd(chance) ?
                 static_s[agent][active[agent]].charged_move_1 :
                 static_s[agent][active[agent]].charged_move_2
-            curr_index = rand() < move.buffChance / 100 ?
+            curr_index = buff_applies(move) ?
                 tree[curr_index].chance_children[1] :
                 tree[curr_index].chance_children[2]
         end

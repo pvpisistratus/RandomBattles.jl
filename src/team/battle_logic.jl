@@ -117,10 +117,10 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
     else
         active1, active2 = get_active(state)
         agent = chance < 0x03 ? 0x01 : 0x02
-        buff_chance = isodd(chance) ?
-            static_state[agent][active1].charged_move_1.buffChance :
-            static_state[agent][active2].charged_move_2.buffChance
-        return rand(Int8(0):Int8(99)) < buff_chance ?
+        active = agent == 0x01 ? active1 : active2
+        return buff_applies(isodd(chance) ? 
+            static_state[agent][active].charged_move_1 : 
+            static_state[agent][active].charged_move_2) ?
             get_chance_state_1(state, static_state, chance) :
             get_chance_state_2(state, static_state, chance)
     end

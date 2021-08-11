@@ -69,20 +69,20 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
 
     chance = get_chance(state)
     if chance == 0x05
-        odds = Int8(50)
+        odds = 0.5
         state_1 = get_chance_state_1(state, static_state, chance)
         state_2 = get_chance_state_2(state, static_state, chance)
     elseif chance != 0x00
         active1, active2 = get_active(state)
         agent = chance < 0x03 ? 0x01 : 0x02
-        odds = isodd(chance) ?
-            static_state[agent][active1].charged_move_1.buffChance :
-            static_state[agent][active2].charged_move_2.buffChance
+        odds = get_buff_chance(isodd(chance) ?
+            static_state[agent][active1].charged_move_1 :
+            static_state[agent][active2].charged_move_2)
         state_1 = get_chance_state_1(state, static_state, chance)
         state_2 = get_chance_state_2(state, static_state, chance)
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
-        if odds == Int8(100)
+        if odds == 1.0
             state = play_turn(state_1, static_state, get_decision(A, B, i, j))
             @inbounds payoffs[i, j] = SM(state, static_state, depth - 1,
                 allow_nothing = allow_nothing,
@@ -91,11 +91,11 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
         else
             state_1 = play_turn(state_1, static_state, get_decision(A, B, i, j))
             state_2 = play_turn(state_2, static_state, get_decision(A, B, i, j))
-            @inbounds payoffs[i, j] = odds / 100 *
+            @inbounds payoffs[i, j] = odds *
                 SM(state_1, static_state, depth - 1,
                     allow_nothing = allow_nothing,
                     allow_overfarming = allow_overfarming,
-                    sim_to_end = sim_to_end).payoff + (100 - odds) / 100 *
+                    sim_to_end = sim_to_end).payoff + (1 - odds) *
                 SM(state_2, static_state, depth - 1,
                     allow_nothing = allow_nothing,
                     allow_overfarming = allow_overfarming,

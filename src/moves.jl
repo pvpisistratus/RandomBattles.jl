@@ -1,4 +1,4 @@
-abstract type Move{T<:PokemonType} end
+abstract type Move{T <: PokemonType} end
 
 """
     FastMove(moveType, stab, power, energy, cooldown)
@@ -7,7 +7,7 @@ Struct for holding fast moves that holds all information that determines
 mechanics: type, STAB (same type attack bonus), power, energy, and cooldown.
 Note that this is agnostic to the identity of the actual move itself.
 """
-struct FastMove{T<:PokemonType} <: Move{T}
+struct FastMove{T <: PokemonType} <: Move{T}
     data::UInt16
 end
 
@@ -55,7 +55,7 @@ mechanics: type, STAB (same type attack bonus), power, energy, and buff
 information (chance, which buffs are applied and to whom). Note that this is
 agnostic to the identity of the actual move itself.
 """
-struct ChargedMove{T<:PokemonType} <: Move{T}
+struct ChargedMove{T <: PokemonType} <: Move{T}
     buff::StatBuffs
     data::UInt16
 end
@@ -108,13 +108,24 @@ end
 
 get_power(cm::ChargedMove) = 5 * (cm.data & 0x003f)
 get_energy(cm::ChargedMove) = 5 * ((cm.data >> 6) & 0x000f)
+get_STAB(fm::FastMove) = iszero(fm.data >> 12) ? 10 : 12
 
 function get_buff_chance(cm::ChargedMove)
     buff_chance = (cm.data >> 10) & 0x03ff
-    return buff_chance == UInt16(0) ? 0.0 :
-        buff_chance == UInt16(1) ? 0.1    :
-        buff_chance == UInt16(2) ? 0.125  :
-        buff_chance == UInt16(3) ? 0.2    :
-        buff_chance == UInt16(4) ? 0.3    :
-        buff_chance == UInt16(5) ? 0.5    : 1.0
+    return buff_chance == 0x0000 ? 0.0   :
+           buff_chance == 0x0006 ? 1.0   :
+           buff_chance == 0x0001 ? 0.1   :
+           buff_chance == 0x0002 ? 0.125 :
+           buff_chance == 0x0003 ? 0.2   :
+           buff_chance == 0x0004 ? 0.3   : 0.5
+end 
+
+function buff_applies(cm::ChargedMove)
+    buff_chance = (cm.data >> 10) & 0x03ff
+    return buff_chance == 0x0000 ? false                                                         :
+           buff_chance == 0x0006 ? true                                                          :
+           buff_chance == 0x0001 ? rand(1:10) == 1                                               :
+           buff_chance == 0x0002 ? rand((true, false, false, false, false, false, false, false)) :
+           buff_chance == 0x0003 ? rand(1:5) == 1                                                :
+           buff_chance == 0x0004 ? rand(1:10) < 4                                                : rand((true, false))
 end

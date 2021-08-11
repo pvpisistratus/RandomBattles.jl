@@ -74,11 +74,11 @@ function evaluate_charged_move(state::DynamicState, static_state::StaticState,
     d_data = next_state[d_agent].data
     move = move_id == 0x01 ? static_state[agent][a_active].charged_move_1 :
         static_state[agent][a_active].charged_move_2
-    buff_chance = move.buffChance
+    buff_chance = get_buff_chance(move)
 
-    if buff_chance == Int8(100)
+    if buff_chance == 1.0
         a_data, d_data = apply_buff(a_data, d_data, move)
-    elseif buff_chance != Int8(0)
+    elseif buff_chance != 0.0
         data += agent == 0x01 ? (move_id == 0x01 ? 0x0f50 : 0x1ea0) :
             (move_id == 0x01 ? 0x2df0 : 0x3d40)
     end
