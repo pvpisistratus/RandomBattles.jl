@@ -30,7 +30,6 @@ evaluate_fast_moves(state::DynamicIndividualState,
             using_fm[0x02] ? calculate_damage(
                 static_state[0x02].stats.attack,
                 state.data,
-                0x02,
                 static_state[0x01],
                 static_state[0x02].fastMove,
             ) : 0x0000), (using_fm[0x01] ?
@@ -39,7 +38,6 @@ evaluate_fast_moves(state::DynamicIndividualState,
             using_fm[0x01] ? calculate_damage(
                 static_state[0x01].stats.attack,
                 state.data,
-                0x01,
                 static_state[0x02],
                 static_state[0x01].fastMove,
             ) : 0x0000), (using_fm[0x02] ?
@@ -82,10 +80,9 @@ function evaluate_charged_move(state::DynamicIndividualState,
         defending_team = damage(next_state[d_agent], calculate_damage(
                 static_state[agent].stats.attack,
                 state.data,
-                agent,
                 static_state[d_agent],
                 move,
-                Int8(100)
+                charge = charge
             ))
     end
     return DynamicIndividualState(

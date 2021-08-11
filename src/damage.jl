@@ -491,7 +491,7 @@ function calculate_damage(
     buff_data::UInt8,
     defender::StaticPokemon,
     move::Move;
-    charge::Int8 = Int8(100),
+    charge::UInt8 = 0x64,
 )
     a, d = get_buff_modifier(buff_data)
     return UInt16((26 * attack * get_power(move) * get_STAB(move) * a * charge) ÷ 
