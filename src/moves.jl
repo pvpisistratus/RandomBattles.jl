@@ -108,6 +108,7 @@ end
 
 get_power(cm::ChargedMove) = 0x0005 * (cm.data & 0x003f)
 get_energy(cm::ChargedMove) = 0x0005 * ((cm.data >> 6) & 0x000f)
+get_buff_target(cm::ChargedMove) = (cm.data >> 11) & 0x0001
 get_STAB(cm::ChargedMove) = iszero(cm.data >> 12) ? 10 : 12
 
 function get_buff_chance(cm::ChargedMove)
