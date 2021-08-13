@@ -9,12 +9,7 @@ Base.IndexStyle(::Type{<:StaticTeam}) = IndexLinear()
 Base.getindex(s::StaticTeam, i::UInt8) =
     i == 0x01 ? s.mon1 : i == 0x02 ? s.mon2 : s.mon3
 
-StaticTeam(mons::Array{String}; league::String = "great", cup::String = "all") =
-    StaticTeam(StaticPokemon(mons[1], league = league, cup = cup),
-               StaticPokemon(mons[2], league = league, cup = cup),
-               StaticPokemon(mons[3], league = league, cup = cup))
-
-StaticTeam(mons::Array{Int64}; league::String = "great", cup::String = "all") =
+StaticTeam(mons::Tuple{Union{String, Int}, 3}; league::String = "great", cup::String = "all") =
     StaticTeam(StaticPokemon(mons[1], league = league, cup = cup),
                StaticPokemon(mons[2], league = league, cup = cup),
                StaticPokemon(mons[3], league = league, cup = cup))

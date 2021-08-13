@@ -168,7 +168,7 @@ const immunities = Dict{DataType, Union{DataType, Core.TypeofBottom}}(
     Poison   => Steel,   Ground   => Flying,  Rock     => Union{}, 
     Bug      => Union{}, Ghost    => Normal,  Steel    => Union{}, 
     Fire     => Union{}, Water    => Union{}, Grass    => Union{},
-    Electric => Union{}, Psychic  => Dark,    Ice      => Union{}, 
+    Electric => Ground,  Psychic  => Dark,    Ice      => Union{}, 
     Dragon   => Fairy,   Dark     => Union{}, Fairy    => Union{}
 )
 
