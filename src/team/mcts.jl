@@ -174,7 +174,7 @@ function MCTS!(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
 end
 
 const default_node = MCTSNode(0x00, 0x00,
-        DynamicState(StaticState(["mew" "mew" "mew" "mew" "mew" "mew"])),
+        DynamicState(StaticState(("mew", "mew", "mew", "mew", "mew", "mew"))),
         (@SVector zeros(UInt8, 3)), 0x0000, 0x0000,
         (@SMatrix [0x0000 for i = 1:8, j = 1:8]), (@SVector zeros(UInt16, 2)),
         (@SVector zeros(8)), (@SVector zeros(8)), (@SVector zeros(UInt16, 8)),
