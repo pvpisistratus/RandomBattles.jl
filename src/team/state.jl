@@ -7,7 +7,7 @@ Base.size(s::StaticState) = (2,)
 Base.IndexStyle(::Type{<:StaticState}) = IndexLinear()
 Base.getindex(s::StaticState, i::UInt8) = i == 0x01 ? s.team1 : s.team2
 
-StaticState(teams::Tuple{Union{String, Int}, 6}; league = "great", cup = "all") =
+StaticState(teams::NTuple{6, Union{String, Int}}; league = "great", cup = "all") =
     StaticState(StaticTeam((teams[1], teams[2], teams[3]), league = league, cup = cup),
         StaticTeam((teams[4], teams[5], teams[6]), league = league, cup = cup))
 
