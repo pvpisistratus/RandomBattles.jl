@@ -83,14 +83,14 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
     end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
         if odds == 1.0
-            state = play_turn(state_1, static_state, get_decision(A, B, i, j))
+            state = play_turn(state_1, static_state, get_decisions(A, B, i, j))
             @inbounds payoffs[i, j] = SM(state, static_state, depth - 1,
                 allow_nothing = allow_nothing,
                 allow_overfarming = allow_overfarming,
                 sim_to_end = sim_to_end).payoff
         else
-            state_1 = play_turn(state_1, static_state, get_decision(A, B, i, j))
-            state_2 = play_turn(state_2, static_state, get_decision(A, B, i, j))
+            state_1 = play_turn(state_1, static_state, get_decisions(A, B, i, j))
+            state_2 = play_turn(state_2, static_state, get_decisions(A, B, i, j))
             @inbounds payoffs[i, j] = odds *
                 SM(state_1, static_state, depth - 1,
                     allow_nothing = allow_nothing,
@@ -120,11 +120,11 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
         (Base.ctpop_int(A) == 0x00 || Base.ctpop_int(B) == 0x00) &&
             return value, strat
         if Base.ctpop_int(A) == 0x01 && Base.ctpop_int(B) == 0x01
-            decision = get_decision(A, B, 0x01, 0x01)
+            decision = get_decisions(A, B, 0x01, 0x01)
         else
             nash_result = SM(s, static_s, depth, sim_to_end = sim_to_end)
             value = nash_result.payoff
-            d1, d2 = rand(), rand()
+            d1, d2 = rand(rb_rng), rand(rb_rng)
             decision1, decision2 = UInt8(length(nash_result.row_strategy)),
                 UInt8(length(nash_result.column_strategy))
             j = 0.0
@@ -143,7 +143,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
                     break
                 end
             end
-            decision = get_decision(A, B, decision1, decision2)
+            decision = get_decisions(A, B, decision1, decision2)
         end
         s = play_turn(s, static_s, decision)
         push!(strat.decisions, decision)

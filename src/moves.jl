@@ -127,10 +127,10 @@ end
 
 function buff_applies(cm::ChargedMove)
     buff_chance = (cm.data >> 10) & 0x03ff
-    return buff_chance == 0x0000 ? false                                                         :
-           buff_chance == 0x0006 ? true                                                          :
-           buff_chance == 0x0001 ? rand(1:10) == 1                                               :
-           buff_chance == 0x0002 ? rand((true, false, false, false, false, false, false, false)) :
-           buff_chance == 0x0003 ? rand(1:5) == 1                                                :
-           buff_chance == 0x0004 ? rand(1:10) < 4                                                : rand((true, false))
+    return buff_chance == 0x0000 ? false                                                                 :
+           buff_chance == 0x0006 ? true                                                                  :
+           buff_chance == 0x0001 ? rand(rb_rng, 1:10) == 1                                               :
+           buff_chance == 0x0002 ? rand(rb_rng, (true, false, false, false, false, false, false, false)) :
+           buff_chance == 0x0003 ? rand(rb_rng, 1:5) == 1                                                :
+           buff_chance == 0x0004 ? rand(rb_rng, 1:10) < 4                                                : rand(rb_rng, (true, false))
 end

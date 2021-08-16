@@ -73,7 +73,7 @@ function resolve_chance(state::DynamicIndividualState,
     if chance == UInt32(0)
         return state
     elseif chance == UInt32(5)
-        return rand() < 0.5 ?
+        return rand(rb_rng) < 0.5 ?
             # subtract chance, add cmp
             DynamicIndividualState(state[0x01], state[0x02],
                 state.data - UInt32(9702)) :
@@ -83,7 +83,7 @@ function resolve_chance(state::DynamicIndividualState,
         agent = chance < UInt32(3) ? 0x01 : 0x02
         move = isodd(chance) ? static_state[agent].charged_move_1 :
             static_state[agent].charged_move_2
-        if rand(Int8(0):Int8(99)) < move.buffChance
+        if buff_applies(move)
             data = apply_buff(state.data, move, agent)
             return DynamicIndividualState(state[0x01], state[0x02],
                 data - chance * UInt32(2205))

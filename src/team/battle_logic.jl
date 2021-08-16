@@ -109,7 +109,7 @@ function resolve_chance(state::DynamicState, static_state::StaticState)
     if chance == 0x00
         return state
     elseif chance == 0x05
-        return rand() < 0.5 ?
+        return rand(rb_rng) < 0.5 ?
             # subtract chance, add cmp
             get_chance_state_1(state, static_state, chance) :
             get_chance_state_2(state, chance)

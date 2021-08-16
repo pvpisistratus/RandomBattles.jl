@@ -66,7 +66,7 @@ function chance_node_in_tree(
     while tree[new_i].index != 0x0000
         new_i += 0x0001
     end
-    chance_index = rand() < odds ? 1 : 2
+    chance_index = rand(rb_rng) < odds ? 1 : 2
     if s.chance_children[chance_index] == 0x0000
         tree[new_i] = MCTSNode(chance_index == 1 ? state_1 : state_2, static_s,
             s.index, new_i, @SVector [0x00, 0x00, UInt8(chance_index)])
@@ -86,7 +86,7 @@ end
 function fill_missing_children(
     tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}}, s::MCTSNode,
     i::UInt16, static_s::StaticState)
-    a = get_decision(s.A, s.B,
+    a = get_decisions(s.A, s.B,
         UInt8((length(findall(!iszero, s.dec_children))) %
             Base.ctpop_int(s.A) + 1),
         UInt8((length(findall(!iszero, s.dec_children))) ÷
@@ -135,7 +135,7 @@ function select_mcts(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
         ((1 - γ) * exp(η * w₂(i))) / divisor +
         γ / Base.ctpop_int(s.B)) for i = 0x01:0x08]
 
-    return UInt8(rand(Categorical(s.σ₁))), UInt8(rand(Categorical(s.σ₂)))
+    return UInt8(rand(rb_rng, Categorical(s.σ₁))), UInt8(rand(rb_rng, Categorical(s.σ₂)))
 end
 
 function update_mcts!(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
@@ -226,7 +226,7 @@ function select_decisions_MCTS(dynamic_state::DynamicState,
         active = get_active(tree[curr_index].state)
         chance = get_chance(tree[curr_index].state)
         if chance == 0x05
-            curr_index = rand() < 0.5 ? tree[curr_index].chance_children[1] :
+            curr_index = rand(rb_rng) < 0.5 ? tree[curr_index].chance_children[1] :
                 tree[curr_index].chance_children[2]
         elseif chance != 0x00
             agent = chance < 0x03 ? 0x01 : 0x02

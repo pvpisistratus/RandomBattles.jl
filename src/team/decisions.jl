@@ -11,7 +11,7 @@
     return to_return_1, to_return_2
 end
 
-@inline function get_decision(d::UInt8, i::UInt8)
+@inline function get_decisions(d::UInt8, i::UInt8)
     to_return = 0x08
     for n = 0x00:0x06
         to_return -= isodd(d >> n) &&
@@ -22,7 +22,7 @@ end
 
 function is_possible(decisions::UInt8, decision::UInt8)
     for i = 0x01:Base.ctpop_int(decisions)
-        get_decision(decisions, i) == decision && return true
+        get_decisions(decisions, i) == decision && return true
     end
     return false
 end
@@ -32,13 +32,13 @@ function select_random_decision(d1::UInt8, d2::UInt8)
     a, b = Base.ctpop_int(d1), Base.ctpop_int(d2)
     return get_decisions(d1, d2, 
         a == 0x01 ? 0x01 : 
-            a == 0x02 ? rand(rng, (0x01, 0x02)) : 
-            a == 0x03 ? rand(rng, (0x01, 0x02, 0x03)) : 
-            a == 0x04 ? rand(rng, (0x01, 0x02, 0x03, 0x04)) : rand(rng, 0x01:a),
+            a == 0x02 ? rand(rb_rng, (0x01, 0x02)) : 
+            a == 0x03 ? rand(rb_rng, (0x01, 0x02, 0x03)) : 
+            a == 0x04 ? rand(rb_rng, (0x01, 0x02, 0x03, 0x04)) : rand(rb_rng, 0x01:a),
         b == 0x01 ? 0x01 : 
-            b == 0x02 ? rand(rng, (0x01, 0x02)) : 
-            b == 0x03 ? rand(rng, (0x01, 0x02, 0x03)) : 
-            b == 0x04 ? rand(rng, (0x01, 0x02, 0x03, 0x04)) : rand(rng, 0x01:b),
+            b == 0x02 ? rand(rb_rng, (0x01, 0x02)) : 
+            b == 0x03 ? rand(rb_rng, (0x01, 0x02, 0x03)) : 
+            b == 0x04 ? rand(rb_rng, (0x01, 0x02, 0x03, 0x04)) : rand(rb_rng, 0x01:b),
     )
 end
 

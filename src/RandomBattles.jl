@@ -5,6 +5,8 @@ if isdefined(Base, :Experimental) && isdefined(Base.Experimental,
       @eval Base.Experimental.@optlevel 3
 end
 
+using Random; const rb_rng = Xoshiro()
+
 # grab data and Pokemon structs so that it can be used
 include("data.jl")
 include("stats.jl")
