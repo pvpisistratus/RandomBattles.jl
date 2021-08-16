@@ -5,7 +5,7 @@ Struct for holding the values associated with the mons that do not change
 throughout the battle: types, stats, and moves. Note that like moves, this
 struct is agnostic to the actual identity/dex/species of the mon.
 """
-struct StaticPokemon{T1<:PokemonType, T2<:PokemonType}
+struct StaticPokemon
     primary_type::UInt8
     secondary_type::UInt8
     stats::Stats
