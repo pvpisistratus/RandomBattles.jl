@@ -1,6 +1,8 @@
-function get_decision(d1::UInt8, d2::UInt8, i::UInt8, j::UInt8)
+@inline function get_decisions(d1::UInt8, d2::UInt8, i::UInt8, j::UInt8)
     to_return_1, to_return_2 = 0x08, 0x08
     for n = 0x00:0x06
+        # bitshift, check if the bit is a one and is at the index specified, 
+        # and change returned value if so
         to_return_1 -= isodd(d1 >> n) &&
             Base.ctpop_int(d1 >> n) == i ? 0x07 - n : 0x00
         to_return_2 -= isodd(d2 >> n) &&
@@ -9,7 +11,7 @@ function get_decision(d1::UInt8, d2::UInt8, i::UInt8, j::UInt8)
     return to_return_1, to_return_2
 end
 
-function get_decision(d::UInt8, i::UInt8)
+@inline function get_decision(d::UInt8, i::UInt8)
     to_return = 0x08
     for n = 0x00:0x06
         to_return -= isodd(d >> n) &&
@@ -26,8 +28,18 @@ function is_possible(decisions::UInt8, decision::UInt8)
 end
 
 function select_random_decision(d1::UInt8, d2::UInt8)
-    return get_decision(d1, d2,
-        rand(0x01:Base.ctpop_int(d1)), rand(0x01:Base.ctpop_int(d2)))
+    # get number of ones (same as count_ones, but returns UInt8's)
+    a, b = Base.ctpop_int(d1), Base.ctpop_int(d2)
+    return get_decisions(d1, d2, 
+        a == 0x01 ? 0x01 : 
+            a == 0x02 ? rand(rng, (0x01, 0x02)) : 
+            a == 0x03 ? rand(rng, (0x01, 0x02, 0x03)) : 
+            a == 0x04 ? rand(rng, (0x01, 0x02, 0x03, 0x04)) : rand(rng, 0x01:a),
+        b == 0x01 ? 0x01 : 
+            b == 0x02 ? rand(rng, (0x01, 0x02)) : 
+            b == 0x03 ? rand(rng, (0x01, 0x02, 0x03)) : 
+            b == 0x04 ? rand(rng, (0x01, 0x02, 0x03, 0x04)) : rand(rng, 0x01:b),
+    )
 end
 
 function get_possible_decisions(state::DynamicState, static_state::StaticState;
