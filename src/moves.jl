@@ -21,7 +21,7 @@ be used internally, as generating the move from the name is a lot cleaner.
 """
 function FastMove(gm_move::Dict{String,Any}, types::Tuple{UInt8, UInt8})
     move_type = UInt8(findfirst(x -> typings[x] == gm_move["type"], 1:19))
-    STAB = (move_type == types[1] || move_type == types[2]) ? 0x0001 : 0x0000
+    STAB = move_type in types ? 0x0001 : 0x0000
     power = UInt16(gm_move["power"])
     energy = UInt16(gm_move["energyGain"])
     cooldown = UInt16(gm_move["cooldown"] ÷ 500)
@@ -72,7 +72,7 @@ be used internally, as generating the move from the name is a lot cleaner.
 """
 function ChargedMove(gm_move::Dict{String,Any}, types::Tuple{UInt8, UInt8})
     move_type = UInt8(findfirst(x -> typings[x] == gm_move["type"], 1:19))
-    STAB = (move_type == types[1] || move_type) ? 0x0001 : 0x0000
+    STAB = move_type in types ? 0x0001 : 0x0000
     buff_target = (haskey(gm_move, "buffs") && 
         gm_move["buffTarget"] == "opponent") ? 0x0001 : 0x0000
     power = UInt16(gm_move["power"] ÷ 5)
