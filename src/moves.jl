@@ -1,4 +1,4 @@
-abstract type Move{T <: PokemonType} end
+abstract type Move end
 
 """
     FastMove(moveType, stab, power, energy, cooldown)
@@ -7,7 +7,8 @@ Struct for holding fast moves that holds all information that determines
 mechanics: type, STAB (same type attack bonus), power, energy, and cooldown.
 Note that this is agnostic to the identity of the actual move itself.
 """
-struct FastMove{T <: PokemonType} <: Move{T}
+struct FastMove <: Move
+    move_type::UInt8
     data::UInt16
 end
 
@@ -18,13 +19,14 @@ Generate a fast move from the gamemaster entry of the move, and the types of
 the mon using it (to determing STAB, same type attack bonus). This should only
 be used internally, as generating the move from the name is a lot cleaner.
 """
-function FastMove(gm_move::Dict{String,Any}, types::Tuple{DataType, DataType})
-    STAB = (typings[gm_move["type"]] == types[1] ||
-        typings[gm_move["type"]] == types[2]) ? 0x0001 : 0x0000
+function FastMove(gm_move::Dict{String,Any}, types::Tuple{UInt8, UInt8})
+    move_type = UInt8(findfirst(x -> typings[x] == gm_move["type"], 1:19))
+    STAB = (move_type == types[1] || move_type == types[2]) ? 0x0001 : 0x0000
     power = UInt16(gm_move["power"])
     energy = UInt16(gm_move["energyGain"])
     cooldown = UInt16(gm_move["cooldown"] ÷ 500)
-    return FastMove{typings[gm_move["type"]]}(
+    return FastMove(
+        move_type,
         cooldown + energy << 3 + power << 8 + STAB << 13
     )
 end
@@ -35,7 +37,7 @@ end
 Generate a fast move from the name of the move, and the types of the mon using
 it (to determing STAB, same type attack bonus)
 """
-function FastMove(move_name::String, types::Tuple{DataType, DataType})
+function FastMove(move_name::String, types::Tuple{UInt8, UInt8})
     move_index = findfirst(isequal(move_name), map(x ->
         gamemaster["moves"][x]["moveId"], 1:length(gamemaster["moves"])))
     gm_move = gamemaster["moves"][move_index]
@@ -55,7 +57,8 @@ mechanics: type, STAB (same type attack bonus), power, energy, and buff
 information (chance, which buffs are applied and to whom). Note that this is
 agnostic to the identity of the actual move itself.
 """
-struct ChargedMove{T <: PokemonType} <: Move{T}
+struct ChargedMove <: Move
+    move_type::UInt8
     buff::StatBuffs
     data::UInt16
 end
@@ -67,11 +70,11 @@ Generate a charged move from the gamemaster entry of the move, and the types of
 the mon using it (to determing STAB, same type attack bonus). This should only
 be used internally, as generating the move from the name is a lot cleaner.
 """
-function ChargedMove(gm_move::Dict{String,Any},
-    types::Tuple{DataType, DataType})
-    STAB = (typings[gm_move["type"]] == types[1] ||
-        typings[gm_move["type"]] == types[2]) ? 0x0001 : 0x0000
-    buff_target = (haskey(gm_move, "buffs") && gm_move["buffTarget"] == "opponent") ? 0x0001 : 0x0000
+function ChargedMove(gm_move::Dict{String,Any}, types::Tuple{UInt8, UInt8})
+    move_type = UInt8(findfirst(x -> typings[x] == gm_move["type"], 1:19))
+    STAB = (move_type == types[1] || move_type) ? 0x0001 : 0x0000
+    buff_target = (haskey(gm_move, "buffs") && 
+        gm_move["buffTarget"] == "opponent") ? 0x0001 : 0x0000
     power = UInt16(gm_move["power"] ÷ 5)
     energy = UInt16(gm_move["energy"] ÷ 5)
     buff = !haskey(gm_move, "buffs") ? defaultBuff :
@@ -83,7 +86,8 @@ function ChargedMove(gm_move::Dict{String,Any},
         gm_move["buffApplyChance"] == ".3"   ? 0x0004 :
         gm_move["buffApplyChance"] == ".5"   ? 0x0005 : 0x0006
 
-    return ChargedMove{typings[gm_move["type"]]}(
+    return ChargedMove(
+        move_type,
         buff,
         power + energy << 6 + buff_chance << 10 + buff_target << 11 + STAB << 12
     )

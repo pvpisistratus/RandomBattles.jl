@@ -6,6 +6,8 @@ throughout the battle: types, stats, and moves. Note that like moves, this
 struct is agnostic to the actual identity/dex/species of the mon.
 """
 struct StaticPokemon{T1<:PokemonType, T2<:PokemonType}
+    primary_type::UInt8
+    secondary_type::UInt8
     stats::Stats
     fastMove::FastMove
     charged_move_1::ChargedMove
@@ -24,8 +26,9 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
     rankings = get_rankings(cup, league = league)
     gmid = get_gamemaster_mon_id(rankings[i]["speciesId"])
     gm = gamemaster["pokemon"][gmid]
-    types = typings[convert(Array{String}, gm["types"])[1]],
-        typings[convert(Array{String}, gm["types"])[2]]
+    type_strings = convert(Array{String}, gm["types"])
+    types = UInt8(findfirst(x -> typings[x] == type_strings[1], 1:19)), 
+        UInt8(findfirst(x -> typings[x] == type_strings[1], 1:19))
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
         level, atk, def, hp = parse.(Int8, custom_stats)
@@ -79,11 +82,13 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
     else
         moveset = custom_moveset == ["none"] ?
             rankings[i]["moveset"] : custom_moveset
-        fastMove = FastMove(moveset[1]::String, types)
-        chargedMove1 = ChargedMove(moveset[2]::String, types)
-        chargedMove2 = ChargedMove(moveset[3]::String, types)
+        fastMove = FastMove(moveset[1], types)
+        chargedMove1 = ChargedMove(moveset[2], types)
+        chargedMove2 = ChargedMove(moveset[3], types)
     end
-    return StaticPokemon{types[1], types[2]}(
+    return StaticPokemon(
+        types[1],
+        types[2],
         stats,
         fastMove,
         get_energy(chargedMove1) > get_energy(chargedMove2) ? chargedMove2 : chargedMove1,

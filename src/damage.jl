@@ -1,443 +1,107 @@
-const double_super_effective = 15625
-const super_effective = 25000
-const neutral = 40000
-const resisted = 64000
-const double_resisted = 102400
-const triple_resisted = 163840
+# Types and effectiveness adapted from Silph Arena graphic
+# https://storage.googleapis.com/silphroad-publishing/silph-wp/3d94d185-type-chart_v4.png
+function get_eff(a::Int8, d1::Int8, d2::Int8)
+    𛲜 = 1       # weakness
+    Θ = -1      # resistance
+    ✗ = -2      # "immunity"
 
-get_eff(move::Move{Normal}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Normal], T₂ <: resistivities[Normal]}    = triple_resisted
-get_eff(move::Move{Normal}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Normal], T₂ <: immunities[Normal]}    = triple_resisted
-get_eff(move::Move{Normal}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Normal], T₂ <: resistivities[Normal]} = double_resisted
-get_eff(move::Move{Normal}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Normal]}    = double_resisted
-get_eff(move::Move{Normal}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Normal]}    = double_resisted
-get_eff(move::Move{Normal}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Normal]}                          = resisted
-get_eff(move::Move{Normal}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Normal]}                          = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Fighting], T₂ <: resistivities[Fighting]}    = triple_resisted
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Fighting], T₂ <: immunities[Fighting]}    = triple_resisted
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Fighting], T₂ <: resistivities[Fighting]} = double_resisted
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Fighting]}    = double_resisted
-get_eff(move::Move{Fighting}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Fighting]}    = double_resisted
-get_eff(move::Move{Fighting}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Fighting]}                          = resisted
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Fighting]}                          = resisted
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Fighting], T₂ <: effectivities[Fighting]}    = resisted
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Fighting], T₂ <: immunities[Fighting]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Fighting], T₂ <: effectivities[Fighting]} = neutral
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Fighting], T₂ <: resistivities[Fighting]} = neutral
-get_eff(move::Move{Fighting}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Fighting]}                          = super_effective
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Fighting]}                          = super_effective
-get_eff(move::Move{Fighting}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Fighting], T₂ <: effectivities[Fighting]} = double_super_effective
-
-get_eff(move::Move{Flying}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Flying], T₂ <: resistivities[Flying]} = double_resisted
-get_eff(move::Move{Flying}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Flying]}                          = resisted
-get_eff(move::Move{Flying}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Flying]}                          = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Flying}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Flying], T₂ <: effectivities[Flying]} = neutral
-get_eff(move::Move{Flying}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Flying], T₂ <: resistivities[Flying]} = neutral
-get_eff(move::Move{Flying}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Flying]}                          = super_effective
-get_eff(move::Move{Flying}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Flying]}                          = super_effective
-get_eff(move::Move{Flying}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Flying], T₂ <: effectivities[Flying]} = double_super_effective
-
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Poison], T₂ <: resistivities[Poison]}    = triple_resisted
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Poison], T₂ <: immunities[Poison]}    = triple_resisted
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Poison], T₂ <: resistivities[Poison]} = double_resisted
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Poison]}    = double_resisted
-get_eff(move::Move{Poison}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Poison]}    = double_resisted
-get_eff(move::Move{Poison}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Poison]}                          = resisted
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Poison]}                          = resisted
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Poison], T₂ <: effectivities[Poison]}    = resisted
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Poison], T₂ <: immunities[Poison]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Poison], T₂ <: effectivities[Poison]} = neutral
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Poison], T₂ <: resistivities[Poison]} = neutral
-get_eff(move::Move{Poison}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Poison]}                          = super_effective
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Poison]}                          = super_effective
-get_eff(move::Move{Poison}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Poison], T₂ <: effectivities[Poison]} = double_super_effective
-
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Ground], T₂ <: resistivities[Ground]}    = triple_resisted
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Ground], T₂ <: immunities[Ground]}    = triple_resisted
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Ground], T₂ <: resistivities[Ground]} = double_resisted
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Ground]}    = double_resisted
-get_eff(move::Move{Ground}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Ground]}    = double_resisted
-get_eff(move::Move{Ground}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Ground]}                          = resisted
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Ground]}                          = resisted
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Ground], T₂ <: effectivities[Ground]}    = resisted
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Ground], T₂ <: immunities[Ground]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Ground], T₂ <: effectivities[Ground]} = neutral
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Ground], T₂ <: resistivities[Ground]} = neutral
-get_eff(move::Move{Ground}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Ground]}                          = super_effective
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Ground]}                          = super_effective
-get_eff(move::Move{Ground}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Ground], T₂ <: effectivities[Ground]} = double_super_effective
-
-get_eff(move::Move{Rock}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Rock], T₂ <: resistivities[Rock]} = double_resisted
-get_eff(move::Move{Rock}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Rock]}                          = resisted
-get_eff(move::Move{Rock}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Rock]}                          = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Rock}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Rock], T₂ <: effectivities[Rock]} = neutral
-get_eff(move::Move{Rock}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Rock], T₂ <: resistivities[Rock]} = neutral
-get_eff(move::Move{Rock}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Rock]}                          = super_effective
-get_eff(move::Move{Rock}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Rock]}                          = super_effective
-get_eff(move::Move{Rock}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Rock], T₂ <: effectivities[Rock]} = double_super_effective
-
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Bug], T₂ <: resistivities[Bug]}    = triple_resisted
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Bug], T₂ <: immunities[Bug]}    = triple_resisted
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Bug], T₂ <: resistivities[Bug]} = double_resisted
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Bug]}    = double_resisted
-get_eff(move::Move{Bug}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Bug]}    = double_resisted
-get_eff(move::Move{Bug}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Bug]}                          = resisted
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Bug]}                          = resisted
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Bug], T₂ <: effectivities[Bug]}    = resisted
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Bug], T₂ <: immunities[Bug]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Bug], T₂ <: effectivities[Bug]} = neutral
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Bug], T₂ <: resistivities[Bug]} = neutral
-get_eff(move::Move{Bug}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Bug]}                          = super_effective
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Bug]}                          = super_effective
-get_eff(move::Move{Bug}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Bug], T₂ <: effectivities[Bug]} = double_super_effective
-
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Ghost], T₂ <: resistivities[Ghost]}    = triple_resisted
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Ghost], T₂ <: immunities[Ghost]}    = triple_resisted
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Ghost], T₂ <: resistivities[Ghost]} = double_resisted
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Ghost]}    = double_resisted
-get_eff(move::Move{Ghost}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Ghost]}    = double_resisted
-get_eff(move::Move{Ghost}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Ghost]}                          = resisted
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Ghost]}                          = resisted
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Ghost], T₂ <: effectivities[Ghost]}    = resisted
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Ghost], T₂ <: immunities[Ghost]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Ghost], T₂ <: effectivities[Ghost]} = neutral
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Ghost], T₂ <: resistivities[Ghost]} = neutral
-get_eff(move::Move{Ghost}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Ghost]}                          = super_effective
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Ghost]}                          = super_effective
-get_eff(move::Move{Ghost}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Ghost], T₂ <: effectivities[Ghost]} = double_super_effective
-
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Steel], T₂ <: resistivities[Steel]}    = triple_resisted
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Steel], T₂ <: immunities[Steel]}    = triple_resisted
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Steel], T₂ <: resistivities[Steel]} = double_resisted
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Steel]}    = double_resisted
-get_eff(move::Move{Steel}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Steel]}    = double_resisted
-get_eff(move::Move{Steel}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Steel]}                          = resisted
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Steel]}                          = resisted
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Steel], T₂ <: effectivities[Steel]}    = resisted
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Steel], T₂ <: immunities[Steel]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Steel], T₂ <: effectivities[Steel]} = neutral
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Steel], T₂ <: resistivities[Steel]} = neutral
-get_eff(move::Move{Steel}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Steel]}                          = super_effective
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Steel]}                          = super_effective
-get_eff(move::Move{Steel}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Steel], T₂ <: effectivities[Steel]} = double_super_effective
-
-get_eff(move::Move{Fire}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Fire], T₂ <: resistivities[Fire]} = double_resisted
-get_eff(move::Move{Fire}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Fire]}                          = resisted
-get_eff(move::Move{Fire}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Fire]}                          = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Fire}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Fire], T₂ <: effectivities[Fire]} = neutral
-get_eff(move::Move{Fire}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Fire], T₂ <: resistivities[Fire]} = neutral
-get_eff(move::Move{Fire}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Fire]}                          = super_effective
-get_eff(move::Move{Fire}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Fire]}                          = super_effective
-get_eff(move::Move{Fire}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Fire], T₂ <: effectivities[Fire]} = double_super_effective
-
-get_eff(move::Move{Water}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Water], T₂ <: resistivities[Water]} = double_resisted
-get_eff(move::Move{Water}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Water]}                          = resisted
-get_eff(move::Move{Water}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Water]}                          = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Water}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Water], T₂ <: effectivities[Water]} = neutral
-get_eff(move::Move{Water}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Water], T₂ <: resistivities[Water]} = neutral
-get_eff(move::Move{Water}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Water]}                          = super_effective
-get_eff(move::Move{Water}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Water]}                          = super_effective
-get_eff(move::Move{Water}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Water], T₂ <: effectivities[Water]} = double_super_effective
-
-get_eff(move::Move{Grass}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Grass], T₂ <: resistivities[Grass]} = double_resisted
-get_eff(move::Move{Grass}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Grass]}                          = resisted
-get_eff(move::Move{Grass}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Grass]}                          = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Grass}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Grass], T₂ <: effectivities[Grass]} = neutral
-get_eff(move::Move{Grass}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Grass], T₂ <: resistivities[Grass]} = neutral
-get_eff(move::Move{Grass}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Grass]}                          = super_effective
-get_eff(move::Move{Grass}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Grass]}                          = super_effective
-get_eff(move::Move{Grass}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Grass], T₂ <: effectivities[Grass]} = double_super_effective
-
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Electric], T₂ <: resistivities[Electric]}    = triple_resisted
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Electric], T₂ <: immunities[Electric]}    = triple_resisted
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Electric], T₂ <: resistivities[Electric]} = double_resisted
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Electric]}    = double_resisted
-get_eff(move::Move{Electric}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Electric]}    = double_resisted
-get_eff(move::Move{Electric}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Electric]}                          = resisted
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Electric]}                          = resisted
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Electric], T₂ <: effectivities[Electric]}    = resisted
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Electric], T₂ <: immunities[Electric]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Electric], T₂ <: effectivities[Electric]} = neutral
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Electric], T₂ <: resistivities[Electric]} = neutral
-get_eff(move::Move{Electric}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Electric]}                          = super_effective
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Electric]}                          = super_effective
-get_eff(move::Move{Electric}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Electric], T₂ <: effectivities[Electric]} = double_super_effective
-
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Psychic], T₂ <: resistivities[Psychic]}    = triple_resisted
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Psychic], T₂ <: immunities[Psychic]}    = triple_resisted
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Psychic], T₂ <: resistivities[Psychic]} = double_resisted
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Psychic]}    = double_resisted
-get_eff(move::Move{Psychic}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Psychic]}    = double_resisted
-get_eff(move::Move{Psychic}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Psychic]}                          = resisted
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Psychic]}                          = resisted
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Psychic], T₂ <: effectivities[Psychic]}    = resisted
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Psychic], T₂ <: immunities[Psychic]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Psychic], T₂ <: effectivities[Psychic]} = neutral
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Psychic], T₂ <: resistivities[Psychic]} = neutral
-get_eff(move::Move{Psychic}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Psychic]}                          = super_effective
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Psychic]}                          = super_effective
-get_eff(move::Move{Psychic}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Psychic], T₂ <: effectivities[Psychic]} = double_super_effective
-
-get_eff(move::Move{Ice}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Ice], T₂ <: resistivities[Ice]} = double_resisted
-get_eff(move::Move{Ice}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Ice]}                          = resisted
-get_eff(move::Move{Ice}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Ice]}                          = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Ice}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Ice], T₂ <: effectivities[Ice]} = neutral
-get_eff(move::Move{Ice}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Ice], T₂ <: resistivities[Ice]} = neutral
-get_eff(move::Move{Ice}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Ice]}                          = super_effective
-get_eff(move::Move{Ice}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Ice]}                          = super_effective
-get_eff(move::Move{Ice}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Ice], T₂ <: effectivities[Ice]} = double_super_effective
-
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Dragon], T₂ <: resistivities[Dragon]}    = triple_resisted
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Dragon], T₂ <: immunities[Dragon]}    = triple_resisted
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Dragon], T₂ <: resistivities[Dragon]} = double_resisted
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: immunities[Dragon]}    = double_resisted
-get_eff(move::Move{Dragon}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: immunities[Dragon]}    = double_resisted
-get_eff(move::Move{Dragon}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Dragon]}                          = resisted
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Dragon]}                          = resisted
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Dragon], T₂ <: effectivities[Dragon]}    = resisted
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Dragon], T₂ <: immunities[Dragon]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Dragon], T₂ <: effectivities[Dragon]} = neutral
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Dragon], T₂ <: resistivities[Dragon]} = neutral
-get_eff(move::Move{Dragon}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Dragon]}                          = super_effective
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Dragon]}                          = super_effective
-get_eff(move::Move{Dragon}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Dragon], T₂ <: effectivities[Dragon]} = double_super_effective
-
-get_eff(move::Move{Dark}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Dark], T₂ <: resistivities[Dark]} = double_resisted
-get_eff(move::Move{Dark}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Dark]}                          = resisted
-get_eff(move::Move{Dark}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Dark]}                          = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Dark}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Dark], T₂ <: effectivities[Dark]} = neutral
-get_eff(move::Move{Dark}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Dark], T₂ <: resistivities[Dark]} = neutral
-get_eff(move::Move{Dark}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Dark]}                          = super_effective
-get_eff(move::Move{Dark}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Dark]}                          = super_effective
-get_eff(move::Move{Dark}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Dark], T₂ <: effectivities[Dark]} = double_super_effective
-
-get_eff(move::Move{Fairy}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Fairy], T₂ <: resistivities[Fairy]} = double_resisted
-get_eff(move::Move{Fairy}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: resistivities[Fairy]}                          = resisted
-get_eff(move::Move{Fairy}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: resistivities[Fairy]}                          = resisted
-get_eff(move::Move{Fairy}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: immunities[Fairy], T₂ <: effectivities[Fairy]}    = resisted
-get_eff(move::Move{Fairy}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Fairy], T₂ <: immunities[Fairy]}    = resisted
-get_eff(move::Move, defender::StaticPokemon)                              = neutral
-get_eff(move::Move{Fairy}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: resistivities[Fairy], T₂ <: effectivities[Fairy]} = neutral
-get_eff(move::Move{Fairy}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Fairy], T₂ <: resistivities[Fairy]} = neutral
-get_eff(move::Move{Fairy}, defender::StaticPokemon{PokemonType, T₂}) where 
-    {T₂ <: effectivities[Fairy]}                          = super_effective
-get_eff(move::Move{Fairy}, defender::StaticPokemon{T₁, PokemonType}) where 
-    {T₁ <: effectivities[Fairy]}                          = super_effective
-get_eff(move::Move{Fairy}, defender::StaticPokemon{T₁, T₂}) where 
-    {T₁ <: effectivities[Fairy], T₂ <: effectivities[Fairy]} = double_super_effective
+    eff = 0
+    if a == 1
+        eff = (d1 == 6 || d1 == 9 ? Θ : d1 == 8 ? ✗ : 0) +
+            (d2 == 6 || d2 == 9 ? Θ : d2 == 8 ? ✗ : 0)
+    elseif a == 2
+        eff = (d1 == 1 || d1 == 6 || d1 == 9 || d1 == 15 || d1 == 17 ? 𛲜 :
+            d1 == 3 || d1 == 4 || d1 == 7 || d1 == 14 || d1 == 18 ? Θ :
+            d1 == 8 ? ✗ : 0) +
+            (d2 == 1 || d2 == 6 || d2 == 9 || d2 == 15 || d2 == 17 ? 𛲜 :
+            d2 == 3 || d2 == 4 || d2 == 7 || d2 == 14 || d2 == 18 ? Θ :
+            d2 == 8 ? ✗ : 0)
+    elseif a == 3
+        eff = (d1 == 2 || d1 == 7 || d1 == 12 ? 𛲜 :
+            d1 == 6 || d1 == 9 || d1 == 13 ? Θ : 0) +
+            (d2 == 2 || d2 == 7 || d2 == 12 ? 𛲜 :
+            d2 == 6 || d2 == 9 || d2 == 13 ? Θ : 0)
+    elseif a == 4
+        eff = (3 < d1 < 7 || d1 == 8 ? Θ : d1 == 12 || d1 == 18 ? 𛲜 :
+            d1 == 9 ? ✗ : 0) + (3 < d2 < 7 || d2 == 8 ? Θ : d2 == 12 ||
+            d2 == 18 ? 𛲜 : d2 == 9 ? ✗ : 0)
+    elseif a == 5
+        eff = (d1 == 4 || d1 == 6 || d1 == 9 || d1 == 10 || d1 == 13 ? 𛲜 :
+            d1 == 7 || d1 == 12 ? Θ : d1 == 3 ? ✗ : 0) +
+            (d2 == 4 || d2 == 6 || d2 == 9 || d2 == 10 || d2 == 13 ? 𛲜 :
+            d2 == 7 || d2 == 12 ? Θ : d2 == 3 ? ✗ : 0)
+    elseif a == 6
+        eff = (d1 == 3 || d1 == 7 || d1 == 10 || d1 == 15 ? 𛲜 :
+            d1 == 2 || d1 == 5 || d1 == 9 ? Θ : 0) +
+            (d2 == 3 || d2 == 7 || d2 == 10 || d2 == 15 ? 𛲜 :
+            d2 == 2 || d2 == 5 || d2 == 9 ? Θ : 0)
+    elseif a == 7
+        eff = (d1 == 12 || d1 == 14 || d1 == 17 ? 𛲜 :
+            1 < d1 < 5 || 7 < d1 < 11 || d1 == 18 ? Θ : 0) +
+            (d2 == 12 || d2 == 14 || d2 == 17 ? 𛲜 :
+            1 < d2 < 5 || 7 < d2 < 11 || d2 == 18 ? Θ : 0)
+    elseif a == 8
+        eff = (d1 == 8 || d1 == 14 ? 𛲜 : d1 == 17 ? Θ : d1 == 1 ? ✗ : 0) +
+            (d2 == 8 || d2 == 14 ? 𛲜 : d2 == 17 ? Θ : d2 == 1 ? ✗ : 0)
+    elseif a == 9
+        eff = (d1 == 6 || d1 == 15 || d1 == 18 ? 𛲜 : 8 < d1 < 12 ||
+            d1 == 13 ? Θ : 0) + (d2 == 6 || d2 == 15 || d2 == 18 ? 𛲜 :
+            8 < d2 < 12 || d2 == 13 ? Θ : 0)
+    elseif a == 10
+        eff = (d1 == 7 || d1 == 9 || d1 == 12 || d1 == 15 ? 𛲜 :
+            d1 == 6 || d1 == 10 || d1 == 11 || d1 == 16 ? Θ : 0) +
+            (d2 == 7 || d2 == 9 || d2 == 12 || d2 == 15 ? 𛲜 :
+            d2 == 6 || d2 == 10 || d2 == 11 || d2 == 16 ? Θ : 0)
+    elseif a == 11
+        eff = (4 < d1 < 7 || d1 == 10 ? 𛲜 : 10 < d1 < 13 || d1 == 16 ? Θ : 0) +
+            (4 < d2 < 7 || d2 == 10 ? 𛲜 : 10 < d2 < 13 || d2 == 16 ? Θ : 0)
+    elseif a == 12
+        eff = (d1 == 5 || d1 == 6 || d1 == 11 ? 𛲜 :
+            2 < d1 < 5 || d1 == 7 || 8 < d1 < 11 || d1 == 12 || d1 == 16 ? Θ :
+            0) + (d2 == 5 || d2 == 6 || d2 == 11 ? 𛲜 :
+            2 < d2 < 5 || d2 == 7 || 8 < d2 < 11 || d2 == 12 || d2 == 16 ? Θ :
+            0)
+    elseif a == 13
+        eff = (d1 == 3 || d1 == 11 ? 𛲜 : d1 == 12 || d1 == 13 || d1 == 16 ? Θ :
+            d1 == 5 ? ✗ : 0) +
+            (d2 == 3 || d2 == 11 ? 𛲜 : d2 == 12 || d2 == 13 || d2 == 16 ? Θ :
+                d2 == 5 ? ✗ : 0)
+    elseif a == 14
+        eff = (d1 == 2 || d1 == 4 ? 𛲜 : d1 == 9 || d1 == 14 ? Θ :
+            d1 == 17 ? ✗ : 0) +
+            (d2 == 2 || d2 == 4 ? 𛲜 : d2 == 9 || d2 == 14 ? Θ :
+            d2 == 17 ? ✗ : 0)
+    elseif a == 15
+        eff = (d1 == 3 || d1 == 5 || d1 == 12 || d1 == 16 ? 𛲜 :
+            8 < d1 < 12 || d1 == 15 ? Θ : 0) +
+            (d2 == 3 || d2 == 5 || d2 == 12 || d2 == 16 ? 𛲜 :
+            8 < d2 < 12 || d2 == 15 ? Θ : 0)
+    elseif a == 16
+        eff = (d1 == 16 ? 𛲜 : d1 == 9 ? Θ : d1 == 18 ? ✗ : 0) +
+            (d2 == 16 ? 𛲜 : d2 == 9 ? Θ : d2 == 18 ? ✗ : 0)
+    elseif a == 17
+        eff = (d1 == 8 || d1 == 14 ? 𛲜 : d1 == 2 || 16 < d1 < 19 ? Θ : 0) +
+            (d2 == 8 || d2 == 14 ? 𛲜 : d2 == 2 || 16 < d2 < 19 ? Θ : 0)
+    else
+        eff = (d1 == 2 || 15 < d1 < 18 ? 𛲜 : d1 == 4 || d1 == 9 ||
+            d1 == 10 ? Θ : 0) +
+            (d2 == 2 || 15 < d2 < 18 ? 𛲜 : d2 == 4 || d2 == 9 ||
+            d2 == 10 ? Θ : 0)
+    end
+    if eff == 0
+        return 40000
+    elseif eff == 1
+        return 25000
+    elseif eff == -1
+        return 64000
+    elseif eff == 2
+        return 15625
+    elseif eff == -2
+        return 102400
+    else
+        return 163840
+    end
+end
 
 """
     calculate_damage(
@@ -461,5 +125,6 @@ function calculate_damage(
 )
     a, d = get_buff_modifier(buff_data)
     return UInt16((26 * attack * get_power(move) * get_STAB(move) * a * charge) ÷ 
-        (get_eff(move, defender) * defender.stats.defense * d) + 1)
+        (get_eff(move.move_type, defender.primary_type, defender.secondary_type) * 
+        defender.stats.defense * d) + 1)
 end

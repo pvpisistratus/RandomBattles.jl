@@ -89,88 +89,9 @@ function get_rankings_mon_id(name::String;
     return 0
 end
 
-abstract type PokemonType end
-abstract type Normal <: PokemonType end
-abstract type Fighting <: PokemonType end
-abstract type Flying <: PokemonType end
-abstract type Poison <: PokemonType end
-abstract type Ground <: PokemonType end
-abstract type Rock <: PokemonType end
-abstract type Bug <: PokemonType end
-abstract type Ghost <: PokemonType end
-abstract type Steel <: PokemonType end
-abstract type Fire <: PokemonType end
-abstract type Water <: PokemonType end
-abstract type Grass <: PokemonType end
-abstract type Electric <: PokemonType end
-abstract type Psychic <: PokemonType end
-abstract type Ice <: PokemonType end
-abstract type Dragon <: PokemonType end
-abstract type Dark <: PokemonType end
-abstract type Fairy <: PokemonType end
-abstract type None <: PokemonType end
-
-# Types and effectiveness adapted from Silph Arena graphic
-# https://storage.googleapis.com/silphroad-publishing/silph-wp/3d94d185-type-chart_v4.png
-const typings = Dict{String, DataType}(
-    "normal"   => Normal,   "fighting" => Fighting, "flying"   => Flying,
-    "poison"   => Poison,   "ground"   => Ground,   "rock"     => Rock,
-    "bug"      => Bug,      "ghost"    => Ghost,    "steel"    => Steel,
-    "fire"     => Fire,     "water"    => Water,    "grass"    => Grass,
-    "electric" => Electric, "psychic"  => Psychic,  "ice"      => Ice,
-    "dragon"   => Dragon,   "dark"     => Dark,     "fairy"    => Fairy,
-    "none"     => None)
-
-const resistivities = Dict{DataType, Union{DataType, Union}}(
-    Normal   => Union{Rock, Steel}, 
-    Fighting => Union{Flying, Poison, Bug, Psychic, Fairy}, 
-    Flying   => Union{Rock, Steel, Electric}, 
-    Poison   => Union{Poison, Ground, Rock, Ghost}, 
-    Ground   => Union{Bug, Grass}, 
-    Rock     => Union{Fighting, Ground, Steel}, 
-    Bug      => Union{Fighting, Flying, Poison, Ghost, Steel, Fire, Fairy}, 
-    Ghost    => Dark, 
-    Steel    => Union{Steel, Fire, Water, Electric}, 
-    Fire     => Union{Rock, Fire, Water, Dragon}, 
-    Water    => Union{Water, Grass, Dragon}, 
-    Grass    => Union{Flying, Poison, Rock, Steel, Fire, Grass, Dragon}, 
-    Electric => Union{Grass, Electric, Dragon}, 
-    Psychic  => Union{Steel, Psychic}, 
-    Ice      => Union{Steel, Fire, Water, Ice}, 
-    Dragon   => Steel, 
-    Dark     => Union{Fighting, Dark, Fairy}, 
-    Fairy    => Union{Poison, Steel, Fire}
-)
-
-const effectivities = Dict{DataType, Union{DataType, Union, Core.TypeofBottom}}(
-    Normal   => Union{}, 
-    Fighting => Union{Normal, Rock, Steel, Ice, Dark}, 
-    Flying   => Union{Fighting, Bug, Grass}, 
-    Poison   => Union{Grass, Fairy}, 
-    Ground   => Union{Poison, Rock, Steel, Fire, Electric}, 
-    Rock     => Union{Flying, Bug, Fire, Ice}, 
-    Bug      => Union{Grass, Psychic, Dark}, 
-    Ghost    => Union{Ghost, Psychic}, 
-    Steel    => Union{Rock, Ice, Fairy}, 
-    Fire     => Union{Bug, Steel, Grass, Ice}, 
-    Water    => Union{Ground, Rock, Fire}, 
-    Grass    => Union{Ground, Rock, Water}, 
-    Electric => Union{Flying, Water}, 
-    Psychic  => Union{Fighting, Poison}, 
-    Ice      => Union{Flying, Ground, Grass, Dragon}, 
-    Dragon   => Dragon, 
-    Dark     => Union{Ghost, Psychic}, 
-    Fairy    => Union{Fighting, Dragon, Dark}
-)
-
-const immunities = Dict{DataType, Union{DataType, Core.TypeofBottom}}(
-    Normal   => Ghost,   Fighting => Ghost,   Flying   => Union{}, 
-    Poison   => Steel,   Ground   => Flying,  Rock     => Union{}, 
-    Bug      => Union{}, Ghost    => Normal,  Steel    => Union{}, 
-    Fire     => Union{}, Water    => Union{}, Grass    => Union{},
-    Electric => Ground,  Psychic  => Dark,    Ice      => Union{}, 
-    Dragon   => Fairy,   Dark     => Union{}, Fairy    => Union{}
-)
+const typings = ("normal", "fighting", "flying", "poison", "ground", 
+    "rock", "bug", "ghost", "steel", "fire", "water", "grass", 
+    "electric", "psychic", "ice", "dragon", "dark", "fairy", "none")
 
 # CP multipliers from PvPoke
 const cpm = Dict(
