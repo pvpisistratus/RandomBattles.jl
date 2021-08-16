@@ -1,6 +1,6 @@
 # Types and effectiveness adapted from Silph Arena graphic
 # https://storage.googleapis.com/silphroad-publishing/silph-wp/3d94d185-type-chart_v4.png
-function get_eff(a::Int8, d1::Int8, d2::Int8)
+function get_eff(a::UInt8, d1::UInt8, d2::UInt8)
     𛲜 = 1       # weakness
     Θ = -1      # resistance
     ✗ = -2      # "immunity"
