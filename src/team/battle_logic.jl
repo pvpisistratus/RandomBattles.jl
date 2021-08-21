@@ -221,7 +221,11 @@ function play_turn(state::DynamicState, static_state::StaticState,
         move = isodd(chance) ?
             static_state[chance < 0x03 ? 0x01 : 0x02][active_1].charged_move_1 :
             static_state[chance < 0x03 ? 0x01 : 0x02][active_2].charged_move_2
-        a1, d1, a2, d2 = apply_buff(a1, d1, a2, d2, move)
+        buff_output = apply_buff(a1, d1, a2, d2, move)
+            a1 = buff_output.a1
+            d1 = buff_output.d1
+            a2 = buff_output.a2
+            d2 = buff_output.d2
 
         next_state_1 =  DynamicState(
             DynamicTeam(

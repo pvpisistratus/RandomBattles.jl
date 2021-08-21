@@ -37,6 +37,19 @@ function evaluate_fast_move(static_state::StaticState, agent::UInt8,
     return EvaluateFastMovesOutput(attacker_energy, defender_hp)
 end
 
+struct ApplyBuffOutput
+    a1::UInt8
+    d1::UInt8
+    a2::UInt8
+    d2::UInt8
+end
+
+apply_buff(a1::UInt8, d1::UInt8, a2::UInt8, d2::UInt8, move::ChargedMove) = 
+    ApplyBuffOutput(clamp(iszero(get_buff_target(move)) ? a1 + get_atk(move.buff) : a1, 0x00, 0x09),
+                    clamp(iszero(get_buff_target(move)) ? d1 + get_def(move.buff) : d1, 0x00, 0x09), 
+                    clamp(!iszero(get_buff_target(move)) ? a2 + get_atk(move.buff) : a2, 0x00, 0x09),
+                    clamp(!iszero(get_buff_target(move)) ? d2 + get_def(move.buff) : d2, 0x00, 0x09))
+
 struct EvaluateChargedMovesOutput
     chance::UInt8
     a1::UInt8
@@ -72,7 +85,11 @@ function evaluate_charged_move(static_state::StaticState, cmp::UInt8, move_id::U
     chance = 0x00
     buff_chance = get_buff_chance(move)
     if buff_chance == 1.0
-        a1, d1, a2, d2 = apply_buff(a1, d1, a2, d2, move)
+        buff_output = apply_buff(a1, d1, a2, d2, move)
+        a1 = buff_output.a1
+        d1 = buff_output.d1
+        a2 = buff_output.a2
+        d2 = buff_output.d2
         fm_dmg_1 = calculate_damage(static_state[0x01][active_1].stats.attack, 
             static_state[0x02][active_2].stats.defense, 
             (static_state[0x02][active_2].primary_type, static_state[0x02][active_2].secondary_type), 
@@ -96,13 +113,6 @@ function evaluate_charged_move(static_state::StaticState, cmp::UInt8, move_id::U
     cmp = defender_hp == 0x0000 || cmp < 0x03 ? 0x00 : cmp == 0x04 ? 0x01 : 0x02
     
     return EvaluateChargedMovesOutput(chance, a1, d1, a2, d2, fm_dmg_1, fm_dmg_2, attacker_energy, defender_hp, shields, cmp)
-end
-
-function apply_buff(a1::UInt8, d1::UInt8, a2::UInt8, d2::UInt8, move::ChargedMove)
-    return clamp(iszero(get_buff_target(move)) ? a1 + get_atk(move.buff) : a1, 0x00, 0x09),
-           clamp(iszero(get_buff_target(move)) ? d1 + get_def(move.buff) : d1, 0x00, 0x09), 
-          clamp(!iszero(get_buff_target(move)) ? a2 + get_atk(move.buff) : a2, 0x00, 0x09),
-          clamp(!iszero(get_buff_target(move)) ? d2 + get_def(move.buff) : d2, 0x00, 0x09)
 end
 
 struct EvaluateSwitchOutput
