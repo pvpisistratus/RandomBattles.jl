@@ -15,6 +15,12 @@ function get_buff_modifier(a::UInt8, d::UInt8)
     return a1 * d2, a2 * d1
 end
 
+
+struct EvaluateFastMovesOutput
+    attacker_energy::UInt8
+    defender_hp::UInt16
+end
+
 """
     evaluate_fast_moves(state, static_state, agent)
 
@@ -28,7 +34,21 @@ function evaluate_fast_move(static_state::StaticState, agent::UInt8,
     attacker_energy += get_energy(static_state[agent][attacker_active].fast_move)
     defender_hp -= min(defender_hp, fm_dmg)
 
-    return attacker_energy, defender_hp
+    return EvaluateFastMovesOutput(attacker_energy, defender_hp)
+end
+
+struct EvaluateChargedMovesOutput
+    chance::UInt8
+    a1::UInt8
+    d1::UInt8 
+    a2::UInt8
+    d2::UInt8
+    fm_dmg_1::UInt8
+    fm_dmg_2::UInt8
+    attacker_energy::UInt8
+    defender_hp::UInt16
+    shields::UInt8
+    cmp::UInt8
 end
 
 """
@@ -54,11 +74,11 @@ function evaluate_charged_move(static_state::StaticState, cmp::UInt8, move_id::U
     buff_chance = get_buff_chance(move)
     if buff_chance == 1.0
         a1, d1, a2, d2 = apply_buff(a1, d1, a2, d2, move)
-        new_fm_dmg_1 = calculate_damage(static_state[0x01][active_1].stats.attack, 
+        fm_dmg_1 = calculate_damage(static_state[0x01][active_1].stats.attack, 
             static_state[0x02][active_2].stats.defense, 
             (static_state[0x02][active_2].primary_type, static_state[0x02][active_2].secondary_type), 
             a1, d2, static_state[0x01][active_1].fast_move)
-        new_fm_dmg_2 = calculate_damage(static_state[0x02][active_2].stats.attack, 
+        fm_dmg_2 = calculate_damage(static_state[0x02][active_2].stats.attack, 
             static_state[0x01][active_1].stats.defense, 
             (static_state[0x01][active_1].primary_type, static_state[0x01][active_1].secondary_type), 
             a2, d1, static_state[0x02][active_2].fast_move)
@@ -76,7 +96,7 @@ function evaluate_charged_move(static_state::StaticState, cmp::UInt8, move_id::U
     shields -= shielding ? 0x01 : 0x00
     cmp = defender_hp == 0x0000 || cmp < 0x03 ? 0x00 : cmp == 0x04 ? 0x01 : 0x02
     
-    return chance, a1, d1, a2, d2, new_fm_dmg_1, new_fm_dmg_2, attacker_energy, defender_hp, shields, cmp
+    return EvaluateChargedMovesOutput(chance, a1, d1, a2, d2, new_fm_dmg_1, new_fm_dmg_2, attacker_energy, defender_hp, shields, cmp)
 end
 
 function apply_buff(a1::UInt8, d1::UInt8, a2::UInt8, d2::UInt8, move::ChargedMove)
@@ -84,6 +104,14 @@ function apply_buff(a1::UInt8, d1::UInt8, a2::UInt8, d2::UInt8, move::ChargedMov
            clamp(iszero(get_buff_target(move)) ? d1 + get_def(move.buff) : d1, 0x00, 0x09), 
           clamp(!iszero(get_buff_target(move)) ? a2 + get_atk(move.buff) : a2, 0x00, 0x09),
           clamp(!iszero(get_buff_target(move)) ? d2 + get_def(move.buff) : d2, 0x00, 0x09)
+end
+
+struct EvaluateSwitchOutput
+    active::UInt8
+    switch_cooldown_1::UInt8
+    switch_cooldown_2::UInt8 
+    fm_dmg_1::UInt16 
+    fm_dmg_2::UInt16
 end
 
 """
@@ -106,13 +134,10 @@ function evaluate_switch(static_state::StaticState, agent::UInt8, to_switch::UIn
          active_2 == 0x02 ? to_switch == 0x01 ? 0x01 : 0x03  :
                             to_switch == 0x01 ? 0x01 : 0x02) : active_2
     
-    switch_cooldown_1 = (agent == 0x01 && time == 0x00) ? Int8(120) :
-        switch_cooldown_1 - min(switch_cooldown_1, Int8(time))
-    switch_cooldown_2 = (agent == 0x02 && time == 0x00) ? Int8(120) :
-        switch_cooldown_2 - min(switch_cooldown_2, Int8(time))
-
-    #fm_pending_1, fm_pending_2 = 0x00, 0x00
-    #a1, d1, a2, d2 = 0x04, 0x04, 0x04, 0x04
+    switch_cooldown_1 = (agent == 0x01 && time == 0x00) ? 0x78 :
+        switch_cooldown_1 - min(switch_cooldown_1, time)
+    switch_cooldown_2 = (agent == 0x02 && time == 0x00) ? 0x78 :
+        switch_cooldown_2 - min(switch_cooldown_2, time)
 
     fm_dmg_1 = calculate_damage(static_state[0x01][active_1].stats.attack, 
         static_state[0x02][active_2].stats.defense, 
@@ -123,7 +148,14 @@ function evaluate_switch(static_state::StaticState, agent::UInt8, to_switch::UIn
         (static_state[0x01][active_1].primary_type, static_state[0x01][active_1].secondary_type), 
         0x04, 0x04, static_state[0x02][active_2].fast_move)
 
-    return agent == 0x01 ? active_1 : active_2, switch_cooldown_1, switch_cooldown_2, fm_dmg_1, fm_dmg_2
+    return EvaluateSwitchOutput(agent == 0x01 ? active_1 : active_2, switch_cooldown_1, switch_cooldown_2, fm_dmg_1, fm_dmg_2)
+end
+
+struct StepTimersOutput
+    fm_pending_1::UInt8 
+    fm_pending_2::UInt8 
+    switch_cooldown_1::UInt8 
+    switch_cooldown_2::UInt8
 end
 
 """
@@ -142,10 +174,10 @@ function step_timers(fm_cooldown_1::UInt8, fm_cooldown_2::UInt8,
     fm_pending_2 = !iszero(fm_cooldown_2) ? fm_cooldown_2 : 
                    !iszero(fm_pending_2)  ? fm_pending_2 - 0x01 : 0x00
 
-    switch_cooldown_1 = max(Int8(0), switch_cooldown_1 - Int8(1))
-    switch_cooldown_2 = max(Int8(0), switch_cooldown_2 - Int8(1))
+    switch_cooldown_1 = max(0x00, switch_cooldown_1 - 0x01)
+    switch_cooldown_2 = max(0x00, switch_cooldown_2 - 0x01)
 
-    return fm_pending_1, fm_pending_2, switch_cooldown_1, switch_cooldown_2
+    return StepTimersOutput(fm_pending_1, fm_pending_2, switch_cooldown_1, switch_cooldown_2)
 end
 
 """

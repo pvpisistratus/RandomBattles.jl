@@ -1,3 +1,9 @@
+struct TurnOutput
+    next_state_1::DynamicState
+    next_state_2::DynamicState
+    odds::Float64
+end
+
 function play_turn(state::DynamicState, static_state::StaticState,
     decision::Tuple{UInt8, UInt8})
 
@@ -34,28 +40,36 @@ function play_turn(state::DynamicState, static_state::StaticState,
             (active_2 == 0x01 ? hp_2_1 : active_2 == 0x02 ? hp_2_2 : hp_2_3) : 
             (active_1 == 0x01 ? hp_1_1 : active_1 == 0x02 ? hp_1_2 : hp_1_3)
 
-        chance, a1, d1, a2, d2, fm_dmg_1, fm_dmg_2, attacker_energy, defender_hp, shields, cmp = 
-            evaluate_charged_move(static_state, cmp, decision[agent] - 0x06, 
-                decision[o_agent] == 0x01, active_1, active_2, a1, d1, a2, d2, 
-                attacker_energy, defender_hp, agent == 0x02 ? shields_1 : shields_2, 
-                fm_dmg_1, fm_dmg_2)
+        cm_output = evaluate_charged_move(static_state, cmp, decision[agent] - 0x06, 
+            decision[o_agent] == 0x01, active_1, active_2, a1, d1, a2, d2, 
+            attacker_energy, defender_hp, agent == 0x02 ? shields_1 : shields_2, 
+            fm_dmg_1, fm_dmg_2)
+
+        chance = cm_output.chance
+        a1 = cm_output.a1
+        d1 = cm_output.d1
+        a2 = cm_output.a2
+        d2 = cm_output.d2
+        fm_dmg_1 = cm_output.fm_dmg_1
+        fm_dmg_2 = cm_output.fm_dmg_2
+        cmp = cm_output.cmp
 
         if agent == 0x01
-            shields_2 = shields
+            shields_2 = cm_output.shields
             fm_pending_1 = 0x00
             fm_pending_2 = min(0x01, fm_pending_2)
-            active_1 == 0x01 ? energy_1_1 = attacker_energy : active_1 == 0x02 ? 
-                energy_1_2 = attacker_energy : energy_1_3 = attacker_energy
-            active_2 == 0x01 ? hp_2_1 = defender_hp : active_2 == 0x02 ? 
-                hp_2_2 = defender_hp : hp_2_3 = defender_hp
+            active_1 == 0x01 ? energy_1_1 = cm_output.attacker_energy : active_1 == 0x02 ? 
+                energy_1_2 = cm_output.attacker_energy : energy_1_3 = cm_output.attacker_energy
+            active_2 == 0x01 ? hp_2_1 = cm_output.defender_hp : active_2 == 0x02 ? 
+                hp_2_2 = cm_output.defender_hp : hp_2_3 = cm_output.defender_hp
         else
-            shields_1 = shields
+            shields_1 = cm_output.shields
             fm_pending_1 = min(0x01, fm_pending_1)
             fm_pending_2 = 0x00
-            active_1 == 0x01 ? hp_1_1 = defender_hp : active_1 == 0x02 ? 
-                hp_1_2 = defender_hp : hp_1_3 = defender_hp
-            active_2 == 0x01 ? energy_2_1 = attacker_energy : active_2 == 0x02 ? 
-                energy_2_2 = attacker_energy : energy_2_3 = attacker_energy
+            active_1 == 0x01 ? hp_1_1 = cm_output.defender_hp : active_1 == 0x02 ? 
+                hp_1_2 = cm_output.defender_hp : hp_1_3 = cm_output.defender_hp
+            active_2 == 0x01 ? energy_2_1 = cm_output.attacker_energy : active_2 == 0x02 ? 
+                energy_2_2 = cm_output.attacker_energy : energy_2_3 = cm_output.attacker_energy
         end
     else
         # evaluate fast moves
@@ -63,43 +77,63 @@ function play_turn(state::DynamicState, static_state::StaticState,
         defender_hp_2 = active_2 == 0x01 ? hp_2_1 : active_2 == 0x02 ? hp_2_2 : hp_2_3
         if fm_pending_1 == 0x01 && !iszero(defender_hp_1)
             attacker_energy = active_1 == 0x01 ? energy_1_1 : active_1 == 0x02 ? energy_1_2 : energy_1_3
-            attacker_energy, defender_hp_2 = evaluate_fast_move(static_state, 0x01, 
+            fm_output = evaluate_fast_move(static_state, 0x01, 
                 active_1, attacker_energy, defender_hp_2, fm_dmg_1)
-            active_1 == 0x01 ? energy_1_1 = attacker_energy : active_1 == 0x02 ? 
-                energy_1_2 = attacker_energy : energy_1_3 = attacker_energy
-            active_2 == 0x01 ? hp_2_1 = defender_hp_2 : active_2 == 0x02 ? 
-                hp_2_2 = defender_hp_2 : hp_2_3 = defender_hp_2
+            active_1 == 0x01 ? energy_1_1 = fm_output.attacker_energy : active_1 == 0x02 ? 
+                energy_1_2 = fm_output.attacker_energy : energy_1_3 = fm_output.attacker_energy
+            active_2 == 0x01 ? hp_2_1 = fm_output.defender_hp : active_2 == 0x02 ? 
+                hp_2_2 = fm_output.defender_hp : hp_2_3 = fm_output.defender_hp
         end
         if fm_pending_2 == 0x01 && !iszero(defender_hp_2)
             attacker_energy = active_2 == 0x01 ? energy_2_1 : active_2 == 0x02 ? energy_2_2 : energy_2_3
-            attacker_energy, defender_hp_1 = evaluate_fast_move(static_state, 0x02, 
+            fm_output = evaluate_fast_move(static_state, 0x02, 
                 active_2, attacker_energy, defender_hp_1, fm_dmg_2)
-            active_2 == 0x01 ? energy_2_1 = attacker_energy : active_2 == 0x02 ? 
-                energy_2_2 = attacker_energy : energy_2_3 = attacker_energy
-            active_1 == 0x01 ? hp_1_1 = defender_hp_1 : active_1 == 0x02 ? 
-                hp_1_2 = defender_hp_1 : hp_1_3 = defender_hp_1
+            active_2 == 0x01 ? energy_2_1 = fm_output.attacker_energy : active_2 == 0x02 ? 
+                energy_2_2 = fm_output.attacker_energy : energy_2_3 = fm_output.attacker_energy
+            active_1 == 0x01 ? hp_1_1 = fm_output.defender_hp : active_1 == 0x02 ? 
+                hp_1_2 = fm_output.defender_hp : hp_1_3 = fm_output.defender_hp
         end
 
         # step timers
         fm_cooldown_1 = decision[1] == 0x03 ? get_cooldown(static_state[0x01][active_1].fast_move) : 0x00
         fm_cooldown_2 = decision[2] == 0x03 ? get_cooldown(static_state[0x02][active_2].fast_move) : 0x00
-        fm_pending_1, fm_pending_2, switch_cooldown_1, switch_cooldown_2 = step_timers(fm_cooldown_1, 
+        step_timers_output = step_timers(fm_cooldown_1, 
             fm_cooldown_2, fm_pending_1, fm_pending_2, switch_cooldown_1, switch_cooldown_2)
+        fm_pending_1 = step_timers_output.fm_pending_1
+        fm_pending_2 = step_timers_output.fm_pending_2
+        switch_cooldown_1 = step_timers_output.switch_cooldown_1
+        switch_cooldown_2 = step_timers_output.switch_cooldown_2
 
         # evaluate switches
         if decision[1] == 0x05 || decision[1] == 0x06
             active_hp_1 = active_1 == 0x01 ? hp_1_1 : active_1 == 0x02 ? hp_1_2 : hp_1_3
-            active_1, switch_cooldown_1, switch_cooldown_2, fm_dmg_1, fm_dmg_2 = 
-                evaluate_switch(static_state, 0x01, decision[1] - 0x04, 
+            switch_output = evaluate_switch(static_state, 0x01, decision[1] - 0x04, 
                     iszero(active_hp_1) ? 0x18 : 0x00, 
                     active_1, active_2, switch_cooldown_1, switch_cooldown_2)
+                    
+            active_1 = switch_output.active
+            switch_cooldown_1 = switch_output.switch_cooldown_1
+            switch_cooldown_2 = switch_output.switch_cooldown_2
+            fm_dmg_1 = switch_output.fm_dmg_1
+            fm_dmg_2 = switch_output.fm_dmg_2
+
+            fm_pending_1 = 0x00
+            a1, d1 = 0x04, 0x04
         end
         if decision[2] == 0x05 || decision[2] == 0x06
             active_hp_2 = active_2 == 0x01 ? hp_2_1 : active_2 == 0x02 ? hp_2_2 : hp_2_3
-            active_2, switch_cooldown_1, switch_cooldown_2, fm_dmg_1, fm_dmg_2 = 
-                evaluate_switch(static_state, 0x02, decision[2] - 0x04, 
+            switch_output = evaluate_switch(static_state, 0x02, decision[2] - 0x04, 
                     iszero(active_hp_2) ? 0x18 : 0x00, 
                     active_1, active_2, switch_cooldown_1, switch_cooldown_2)
+            
+            active_2 = switch_output.active
+            switch_cooldown_1 = switch_output.switch_cooldown_1
+            switch_cooldown_2 = switch_output.switch_cooldown_2
+            fm_dmg_1 = switch_output.fm_dmg_1
+            fm_dmg_2 = switch_output.fm_dmg_2
+
+            fm_pending_2 = 0x00
+            a2, d2 = 0x04, 0x04
         end
 
         active_hp_1 = active_1 == 0x01 ? hp_1_1 : active_1 == 0x02 ? hp_1_2 : hp_1_3
@@ -205,7 +239,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
         odds = get_buff_chance(move)
     end
 
-    return next_state_1, next_state_2, odds
+    return TurnOutput(next_state_1, next_state_2, odds)
 end
 
 """
@@ -222,12 +256,13 @@ function play_battle(state::DynamicState, static_state::StaticState;
             allow_overfarming = allow_overfarming)
         (iszero(d1) || iszero(d2)) &&
             return battle_score(state, static_state)
-        next_state_1, next_state_2, odds = play_turn(
+        turn_output = play_turn(
             state, static_state, select_random_decision(d1, d2))
-        if odds == 1.0
-            state = next_state_1
+        if turn_output.odds == 1.0
+            state = turn_output.next_state_1
         else
-            state = rand(rb_rng) < odds ? next_state_1 : next_state_2
+            state = rand(rb_rng) < turn_output.odds ? 
+                turn_output.next_state_1 : turn_output.next_state_2
         end
     end
 end
