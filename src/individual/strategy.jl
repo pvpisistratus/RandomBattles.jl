@@ -51,7 +51,7 @@ function plot_strategy(strat::IndividualStrategy,
                 strat.decisions[i][j] != 0x06 &&
                 strat.hps[i][get_other_agent(j)] <
                 strat.hps[i - 1][get_other_agent(j)]
-                color = colors[static_s[j].fastMove.moveType]
+                color = colors[static_s[j].fast_move.moveType]
                 scatter!(plt2, [i], [-Int64(j)], markershape = :square,
                     alpha = 0.5, color = color)
             end

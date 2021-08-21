@@ -31,17 +31,17 @@ evaluate_fast_moves(state::DynamicIndividualState,
                 static_state[0x02].stats.attack,
                 state.data,
                 static_state[0x01],
-                static_state[0x02].fastMove,
+                static_state[0x02].fast_move,
             ) : 0x0000), (using_fm[0x01] ?
-            get_energy(static_state[0x01].fastMove) : Int8(0))),
+            get_energy(static_state[0x01].fast_move) : Int8(0))),
         add_energy(damage(state[0x02],
             using_fm[0x01] ? calculate_damage(
                 static_state[0x01].stats.attack,
                 state.data,
                 static_state[0x02],
-                static_state[0x01].fastMove,
+                static_state[0x01].fast_move,
             ) : 0x0000), (using_fm[0x02] ?
-            get_energy(static_state[0x02].fastMove) : Int8(0))),
+            get_energy(static_state[0x02].fast_move) : Int8(0))),
         state.data)
 
 """

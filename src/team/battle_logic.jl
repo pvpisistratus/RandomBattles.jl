@@ -1,128 +1,207 @@
 function play_turn(state::DynamicState, static_state::StaticState,
     decision::Tuple{UInt8, UInt8})
-    next_state = state
 
-    fm_pending = get_fast_moves_pending(state)
-    active1, active2 = get_active(next_state)
-    cmp = get_cmp(state)
+    # unpack state
+    active_1, active_2 = get_active(next_state)
+    fm_pending_1, fm_pending_2 = get_fast_moves_pending(next_state)
+    cmp = get_cmp(next_state)
+    chance = 0x00
+    fm_dmg_1, fm_dmg_2 = get_fm_damage(state)
 
+    switch_cooldown_1, switch_cooldown_2 = state[0x01].switch_cooldown, state[0x02].switch_cooldown
+    a1, d1 = get_buffs(state[0x01])
+    a2, d2 = get_buffs(state[0x02])
+    shields_1, shields_2 = get_shields(state[0x01]), get_shields(state[0x02])
+
+    hp_1_1, hp_1_2, hp_1_3, hp_2_1, hp_2_2, hp_2_3 = 
+        get_hp(state[0x01][0x01]), get_hp(state[0x01][0x02]), get_hp(state[0x01][0x03]),
+        get_hp(state[0x02][0x01]), get_hp(state[0x02][0x02]), get_hp(state[0x02][0x03])
+    energy_1_1, energy_1_2, energy_1_3, energy_2_1, energy_2_2, energy_2_3 = 
+        get_energy(state[0x01][0x01]), get_energy(state[0x01][0x02]), get_energy(state[0x01][0x03]),
+        get_energy(state[0x02][0x01]), get_energy(state[0x02][0x02]), get_energy(state[0x02][0x03])
+
+    # if in charged move state
     if !iszero(cmp)
         agent, o_agent = isodd(cmp) ? (0x01, 0x02) : (0x02, 0x01)
-        next_state = evaluate_charged_move(next_state, static_state, cmp,
-            decision[agent] - 0x06, 0x64, decision[o_agent] == 0x01)
-        data = next_state.data - UInt32(fm_pending[agent]) *
-            UInt32(agent == 0x01 ? 16 : 112)
-        if !iszero(fm_pending[o_agent])
-            data -= UInt32(fm_pending[o_agent] - 1) *
-                UInt32(o_agent == 0x01 ? 16 : 112)
+
+        attacker_energy = agent == 0x01 ? (active_1 == 0x01 ? energy_1_1 : 
+            active_1 == 0x02 ? energy_1_2 : energy_1_3) : 
+            (active_2 == 0x01 ? energy_2_1 : active_2 == 0x02 ? 
+            energy_2_2 : energy_2_3)
+        defender_hp = agent == 0x01 ? 
+            (active_2 == 0x01 ? hp_2_1 : active_2 == 0x02 ? hp_2_2 : hp_2_3) : 
+            (active_1 == 0x01 ? hp_1_1 : active_1 == 0x02 ? hp_1_2 : hp_1_3)
+
+        chance, a1, d1, a2, d2, fm_dmg_1, fm_dmg_2, attacker_energy, defender_hp, shields, cmp = 
+            evaluate_charged_move(static_state, cmp, decision[agent] - 0x06, 
+                decision[o_agent] == 0x01, active_1, active_2, a1, d1, a2, d2, 
+                attacker_energy, defender_hp, agent == 0x02 ? shields_1 : shields_2, 
+                fm_dmg_1, fm_dmg_2)
+
+        if agent == 0x01
+            shields_2 = shields
+            fm_pending_1 = 0x00
+            fm_pending_2 = min(0x01, fm_pending_2)
+            active_1 == 0x01 ? energy_1_1 = attacker_energy : active_1 == 0x02 ? 
+                energy_1_2 = attacker_energy : energy_1_3 = attacker_energy
+            active_2 == 0x01 ? hp_2_1 = defender_hp : active_2 == 0x02 ? 
+                hp_2_2 = defender_hp : hp_2_3 = defender_hp
+        else
+            shields_1 = shields
+            fm_pending_1 = min(0x01, fm_pending_1)
+            fm_pending_2 = 0x00
+            active_1 == 0x01 ? hp_1_1 = defender_hp : active_1 == 0x02 ? 
+                hp_1_2 = defender_hp : hp_1_3 = defender_hp
+            active_2 == 0x01 ? energy_2_1 = attacker_energy : active_2 == 0x02 ? 
+                energy_2_2 = attacker_energy : energy_2_3 = attacker_energy
         end
-        next_state = DynamicState(next_state[0x01], next_state[0x02], data)
     else
-        if fm_pending[1] == 0x01 || fm_pending[2] == 0x01
-            next_state = evaluate_fast_moves(next_state, static_state,
-                (fm_pending[1] == 0x01 &&
-                    get_hp(next_state[0x01][active1]) != 0x0000,
-                fm_pending[2] == 0x01 &&
-                    get_hp(next_state[0x02][active2]) != 0x0000))
+        # evaluate fast moves
+        defender_hp_1 = active_1 == 0x01 ? hp_1_1 : active_1 == 0x02 ? hp_1_2 : hp_1_3
+        defender_hp_2 = active_2 == 0x01 ? hp_2_1 : active_2 == 0x02 ? hp_2_2 : hp_2_3
+        if fm_pending_1 == 0x01 && !iszero(defender_hp_1)
+            attacker_energy = active_1 == 0x01 ? energy_1_1 : active_1 == 0x02 ? energy_1_2 : energy_1_3
+            attacker_energy, defender_hp_2 = evaluate_fast_move(static_state, 0x01, 
+                active_1, attacker_energy, defender_hp_2, fm_dmg_1)
+            active_1 == 0x01 ? energy_1_1 = attacker_energy : active_1 == 0x02 ? 
+                energy_1_2 = attacker_energy : energy_1_3 = attacker_energy
+            active_2 == 0x01 ? hp_2_1 = defender_hp_2 : active_2 == 0x02 ? 
+                hp_2_2 = defender_hp_2 : hp_2_3 = defender_hp_2
+        end
+        if fm_pending_2 == 0x01 && !iszero(defender_hp_2)
+            attacker_energy = active_2 == 0x01 ? energy_2_1 : active_2 == 0x02 ? energy_2_2 : energy_2_3
+            attacker_energy, defender_hp_1 = evaluate_fast_move(static_state, 0x02, 
+                active_2, attacker_energy, defender_hp_1, fm_dmg_2)
+            active_2 == 0x01 ? energy_2_1 = attacker_energy : active_2 == 0x02 ? 
+                energy_2_2 = attacker_energy : energy_2_3 = attacker_energy
+            active_1 == 0x01 ? hp_1_1 = defender_hp_1 : active_1 == 0x02 ? 
+                hp_1_2 = defender_hp_1 : hp_1_3 = defender_hp_1
         end
 
-        next_state = step_timers(next_state,
-            decision[1] == 0x03 ?
-                get_cooldown(static_state[0x01][active1].fastMove) : 0x0000,
-            decision[2] == 0x03 ?
-                get_cooldown(static_state[0x02][active2].fastMove) : 0x0000)
+        # step timers
+        fm_cooldown_1 = decision[1] == 0x03 ? get_cooldown(static_state[0x01][active_1].fast_move) : 0x00
+        fm_cooldown_2 = decision[2] == 0x03 ? get_cooldown(static_state[0x02][active_2].fast_move) : 0x00
+        fm_pending_1, fm_pending_2, switch_cooldown_1, switch_cooldown_2 = step_timers(fm_cooldown_1, 
+            fm_cooldown_2, fm_pending_1, fm_pending_2, switch_cooldown_1, switch_cooldown_2)
+
+        # evaluate switches
         if decision[1] == 0x05 || decision[1] == 0x06
-            next_state = evaluate_switch(next_state,
-                static_state, 0x01, decision[1] - 0x04,
-                iszero(get_hp(state[0x01][active1])) ?
-                0x18 : 0x00)
+            active_1, switch_cooldown_1, switch_cooldown_2, fm_dmg_1, fm_dmg_2 = 
+                evaluate_switch(static_state, 0x01, decision[1] - 0x04, 
+                    iszero(get_hp(state[0x01][active_1])) ? 0x18 : 0x00, 
+                    active_1, active_2, switch_cooldown_1, switch_cooldown_2)
         end
         if decision[2] == 0x05 || decision[2] == 0x06
-            next_state = evaluate_switch(next_state,
-                static_state, 0x02, decision[2] - 0x04,
-                iszero(get_hp(state[0x02][active2])) ?
-                0x18 : 0x00)
+            active_2, switch_cooldown_1, switch_cooldown_2, fm_dmg_1, fm_dmg_2 = 
+                evaluate_switch(static_state, 0x02, decision[2] - 0x04, 
+                    iszero(get_hp(state[0x02][active_2])) ? 0x18 : 0x00, 
+                    active_1, active_2, switch_cooldown_1, switch_cooldown_2)
         end
-        active1, active2 = get_active(next_state)
 
-        if get_hp(next_state[0x01][active1]) != 0x0000 &&
-            get_hp(next_state[0x02][active2]) != 0x0000
+        active_hp_1 = active_1 == 0x01 ? hp_1_1 : active_1 == 0x02 ? hp_1_2 : hp_1_3
+        active_hp_2 = active_2 == 0x01 ? hp_2_1 : active_2 == 0x02 ? hp_2_2 : hp_2_3
+        if !iszero(active_hp_1) && !iszero(active_hp_2)
             if decision[1] == 0x04
                 if decision[2] == 0x04
                     atk_cmp = Base.cmp(
-                        static_state[0x01][active1].stats.attack,
-                        static_state[0x02][active2].stats.attack
+                        static_state[0x01][active_1].stats.attack,
+                        static_state[0x02][active_2].stats.attack
                     )
-                    return DynamicState(next_state[0x01],
-                        next_state[0x02], next_state.data +
-                        (atk_cmp == 1 ? UInt32(2352) :
-                        atk_cmp == -1 ? UInt32(3136) : UInt32(19600)))
+                    atk_cmp == 1 ? cmp = 0x03 : atk_cmp == -1 ? cmp = 0x04 : chance = 0x05
                 else
-                    return DynamicState(next_state[0x01],
-                        next_state[0x02], next_state.data + UInt32(784))
+                    cmp = 0x01
                 end
             elseif decision[2] == 0x04
-                return DynamicState(next_state[0x01],
-                    next_state[0x02], next_state.data + UInt32(2*784))
+                cmp = 0x02
             end
         end
     end
 
-    return next_state
-end
-
-function get_chance_state_1(state::DynamicState, static_state::StaticState,
-    chance::UInt8)
-    if chance == 0x05
-        return DynamicState(state[0x01], state[0x02], state.data - 0x4360)
-    else
-        active1, active2 = get_active(state)
-        agent, o_agent = chance < 0x03 ? (0x01, 0x02) : (0x02, 0x01)
-        move = isodd(chance) ?
-            static_state[agent][active1].charged_move_1 :
-            static_state[agent][active2].charged_move_2
-        a_data = state[agent].data
-        d_data = state[o_agent].data
-        a_data, d_data = apply_buff(a_data, d_data, move)
-        return update_fm_damage(DynamicState(
-            DynamicTeam(state[0x01][0x01], state[0x01][0x02],
-                state[0x01][0x03], state[0x01].switchCooldown,
-                agent == 0x01 ? a_data : d_data),
-            DynamicTeam(state[0x02][0x01], state[0x02][0x02],
-                state[0x02][0x03], state[0x02].switchCooldown,
-                agent == 0x02 ? a_data : d_data),
-            state.data - UInt32(chance) * UInt32(3920)), static_state)
-    end
-end
-
-function get_chance_state_2(state::DynamicState, chance::UInt8)
-    if chance == 0x05
-        return DynamicState(state[0x01], state[0x02], state.data - 0x4050)
-    else
-        return DynamicState(state[0x01], state[0x02],
-            state.data - UInt32(chance) * UInt32(3920))
-    end
-end
-
-function resolve_chance(state::DynamicState, static_state::StaticState)
-    chance = get_chance(state)
-    if chance == 0x00
-        return state
+    # check chance and repack
+    if iszero(chance)
+        # no chance to evaluate
+        next_state_1 = DynamicState(
+            DynamicTeam(
+                DynamicPokemon(hp_1_1, energy_1_1), 
+                DynamicPokemon(hp_1_2, energy_1_2), 
+                DynamicPokemon(hp_1_3, energy_1_3), 
+                switch_cooldown_1, a1, d1, sheilds_1
+            ), DynamicTeam(
+                DynamicPokemon(hp_2_1, energy_2_1), 
+                DynamicPokemon(hp_2_2, energy_2_2), 
+                DynamicPokemon(hp_2_3, energy_2_3), 
+                switch_cooldown_2, a2, d2, sheilds_2
+            ), active_1, active_2, fm_pending_1, fm_pending2, cmp, 0x00, fm_dmg_1, fm_dmg_2
+        )
+        next_state_2 = next_state_1
+        odds = 1.0
     elseif chance == 0x05
-        return rand(rb_rng) < 0.5 ?
-            # subtract chance, add cmp
-            get_chance_state_1(state, static_state, chance) :
-            get_chance_state_2(state, chance)
+        # decide randomly who gets cmp
+        next_state_1 = DynamicState(
+            DynamicTeam(
+                DynamicPokemon(hp_1_1, energy_1_1), 
+                DynamicPokemon(hp_1_2, energy_1_2), 
+                DynamicPokemon(hp_1_3, energy_1_3), 
+                switch_cooldown_1, a1, d1, sheilds_1
+            ), DynamicTeam(
+                DynamicPokemon(hp_2_1, energy_2_1), 
+                DynamicPokemon(hp_2_2, energy_2_2), 
+                DynamicPokemon(hp_2_3, energy_2_3), 
+                switch_cooldown_2, a2, d2, sheilds_2
+            ), active_1, active_2, fm_pending_1, fm_pending2, 0x03, 0x00, fm_dmg_1, fm_dmg_2
+        )
+        next_state_2 = DynamicState(
+            DynamicTeam(
+                DynamicPokemon(hp_1_1, energy_1_1), 
+                DynamicPokemon(hp_1_2, energy_1_2), 
+                DynamicPokemon(hp_1_3, energy_1_3), 
+                switch_cooldown_1, a1, d1, sheilds_1
+            ), DynamicTeam(
+                DynamicPokemon(hp_2_1, energy_2_1), 
+                DynamicPokemon(hp_2_2, energy_2_2), 
+                DynamicPokemon(hp_2_3, energy_2_3), 
+                switch_cooldown_2, a2, d2, sheilds_2
+            ), active_1, active_2, fm_pending_1, fm_pending2, 0x04, 0x00, fm_dmg_1, fm_dmg_2
+        )
+        odds = 0.5
     else
-        active1, active2 = get_active(state)
-        agent = chance < 0x03 ? 0x01 : 0x02
-        active = agent == 0x01 ? active1 : active2
-        return buff_applies(isodd(chance) ? 
-            static_state[agent][active].charged_move_1 : 
-            static_state[agent][active].charged_move_2) ?
-            get_chance_state_1(state, static_state, chance) :
-            get_chance_state_2(state, chance)
+        # apply or don't apply a buff from a charged move
+        next_state_2 = DynamicState(
+            DynamicTeam(
+                DynamicPokemon(hp_1_1, energy_1_1), 
+                DynamicPokemon(hp_1_2, energy_1_2), 
+                DynamicPokemon(hp_1_3, energy_1_3), 
+                switch_cooldown_1, a1, d1, sheilds_1
+            ), DynamicTeam(
+                DynamicPokemon(hp_2_1, energy_2_1), 
+                DynamicPokemon(hp_2_2, energy_2_2), 
+                DynamicPokemon(hp_2_3, energy_2_3), 
+                switch_cooldown_2, a2, d2, sheilds_2
+            ), active_1, active_2, fm_pending_1, fm_pending2, cmp, 0x00, fm_dmg_1, fm_dmg_2
+        )
+
+        move = isodd(chance) ?
+            static_state[chance < 0x03 ? 0x01 : 0x02][active_1].charged_move_1 :
+            static_state[chance < 0x03 ? 0x01 : 0x02][active_2].charged_move_2
+        a1, d1, a2, d2 = apply_buff(a1, d1, a2, d2, move)
+
+        next_state_1 =  DynamicState(
+            DynamicTeam(
+                DynamicPokemon(hp_1_1, energy_1_1), 
+                DynamicPokemon(hp_1_2, energy_1_2), 
+                DynamicPokemon(hp_1_3, energy_1_3), 
+                switch_cooldown_1, a1, d1, sheilds_1
+            ), DynamicTeam(
+                DynamicPokemon(hp_2_1, energy_2_1), 
+                DynamicPokemon(hp_2_2, energy_2_2), 
+                DynamicPokemon(hp_2_3, energy_2_3), 
+                switch_cooldown_2, a2, d2, sheilds_2
+            ), active_1, active_2, fm_pending_1, fm_pending2, cmp, 0x00, fm_dmg_1, fm_dmg_2
+        )
+        odds = get_buff_chance(move)
     end
+
+    return next_state_1, next_state_2, odds
 end
 
 """
@@ -133,16 +212,19 @@ equally weighted decisions.
 """
 function play_battle(state::DynamicState, static_state::StaticState;
   allow_nothing::Bool = false, allow_overfarming::Bool = false)
-    active1, active2 = get_active(state)
     while true
-        state = resolve_chance(state, static_state)
         d1, d2 = get_possible_decisions(state, static_state,
             allow_nothing = allow_nothing,
             allow_overfarming = allow_overfarming)
         (iszero(d1) || iszero(d2)) &&
             return battle_score(state, static_state)
-        state = play_turn(
+        next_state_1, next_state_2, odds = play_turn(
             state, static_state, select_random_decision(d1, d2))
+        if odds == 1.0
+            state = next_state_1
+        else
+            state = rand(rb_rng) < odds ? next_state_1 : next_state_2
+        end
     end
 end
 

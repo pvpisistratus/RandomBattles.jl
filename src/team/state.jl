@@ -14,7 +14,7 @@ StaticState(teams::NTuple{6, Union{String, Int}}; league = "great", cup = "all")
 struct DynamicState <: AbstractArray{DynamicTeam, 1}
     team1::DynamicTeam
     team2::DynamicTeam
-    data::UInt32              # active, fastMovesPending, cmp, chance, fm_damage
+    data::UInt32 # active, pending fast moves, cmp, chance, fast move damage
 end
 
 Base.size(d::DynamicState) = (2,)
@@ -31,23 +31,6 @@ get_chance(state::DynamicState) = UInt8((state.data ÷ UInt32(3920)) % UInt32(6)
 get_fm_damage(state::DynamicState) =
     UInt16((state.data ÷ UInt32(23520)) % UInt32(425)),
     UInt16(state.data ÷ UInt32(9996000))
-
-function get_fast_move_damages(state::DynamicState, static_state::StaticState,
-    active1::UInt8, active2::UInt8)
-    static_mon_1 = static_state[0x01][active1]
-    static_mon_2 = static_state[0x02][active2]
-    return calculate_damage(
-        static_mon_2.stats.attack,
-        state[0x02].data,
-        static_mon_1,
-        static_mon_2.fastMove,
-    ), calculate_damage(
-        static_mon_1.stats.attack,
-        state[0x01].data,
-        static_mon_2,
-        static_mon_1.fastMove,
-    )
-end
 
 function update_fm_damage(state::DynamicState, static_state::StaticState)
     active1, active2 = get_active(state)
@@ -73,3 +56,11 @@ function DynamicState(s::StaticState)
     d = DynamicState(DynamicTeam(s[0x01]), DynamicTeam(s[0x02]), UInt32(133))
     return update_fm_damage(d, s)
 end
+
+DynamicState(team1::DynamicTeam, team2::DynamicTeam, active_1::UInt8, active_2::UInt8, 
+    fm_pending_1::UInt8, fm_pending_2::UInt8, cmp::UInt8, chance::UInt8, 
+    fm_dmg_1::UInt16, fm_dmg_2::UInt16) = 
+    DynamicState(team1, team2, UInt32(active_1) + UInt32(active_2) << UInt32(2) + 
+        UInt32(fm_pending_1) << UInt32(4) + UInt32(112) * UInt32(fm_pending_2) + 
+        UInt32(cmp) * UInt32(784) + UInt32(chance) * UInt32(3920) + 
+        UInt32(fm_dmg_1) * UInt32(23520) + UInt32(fm_dmg_2) * UInt32(9996000))

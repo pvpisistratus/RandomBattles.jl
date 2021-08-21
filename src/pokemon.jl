@@ -1,5 +1,5 @@
 """
-    StaticPokemon(types, stats, fastMove, chargedMoves)
+    StaticPokemon(types, stats, fast_move, chargedMoves)
 
 Struct for holding the values associated with the mons that do not change
 throughout the battle: types, stats, and moves. Note that like moves, this
@@ -9,7 +9,7 @@ struct StaticPokemon
     primary_type::UInt8
     secondary_type::UInt8
     stats::Stats
-    fastMove::FastMove
+    fast_move::FastMove
     charged_move_1::ChargedMove
     charged_move_2::ChargedMove
 end
@@ -62,11 +62,11 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
     stats = Stats(attack, defense, hitpoints)
     if haskey(rankings[i], "moveStr")
         moves = parse.(Ref(Int64), split(rankings[i]["moveStr"], "-"))
-        fastMovesAvailable = gm["fastMoves"]
-        sort!(fastMovesAvailable)
-        fastMoveGm = gamemaster["moves"][get_gamemaster_move_id(
-            fastMovesAvailable[moves[1]+1])]
-        fastMove = Move(fastMoveGm, types)
+        available_fast_moves = gm["fastMoves"]
+        sort!(available_fast_moves)
+        fast_move_gm = gamemaster["moves"][get_gamemaster_move_id(
+            available_fast_moves[moves[1]+1])]
+        fast_move = Move(fast_move_gm, types)
         chargedMovesAvailable = gm["chargedMoves"]
         if haskey(gm, "tags") &&
            "shadoweligible" in gm["tags"] && gm["level25CP"] < cp_limit
@@ -82,7 +82,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
     else
         moveset = custom_moveset == ["none"] ?
             rankings[i]["moveset"] : custom_moveset
-        fastMove = FastMove(moveset[1], types)
+        fast_move = FastMove(moveset[1], types)
         chargedMove1 = ChargedMove(moveset[2], types)
         chargedMove2 = ChargedMove(moveset[3], types)
     end
@@ -90,7 +90,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
         types[1],
         types[2],
         stats,
-        fastMove,
+        fast_move,
         get_energy(chargedMove1) > get_energy(chargedMove2) ? chargedMove2 : chargedMove1,
         get_energy(chargedMove1) > get_energy(chargedMove2) ? chargedMove1 : chargedMove2
     )
@@ -139,34 +139,14 @@ struct DynamicPokemon
     data::UInt16    # hp (initially hitpoints stat) and energy (initially 0)
 end
 
+get_energy(p::DynamicPokemon) = UInt8(p.data >> 0x0009)
+get_hp(p::DynamicPokemon) = p.data % 0x0200
+
 """
     DynamicPokemon(mon)
 
 Construct a starting DynamicPokemon from a StaticPokemon. This is just setting
 the starting hp of the mon to the stat value, and the energy to zero.
 """
-
-function get_energy(p::DynamicPokemon)
-    return p.data >> 0x0009
-end
-
-function get_hp(p::DynamicPokemon)
-    return p.data % 0x0200
-end
-
-function add_energy(p::DynamicPokemon, e::UInt16)
-    return DynamicPokemon(min(0x0064, get_energy(p) + e) << 9 + get_hp(p))
-end
-
-function subtract_energy(p::DynamicPokemon, e::UInt16)
-    curr_e = get_energy(p)
-    return DynamicPokemon((curr_e - min(curr_e, e)) << 9 + get_hp(p))
-end
-
-function damage(p::DynamicPokemon, d::UInt16)
-    return DynamicPokemon(p.data - min(get_hp(p), d))
-end
-
-function DynamicPokemon(mon::StaticPokemon)
-    DynamicPokemon(mon.stats.hitpoints)
-end
+DynamicPokemon(mon::StaticPokemon) = DynamicPokemon(mon.stats.hitpoints)
+DynamicPokemon(hp::UInt16, energy::UInt8) = DynamicPokemon((UInt16(energy) << 0x0009) + hp)

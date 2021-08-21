@@ -9,25 +9,10 @@ As a result, the multiplier for no buff effect is 0. Inputs should be between -4
 julia> get_buff_modifier(Int8(0))
 12
 """
-function get_buff_modifier(i::UInt8)
-    a = i ÷ UInt8(27)
-    d = (i ÷ UInt8(3)) % UInt8(9)
-    a1, a2 = a > UInt8(3) ? (a, UInt8(4)) :
-        (UInt8(4), UInt8(8) - a)
-    d1, d2 = d > UInt8(3) ? (d, UInt8(4)) :
-        (UInt8(4), UInt8(8) - d)
+function get_buff_modifier(a::UInt8, d::UInt8)
+    a1, a2 = a > UInt8(3) ? (a, UInt8(4)) : (UInt8(4), UInt8(8) - a)
+    d1, d2 = d > UInt8(3) ? (d, UInt8(4)) : (UInt8(4), UInt8(8) - d)
     return a1 * d2, a2 * d1
-end
-
-function evaluate_fast_moves(team::DynamicTeam, active::UInt8, dmg::UInt16, energy::UInt16)
-    active_mon = add_energy(damage(team[active], dmg), energy)
-    return DynamicTeam(
-        active == 0x01 ? active_mon : team[0x01],
-        active == 0x02 ? active_mon : team[0x02],
-        active == 0x03 ? active_mon : team[0x03],
-        team.switchCooldown,
-        team.data
-    )
 end
 
 """
@@ -36,22 +21,14 @@ end
 Takes in the dynamic state, the static state, and the attacking agent and returns
 the dynamic state after the fast move has occurred, with precisely one copy
 """
-function evaluate_fast_moves(state::DynamicState, static_state::StaticState,
-    using_fm::Tuple{Bool, Bool})
-    active1, active2 = get_active(state)
-    fm_dmg1, fm_dmg2 = get_fm_damage(state)
+function evaluate_fast_move(static_state::StaticState, agent::UInt8, 
+    attacker_active::UInt8, attacker_energy::UInt8, 
+    defender_hp::UInt16, fm_dmg::UInt16)
 
-    return DynamicState(
-        evaluate_fast_moves(state[0x01], active1,
-            using_fm[2] ? fm_dmg1 : 0x0000,
-            using_fm[1] ? get_energy(static_state[0x01][active1].fastMove) :
-            0x0000),
-        evaluate_fast_moves(state[0x02], active2,
-            using_fm[1] ? fm_dmg2 : 0x0000,
-            using_fm[2] ? get_energy(static_state[0x02][active2].fastMove) :
-            0x0000),
-        state.data
-    )
+    attacker_energy += get_energy(static_state[agent][attacker_active].fast_move)
+    defender_hp -= min(defender_hp, fm_dmg)
+
+    return attacker_energy, defender_hp
 end
 
 """
@@ -62,88 +39,51 @@ the charge, whether or not the opponent shields, and whether or not buffs are
 applied (say in the case of a random buff move) and returns
 the dynamic state after the charged move has occurred, with precisely one copy
 """
-function evaluate_charged_move(state::DynamicState, static_state::StaticState,
-    cmp::UInt8, move_id::UInt8, charge::UInt8, shielding::Bool)
-    next_state = state
-    active1, active2 = get_active(next_state)
+function evaluate_charged_move(static_state::StaticState, cmp::UInt8, move_id::UInt8, 
+    shielding::Bool, active_1::UInt8, active_2::UInt8, a1::UInt8, d1::UInt8, a2::UInt8, 
+    d2::UInt8, attacker_energy::UInt8, defender_hp::UInt16, shields::UInt8, 
+    fm_dmg_1::UInt16, fm_dmg_2::UInt16)
+
     a_active, d_active, agent, d_agent = isodd(cmp) ?
-        (active1, active2, 0x01, 0x02) : (active2, active1, 0x02, 0x01)
-    data = next_state.data
-    a_data = next_state[agent].data
-    d_data = next_state[d_agent].data
+        (active_1, active_2, 0x01, 0x02) : (active_2, active_1, 0x02, 0x01)
     move = move_id == 0x01 ? static_state[agent][a_active].charged_move_1 :
         static_state[agent][a_active].charged_move_2
+    new_fm_dmg_1, new_fm_dmg_2 = fm_dmg_1, fm_dmg_2
+    
+    chance = 0x00
     buff_chance = get_buff_chance(move)
-
     if buff_chance == 1.0
-        a_data, d_data = apply_buff(a_data, d_data, move)
-    elseif buff_chance != 0.0
-        data += agent == 0x01 ? (move_id == 0x01 ? 0x0f50 : 0x1ea0) :
-            (move_id == 0x01 ? 0x2df0 : 0x3d40)
+        a1, d1, a2, d2 = apply_buff(a1, d1, a2, d2, move)
+        new_fm_dmg_1 = calculate_damage(static_state[0x01][active_1].stats.attack, 
+            static_state[0x02][active_2].stats.defense, 
+            (static_state[0x02][active_2].primary_type, static_state[0x02][active_2].secondary_type), 
+            a1, d2, static_state[0x01][active_1].fast_move)
+        new_fm_dmg_2 = calculate_damage(static_state[0x02][active_2].stats.attack, 
+            static_state[0x01][active_1].stats.defense, 
+            (static_state[0x01][active_1].primary_type, static_state[0x01][active_1].secondary_type), 
+            a2, d1, static_state[0x02][active_2].fast_move)
+    elseif !iszero(buff_chance)
+        chance = agent == 0x01 ? (move_id == 0x01 ? 0x01 : 0x02) :
+            (move_id == 0x01 ? 0x03 : 0x04)
     end
 
-    attacking_team = DynamicTeam(
-        a_active == 0x01 ? subtract_energy(next_state[agent][0x01],
-            get_energy(move)) : next_state[agent][0x01],
-        a_active == 0x02 ? subtract_energy(next_state[agent][0x02],
-            get_energy(move)) : next_state[agent][0x02],
-        a_active == 0x03 ? subtract_energy(next_state[agent][0x03],
-            get_energy(move)) : next_state[agent][0x03],
-        next_state[agent].switchCooldown,
-        a_data
-    )
-
-    damage_dealt = shielding ? 0x0001 : calculate_damage(
-        static_state[agent][a_active].stats.attack,
-        state[agent].data,
-        static_state[d_agent][d_active],
-        move,
-        charge = charge
-    )
-
-    defending_team = DynamicTeam(
-        d_active == 0x01 ? damage(next_state[d_agent][0x01], damage_dealt) :
-            next_state[d_agent][0x01],
-        d_active == 0x02 ? damage(next_state[d_agent][0x02], damage_dealt) :
-            next_state[d_agent][0x02],
-        d_active == 0x03 ? damage(next_state[d_agent][0x03], damage_dealt) :
-            next_state[d_agent][0x03],
-        next_state[d_agent].switchCooldown,
-        d_data - (shielding ? 0x01 : 0x00)
-    )
-
-    next_state = DynamicState(
-        agent == 0x01 ? attacking_team : defending_team,
-        agent == 0x01 ? defending_team : attacking_team,
-        # go from cmp 4 (2 then 1) to cmp 1
-        # or go from cmp 3 (1 then 2) to cmp 2
-        # or go from cmp 2 to 0
-        # or go from cmp 1 to 0
-        data  - (cmp == 0x04 ? (get_hp(defending_team[d_active]) != 0x0000 ?
-            0x0930 : 0x0c40) : (cmp == 0x03 ?
-            (get_hp(defending_team[d_active]) != 0x0000 ? 0x0310 : 0x0930) :
-            (cmp == 0x02 ? 0x0620 : 0x0310)))
-    )
-
-    if buff_chance == Int8(100)
-        return update_fm_damage(next_state, static_state)
-    else
-        return next_state
-    end
+    attacker_energy -= get_energy(move)
+    defender_hp -= shielding ? 0x0001 : min(defender_hp, 
+        calculate_damage(static_state[agent][a_active].stats.attack, 
+        static_state[d_agent][d_active].stats.defense, 
+        (static_state[d_agent][d_active].primary_type, static_state[d_agent][d_active].secondary_type), 
+        agent == 0x01 ? a1 : a2, agent == 0x02 ? d1 : d2, static_state[agent][a_active].fast_move))
+    shields -= shielding ? 0x01 : 0x00
+    cmp = defender_hp == 0x0000 || cmp < 0x03 ? 0x00 : cmp == 0x04 ? 0x01 : 0x02
+    
+    return chance, a1, d1, a2, d2, new_fm_dmg_1, new_fm_dmg_2, attacker_energy, defender_hp, shields, cmp
 end
 
-function apply_buff(a_data::UInt8, d_data::UInt8, move::ChargedMove)
-    a1 = a_data ÷ UInt8(27)
-    d1 = (a_data ÷ UInt8(3)) % UInt8(9)
-    a2 = d_data ÷ UInt8(27)
-    d2 = (d_data ÷ UInt8(3)) % UInt8(9)
-    return (a_data + Int8(27) * clamp(get_atk(iszero(get_buff_target(move)) ? move.buff : defaultBuff),
-        -Int8(a1), Int8(9 - a1)) + Int8(3) * clamp(get_def(!iszero(get_buff_target(move)) ? move.buff : defaultBuff),
-        -Int8(d1), Int8(9 - a1)), d_data + Int8(27) * clamp(
-        get_atk(!iszero(get_buff_target(move)) ? move.buff : defaultBuff), 
-        -Int8(a2), Int8(9 - a1)) + Int8(3) *
-        clamp(get_def(iszero(get_buff_target(move)) ? move.buff : defaultBuff), -Int8(d2), Int8(9 - a1))
-    )
+function apply_buff(a1::UInt8, d1::UInt8, a2::UInt8, d2::UInt8, move::ChargedMove)
+    return clamp(iszero(get_buff_target(move)) ? a1 + get_atk(move.buff) : a1, 0x00, 0x09),
+           clamp(iszero(get_buff_target(move)) ? d1 + get_def(move.buff) : d1, 0x00, 0x09), 
+          clamp(!iszero(get_buff_target(move)) ? a2 + get_atk(move.buff) : a2, 0x00, 0x09),
+          clamp(!iszero(get_buff_target(move)) ? d2 + get_def(move.buff) : d2, 0x00, 0x09)
 end
 
 """
@@ -153,38 +93,37 @@ Takes in the dynamic state, the switching agent, which team member they switch t
 and the time in the switch (only applies in switches after a faint) and returns
 the dynamic state after the switch has occurred, with precisely one copy
 """
-function evaluate_switch(state::DynamicState, static_state::StaticState,
-    agent::UInt8, to_switch::UInt8, time::UInt8)
-    data = state.data
-    active1, active2 = get_active(state)
-    fmPending = get_fast_moves_pending(state)
-    if agent == 0x01
-        data += active1 == 0x01 ? to_switch == 0x01 ? Int16(1)  : Int16(2) :
-                active1 == 0x02 ? to_switch == 0x01 ? Int16(-1) : Int16(1) :
-                                  to_switch == 0x01 ? Int16(-2) : Int16(-1)
-        data -= fmPending[1] * UInt32(16)
-    else
-        data += active2 == 0x01 ? to_switch == 0x01 ? Int16(4)  : Int16(8) :
-                active2 == 0x02 ? to_switch == 0x01 ? Int16(-4) : Int16(4) :
-                                  to_switch == 0x01 ? Int16(-8) : Int16(-4)
-        data -= fmPending[2] * UInt32(112)
-    end
-    next_state =  DynamicState(
-        DynamicTeam(
-            state[0x01][0x01], state[0x01][0x02], state[0x01][0x03],
-            ((agent == 0x01 && time == 0x00) ? Int8(120) :
-                state[0x01].switchCooldown -
-                min(state[0x01].switchCooldown, time)),
-            0x78 + state[0x01].data % 3),
-        DynamicTeam(
-            state[0x02][0x01], state[0x02][0x02], state[0x02][0x03],
-            ((agent == 0x02 && time == 0x00) ? Int8(120) :
-                state[0x02].switchCooldown -
-                min(state[0x02].switchCooldown, time)),
-            0x78 + state[0x02].data % 3),
-        data)
-    next_state = update_fm_damage(next_state, static_state)
-    return next_state
+function evaluate_switch(static_state::StaticState, agent::UInt8, to_switch::UInt8, 
+    time::UInt8, active_1::UInt8, active_2::UInt8, switch_cooldown_1::Int8, 
+    switch_cooldown_2::Int8)
+
+    active_1 = agent == 0x01 ? 
+        (active_1 == 0x01 ? to_switch == 0x01 ? 0x02 : 0x03  :
+         active_1 == 0x02 ? to_switch == 0x01 ? 0x01 : 0x03  :
+                            to_switch == 0x01 ? 0x01 : 0x02) : active_1
+    active_2 = agent == 0x02 ? 
+        (active_2 == 0x01 ? to_switch == 0x01 ? 0x02 : 0x03  :
+         active_2 == 0x02 ? to_switch == 0x01 ? 0x01 : 0x03  :
+                            to_switch == 0x01 ? 0x01 : 0x02) : active_2
+    
+    switch_cooldown_1 = (agent == 0x01 && time == 0x00) ? Int8(120) :
+        switch_cooldown_1 - min(switch_cooldown_1, time)
+    switch_cooldown_2 = (agent == 0x02 && time == 0x00) ? Int8(120) :
+        switch_cooldown_2 - min(switch_cooldown_2, time)
+
+    #fm_pending_1, fm_pending_2 = 0x00, 0x00
+    #a1, d1, a2, d2 = 0x04, 0x04, 0x04, 0x04
+
+    fm_dmg_1 = calculate_damage(static_state[0x01][active_1].stats.attack, 
+        static_state[0x02][active_2].stats.defense, 
+        (static_state[0x02][active_2].primary_type, static_state[0x02][active_2].secondary_type), 
+        0x04, 0x04, static_state[0x01][active_1].fast_move)
+    fm_dmg_2 = calculate_damage(static_state[0x02][active_2].stats.attack, 
+        static_state[0x01][active_1].stats.defense, 
+        (static_state[0x01][active_1].primary_type, static_state[0x01][active_1].secondary_type), 
+        0x04, 0x04, static_state[0x02][active_2].fast_move)
+
+    return agent == 0x01 ? active_1 : active_2, switch_cooldown_1, switch_cooldown_2, fm_dmg_1, fm_dmg_2
 end
 
 """
@@ -194,28 +133,19 @@ Given the dynamic state and the fast move cooldowns, adjust the times so that
 one turn has elapsed, and reset fast move cooldowns as needed. This returns a
 new DynamicState using precisely one copy
 """
-function step_timers(state::DynamicState, fmCooldown1::UInt16, fmCooldown2::UInt16)
-    fmPending = get_fast_moves_pending(state)
-    data = state.data
-    if fmCooldown1 != Int8(0)
-        data += (UInt16(fmCooldown1) - fmPending[1]) * 0x0010
-    elseif fmPending[1] != 0x00
-        data -= 0x0010
-    end
-    if fmCooldown2 != Int8(0)
-        data += (UInt16(fmCooldown2) - fmPending[2]) * 0x0070
-    elseif fmPending[2] != 0x00
-        data -= 0x0070
-    end
+function step_timers(fm_cooldown_1::UInt8, fm_cooldown_2::UInt8, 
+    fm_pending_1::UInt8, fm_pending_2::UInt8, 
+    switch_cooldown_1::Int8, switch_cooldown_2::Int8)
 
-    return DynamicState(
-        DynamicTeam(state[0x01][0x01], state[0x01][0x02], state[0x01][0x03],
-            max(Int8(0), state[0x01].switchCooldown - Int8(1)),
-            state[0x01].data),
-        DynamicTeam(state[0x02][0x01], state[0x02][0x02], state[0x02][0x03],
-            max(Int8(0), state[0x02].switchCooldown - Int8(1)),
-            state[0x02].data),
-        data)
+    fm_pending_1 = !iszero(fm_cooldown_1) ? fm_cooldown_1 : 
+                   !iszero(fm_pending_1)  ? fm_pending_1 - 0x01 : 0x00
+    fm_pending_2 = !iszero(fm_cooldown_2) ? fm_cooldown_2 : 
+                   !iszero(fm_pending_2)  ? fm_pending_2 - 0x01 : 0x00
+
+    switch_cooldown_1 = max(Int8(0), switch_cooldown_1 - Int8(1))
+    switch_cooldown_2 = max(Int8(0), switch_cooldown_2 - Int8(1))
+
+    return fm_pending_1, fm_pending_2, switch_cooldown_1, switch_cooldown_2
 end
 
 """

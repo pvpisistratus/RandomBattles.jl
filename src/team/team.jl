@@ -19,7 +19,7 @@ struct DynamicTeam <: AbstractArray{DynamicPokemon, 1}
     mon1::DynamicPokemon
     mon2::DynamicPokemon
     mon3::DynamicPokemon
-    switchCooldown::Int8     # Initially 0
+    switch_cooldown::Int8     # Initially 0
     data::UInt8              # StatBuff info and shields
 end
 
@@ -28,16 +28,20 @@ Base.IndexStyle(::Type{<:DynamicTeam}) = IndexLinear()
 Base.getindex(d::DynamicTeam, i::UInt8) =
     i == 0x01 ? d.mon1 : i == 0x02 ? d.mon2 : d.mon3
 
+get_buffs(team::DynamicTeam) = team.data ÷ 0x1b, (team.data ÷ 0x03) % 0x09
+get_shields(team::DynamicTeam) = team.data % 0x03
 has_shield(team::DynamicTeam) = !iszero(team.data % 0x03)
+# returns 2 if 1, 1 if 2. Note: tested some bit twiddling code that was roughly
+# equivalent speed, but this is more readable.
+get_other_agent(agent::UInt8) = agent == 0x01 ? 0x02 : 0x01
 
 DynamicTeam(team::StaticTeam) = DynamicTeam(
     DynamicPokemon(team[0x01]),
     DynamicPokemon(team[0x02]),
     DynamicPokemon(team[0x03]),
     Int8(0),
-    UInt8(122)
+    0x7a
 )
-
-# returns 2 if 1, 1 if 2. Note: tested some bit twiddling code that was roughly
-# equivalent speed, but this is more readable.
-get_other_agent(agent::UInt8) = agent == 0x01 ? 0x02 : 0x01
+DynamicTeam(mon1::DynamicPokemon, mon2::DynamicPokemon, mon3::DynamicPokemon, 
+    switch_cooldown::Int8, a::UInt8, d::UInt8, shields::UInt8) = 
+    DynamicTeam(mon1, mon2, mon3, switch_cooldown, a * 0x1b + d * 0x03 + shields)

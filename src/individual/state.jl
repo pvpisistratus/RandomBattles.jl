@@ -34,16 +34,15 @@ has_shield(state::DynamicIndividualState, agent::UInt8) = agent == 0x01 ?
   !iszero((state.data ÷ UInt32(3)) % UInt32(3))
 
 get_fast_moves_pending(state::DynamicIndividualState) =
-    (state.data ÷ UInt32(9)) % UInt32(7), (state.data ÷ UInt32(63)) % UInt32(7)
+    UInt8((state.data ÷ UInt32(9)) % UInt32(7)), UInt8((state.data ÷ UInt32(63)) % UInt32(7))
 
-get_cmp(state::DynamicIndividualState) = (state.data ÷ UInt32(441)) % UInt32(5)
+get_cmp(state::DynamicIndividualState) = UInt8((state.data ÷ UInt32(441)) % UInt32(5))
 
-get_chance(state::DynamicIndividualState) = (state.data ÷ UInt32(2205)) %
-    UInt32(6)
+get_chance(state::DynamicIndividualState) = UInt8((state.data ÷ UInt32(2205)) % UInt32(6))
 
 get_buffs(data::UInt32, attacker::Int64) = attacker == 1 ?
-    ((data ÷ UInt32(13230))   % 9, (data ÷ UInt32(119070))  % 9) :
-    ((data ÷ UInt32(1071630)) % 9, (data ÷ UInt32(9644670)) % 9)
+    (UInt8((data ÷ UInt32(13230)))   % 9, UInt8(data ÷ UInt32(119070))  % 9) :
+    (UInt8((data ÷ UInt32(1071630))) % 9, UInt8(data ÷ UInt32(9644670)) % 9)
 
 DynamicIndividualState(state::StaticIndividualState; shields::Int8 = Int8(2)) =
     DynamicIndividualState(

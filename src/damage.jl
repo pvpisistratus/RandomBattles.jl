@@ -118,13 +118,14 @@ Calculate the damage a particular pokemon does against another using a charged m
 """
 function calculate_damage(
     attack::UInt16,
-    buff_data::UInt8,
-    defender::StaticPokemon,
+    defense::UInt16,
+    mon_typings::Tuple{UInt8, UInt8},
+    buff_atk::UInt8,
+    buff_def::UInt8,
     move::Move;
     charge::UInt8 = 0x64,
 )
-    a, d = get_buff_modifier(buff_data)
-    return UInt16((26 * attack * get_power(move) * get_STAB(move) * a * charge) ÷ 
-        (get_eff(move.move_type, defender.primary_type, defender.secondary_type) * 
-        defender.stats.defense * d) + 1)
+    buff_num, buff_denom = get_buff_modifier(buff_atk, buff_def)
+    return UInt16((26 * attack * get_power(move) * get_STAB(move) * buff_num * charge) ÷ 
+        (get_eff(move.move_type, mon_typings[1], mon_typings[2]) * defense * buff_denom) + 1)
 end

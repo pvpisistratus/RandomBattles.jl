@@ -45,9 +45,9 @@ function FastMove(move_name::String, types::Tuple{UInt8, UInt8})
 end
 
 get_STAB(fm::FastMove) = iszero(fm.data >> 13) ? 10 : 12
-get_power(fm::FastMove) = (fm.data >> 8) & 0x001f
-get_energy(fm::FastMove) = (fm.data >> 3) & 0x001f
-get_cooldown(fm::FastMove) = fm.data & 0x0007
+get_power(fm::FastMove) = UInt8((fm.data >> 8) & 0x001f)
+get_energy(fm::FastMove) = UInt8((fm.data >> 3) & 0x001f)
+get_cooldown(fm::FastMove) = UInt8(fm.data & 0x0007)
 
 """
     ChargedMove(moveType, stab, power, energy, buffChance, opp_buffs, self_buffs)
@@ -110,9 +110,9 @@ function ChargedMove(move_name::String, types)
     return ChargedMove(gm_move, types)
 end
 
-get_power(cm::ChargedMove) = 0x0005 * (cm.data & 0x003f)
-get_energy(cm::ChargedMove) = 0x0005 * ((cm.data >> 6) & 0x000f)
-get_buff_target(cm::ChargedMove) = (cm.data >> 11) & 0x0001
+get_power(cm::ChargedMove) = UInt8(0x0005 * (cm.data & 0x003f))
+get_energy(cm::ChargedMove) = UInt8(0x0005 * ((cm.data >> 6) & 0x000f))
+get_buff_target(cm::ChargedMove) = UInt8((cm.data >> 11) & 0x0001)
 get_STAB(cm::ChargedMove) = iszero(cm.data >> 12) ? 10 : 12
 
 function get_buff_chance(cm::ChargedMove)
