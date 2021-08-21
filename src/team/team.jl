@@ -43,5 +43,5 @@ DynamicTeam(team::StaticTeam) = DynamicTeam(
     0x7a
 )
 DynamicTeam(mon1::DynamicPokemon, mon2::DynamicPokemon, mon3::DynamicPokemon, 
-    switch_cooldown::Int8, a::UInt8, d::UInt8, shields::UInt8) = 
+    switch_cooldown::UInt8, a::UInt8, d::UInt8, shields::UInt8) = 
     DynamicTeam(mon1, mon2, mon3, switch_cooldown, a * 0x1b + d * 0x03 + shields)
