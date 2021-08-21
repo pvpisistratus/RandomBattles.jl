@@ -32,29 +32,17 @@ get_fm_damage(state::DynamicState) =
     UInt16((state.data ÷ UInt32(23520)) % UInt32(425)),
     UInt16(state.data ÷ UInt32(9996000))
 
-function update_fm_damage(state::DynamicState, static_state::StaticState)
-    active1, active2 = get_active(state)
-
-    new_fm_dmg1, new_fm_dmg2 = get_fast_move_damages(
-        state, static_state, active1, active2)
-    fm_dmg1, fm_dmg2 = get_fm_damage(state)
-    data = state.data
-    if new_fm_dmg1 > fm_dmg1
-        data += UInt32(new_fm_dmg1 - fm_dmg1) * UInt32(23520)
-    else
-        data -= UInt32(fm_dmg1 - new_fm_dmg1) * UInt32(23520)
-    end
-    if new_fm_dmg2 > fm_dmg2
-        data += UInt32(new_fm_dmg2 - fm_dmg2) * UInt32(9996000)
-    else
-        data -= UInt32(fm_dmg2 - new_fm_dmg2) * UInt32(9996000)
-    end
-    return DynamicState(state[0x01], state[0x02], data)
-end
-
 function DynamicState(s::StaticState)
-    d = DynamicState(DynamicTeam(s[0x01]), DynamicTeam(s[0x02]), UInt32(133))
-    return update_fm_damage(d, s)
+    fm_dmg_1 = UInt32(calculate_damage(s[0x01][0x01].stats.attack, 
+            s[0x02][0x01].stats.defense, 
+            (s[0x02][0x01].primary_type, s[0x02][0x01].secondary_type), 
+            0x04, 0x04, s[0x01][0x01].fast_move))
+    fm_dmg_2 = UInt32(calculate_damage(s[0x02][0x01].stats.attack, 
+        s[0x01][0x01].stats.defense, 
+        (s[0x01][0x01].primary_type, s[0x01][0x01].secondary_type), 
+        0x04, 0x04, s[0x02][0x01].fast_move))
+    return DynamicState(DynamicTeam(s[0x01]), DynamicTeam(s[0x02]), UInt32(133) + 
+        fm_dmg_1 * UInt32(23520) + fm_dmg_2 * UInt32(9996000))
 end
 
 DynamicState(team1::DynamicTeam, team2::DynamicTeam, active_1::UInt8, active_2::UInt8, 
