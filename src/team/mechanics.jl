@@ -43,8 +43,8 @@ struct EvaluateChargedMovesOutput
     d1::UInt8 
     a2::UInt8
     d2::UInt8
-    fm_dmg_1::UInt8
-    fm_dmg_2::UInt8
+    fm_dmg_1::UInt16
+    fm_dmg_2::UInt16
     attacker_energy::UInt8
     defender_hp::UInt16
     shields::UInt8
@@ -68,8 +68,7 @@ function evaluate_charged_move(static_state::StaticState, cmp::UInt8, move_id::U
         (active_1, active_2, 0x01, 0x02) : (active_2, active_1, 0x02, 0x01)
     move = move_id == 0x01 ? static_state[agent][a_active].charged_move_1 :
         static_state[agent][a_active].charged_move_2
-    new_fm_dmg_1, new_fm_dmg_2 = fm_dmg_1, fm_dmg_2
-    
+
     chance = 0x00
     buff_chance = get_buff_chance(move)
     if buff_chance == 1.0
@@ -96,7 +95,7 @@ function evaluate_charged_move(static_state::StaticState, cmp::UInt8, move_id::U
     shields -= shielding ? 0x01 : 0x00
     cmp = defender_hp == 0x0000 || cmp < 0x03 ? 0x00 : cmp == 0x04 ? 0x01 : 0x02
     
-    return EvaluateChargedMovesOutput(chance, a1, d1, a2, d2, new_fm_dmg_1, new_fm_dmg_2, attacker_energy, defender_hp, shields, cmp)
+    return EvaluateChargedMovesOutput(chance, a1, d1, a2, d2, fm_dmg_1, fm_dmg_2, attacker_energy, defender_hp, shields, cmp)
 end
 
 function apply_buff(a1::UInt8, d1::UInt8, a2::UInt8, d2::UInt8, move::ChargedMove)
