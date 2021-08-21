@@ -135,7 +135,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
                 DynamicPokemon(hp_2_2, energy_2_2), 
                 DynamicPokemon(hp_2_3, energy_2_3), 
                 switch_cooldown_2, a2, d2, shields_2
-            ), active_1, active_2, fm_pending_1, fm_pending2, cmp, 0x00, fm_dmg_1, fm_dmg_2
+            ), active_1, active_2, fm_pending_1, fm_pending_2, cmp, 0x00, fm_dmg_1, fm_dmg_2
         )
         next_state_2 = next_state_1
         odds = 1.0
@@ -152,7 +152,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
                 DynamicPokemon(hp_2_2, energy_2_2), 
                 DynamicPokemon(hp_2_3, energy_2_3), 
                 switch_cooldown_2, a2, d2, shields_2
-            ), active_1, active_2, fm_pending_1, fm_pending2, 0x03, 0x00, fm_dmg_1, fm_dmg_2
+            ), active_1, active_2, fm_pending_1, fm_pending_2, 0x03, 0x00, fm_dmg_1, fm_dmg_2
         )
         next_state_2 = DynamicState(
             DynamicTeam(
@@ -165,7 +165,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
                 DynamicPokemon(hp_2_2, energy_2_2), 
                 DynamicPokemon(hp_2_3, energy_2_3), 
                 switch_cooldown_2, a2, d2, shields_2
-            ), active_1, active_2, fm_pending_1, fm_pending2, 0x04, 0x00, fm_dmg_1, fm_dmg_2
+            ), active_1, active_2, fm_pending_1, fm_pending_2, 0x04, 0x00, fm_dmg_1, fm_dmg_2
         )
         odds = 0.5
     else
@@ -181,7 +181,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
                 DynamicPokemon(hp_2_2, energy_2_2), 
                 DynamicPokemon(hp_2_3, energy_2_3), 
                 switch_cooldown_2, a2, d2, shields_2
-            ), active_1, active_2, fm_pending_1, fm_pending2, cmp, 0x00, fm_dmg_1, fm_dmg_2
+            ), active_1, active_2, fm_pending_1, fm_pending_2, cmp, 0x00, fm_dmg_1, fm_dmg_2
         )
 
         move = isodd(chance) ?
@@ -200,7 +200,7 @@ function play_turn(state::DynamicState, static_state::StaticState,
                 DynamicPokemon(hp_2_2, energy_2_2), 
                 DynamicPokemon(hp_2_3, energy_2_3), 
                 switch_cooldown_2, a2, d2, shields_2
-            ), active_1, active_2, fm_pending_1, fm_pending2, cmp, 0x00, fm_dmg_1, fm_dmg_2
+            ), active_1, active_2, fm_pending_1, fm_pending_2, cmp, 0x00, fm_dmg_1, fm_dmg_2
         )
         odds = get_buff_chance(move)
     end
