@@ -19,7 +19,7 @@ struct DynamicTeam <: AbstractArray{DynamicPokemon, 1}
     mon1::DynamicPokemon
     mon2::DynamicPokemon
     mon3::DynamicPokemon
-    switch_cooldown::Int8     # Initially 0
+    switch_cooldown::UInt8     # Initially 0
     data::UInt8              # StatBuff info and shields
 end
 
