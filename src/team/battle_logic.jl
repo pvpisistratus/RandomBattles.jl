@@ -2,9 +2,9 @@ function play_turn(state::DynamicState, static_state::StaticState,
     decision::Tuple{UInt8, UInt8})
 
     # unpack state
-    active_1, active_2 = get_active(next_state)
-    fm_pending_1, fm_pending_2 = get_fast_moves_pending(next_state)
-    cmp = get_cmp(next_state)
+    active_1, active_2 = get_active(state)
+    fm_pending_1, fm_pending_2 = get_fast_moves_pending(state)
+    cmp = get_cmp(state)
     chance = 0x00
     fm_dmg_1, fm_dmg_2 = get_fm_damage(state)
 
@@ -86,15 +86,17 @@ function play_turn(state::DynamicState, static_state::StaticState,
 
         # evaluate switches
         if decision[1] == 0x05 || decision[1] == 0x06
+            active_hp_1 = active_1 == 0x01 ? hp_1_1 : active_1 == 0x02 ? hp_1_2 : hp_1_3
             active_1, switch_cooldown_1, switch_cooldown_2, fm_dmg_1, fm_dmg_2 = 
                 evaluate_switch(static_state, 0x01, decision[1] - 0x04, 
-                    iszero(get_hp(state[0x01][active_1])) ? 0x18 : 0x00, 
+                    iszero(active_hp_1) ? 0x18 : 0x00, 
                     active_1, active_2, switch_cooldown_1, switch_cooldown_2)
         end
         if decision[2] == 0x05 || decision[2] == 0x06
+            active_hp_2 = active_2 == 0x01 ? hp_2_1 : active_2 == 0x02 ? hp_2_2 : hp_2_3
             active_2, switch_cooldown_1, switch_cooldown_2, fm_dmg_1, fm_dmg_2 = 
                 evaluate_switch(static_state, 0x02, decision[2] - 0x04, 
-                    iszero(get_hp(state[0x02][active_2])) ? 0x18 : 0x00, 
+                    iszero(active_hp_2) ? 0x18 : 0x00, 
                     active_1, active_2, switch_cooldown_1, switch_cooldown_2)
         end
 
