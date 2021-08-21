@@ -8,11 +8,13 @@ function play_turn(state::DynamicState, static_state::StaticState,
     chance = 0x00
     fm_dmg_1, fm_dmg_2 = get_fm_damage(state)
 
+    # unpack teams
     switch_cooldown_1, switch_cooldown_2 = state[0x01].switch_cooldown, state[0x02].switch_cooldown
     a1, d1 = get_buffs(state[0x01])
     a2, d2 = get_buffs(state[0x02])
     shields_1, shields_2 = get_shields(state[0x01]), get_shields(state[0x02])
 
+    # unpack pokemon
     hp_1_1, hp_1_2, hp_1_3, hp_2_1, hp_2_2, hp_2_3 = 
         get_hp(state[0x01][0x01]), get_hp(state[0x01][0x02]), get_hp(state[0x01][0x03]),
         get_hp(state[0x02][0x01]), get_hp(state[0x02][0x02]), get_hp(state[0x02][0x03])

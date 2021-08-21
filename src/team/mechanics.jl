@@ -107,9 +107,9 @@ function evaluate_switch(static_state::StaticState, agent::UInt8, to_switch::UIn
                             to_switch == 0x01 ? 0x01 : 0x02) : active_2
     
     switch_cooldown_1 = (agent == 0x01 && time == 0x00) ? Int8(120) :
-        switch_cooldown_1 - min(switch_cooldown_1, time)
+        switch_cooldown_1 - min(switch_cooldown_1, Int8(time))
     switch_cooldown_2 = (agent == 0x02 && time == 0x00) ? Int8(120) :
-        switch_cooldown_2 - min(switch_cooldown_2, time)
+        switch_cooldown_2 - min(switch_cooldown_2, Int8(time))
 
     #fm_pending_1, fm_pending_2 = 0x00, 0x00
     #a1, d1, a2, d2 = 0x04, 0x04, 0x04, 0x04
