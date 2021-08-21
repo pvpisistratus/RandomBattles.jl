@@ -122,8 +122,8 @@ and the time in the switch (only applies in switches after a faint) and returns
 the dynamic state after the switch has occurred, with precisely one copy
 """
 function evaluate_switch(static_state::StaticState, agent::UInt8, to_switch::UInt8, 
-    time::UInt8, active_1::UInt8, active_2::UInt8, switch_cooldown_1::Int8, 
-    switch_cooldown_2::Int8)
+    time::UInt8, active_1::UInt8, active_2::UInt8, switch_cooldown_1::UInt8, 
+    switch_cooldown_2::UInt8)
 
     active_1 = agent == 0x01 ? 
         (active_1 == 0x01 ? to_switch == 0x01 ? 0x02 : 0x03  :
@@ -167,7 +167,7 @@ new DynamicState using precisely one copy
 """
 function step_timers(fm_cooldown_1::UInt8, fm_cooldown_2::UInt8, 
     fm_pending_1::UInt8, fm_pending_2::UInt8, 
-    switch_cooldown_1::Int8, switch_cooldown_2::Int8)
+    switch_cooldown_1::UInt8, switch_cooldown_2::UInt8)
 
     fm_pending_1 = !iszero(fm_cooldown_1) ? fm_cooldown_1 : 
                    !iszero(fm_pending_1)  ? fm_pending_1 - 0x01 : 0x00
