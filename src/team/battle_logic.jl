@@ -271,13 +271,33 @@ function play_battle(state::DynamicState, static_state::StaticState;
     end
 end
 
+function play_battle(teams::NTuple{6, Union{String, Int}}; 
+    league::String = "great", cup::String = "all", 
+    allow_nothing::Bool = false, allow_overfarming::Bool = false)
+    static_state = StaticState(teams, league = league, cup = cup)
+    dynamic_state = DynamicState(static_state)
+    return play_battle(dynamic_state, static_state,
+        allow_nothing = allow_nothing, allow_overfarming = allow_overfarming)
+end
+
 """
     battle_scores(state, static_state, N)
 
 Play through N battles, starting from the inputted state with random,
 equally weighted decisions.
 """
-function battle_scores(starting_state::DynamicState,
-  static_state::StaticState, N::Int64)
-    return map(x -> play_battle(starting_state, static_state), 1:N)
+function battle_scores(starting_state::DynamicState, static_state::StaticState, 
+    N::Int64; allow_nothing::Bool = false, allow_overfarming::Bool = false)
+    return map(x -> play_battle(starting_state, static_state, 
+        allow_nothing = allow_nothing, allow_overfarming = allow_overfarming), 1:N)
+end
+
+function battle_scores(teams::NTuple{6, Union{String, Int}}, N; 
+    league::String = "great", cup::String = "all", 
+    allow_nothing::Bool = false, allow_overfarming::Bool = false)
+    static_state = StaticState(teams, league = league, cup = cup)
+    dynamic_state = DynamicState(static_state)
+    
+    return map(x -> play_battle(dynamic_state, static_state, 
+        allow_nothing = allow_nothing, allow_overfarming = allow_overfarming), 1:N)
 end
