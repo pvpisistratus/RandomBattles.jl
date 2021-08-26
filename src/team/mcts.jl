@@ -135,7 +135,8 @@ function select_mcts(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
         ((1 - γ) * exp(η * w₂(i))) / divisor +
         γ / Base.ctpop_int(s.B)) for i = 0x01:0x08]
 
-    return UInt8(rand(rb_rng, Categorical(s.σ₁))), UInt8(rand(rb_rng, Categorical(s.σ₂)))
+    return UInt8(rand(rb_rng, Categorical(s.σ₁))), UInt8(rand(rb_rng, 
+        Categorical(s.σ₂)))
 end
 
 function update_mcts!(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
@@ -226,7 +227,8 @@ function select_decisions_MCTS(dynamic_state::DynamicState,
         active = get_active(tree[curr_index].state)
         chance = get_chance(tree[curr_index].state)
         if chance == 0x05
-            curr_index = rand(rb_rng) < 0.5 ? tree[curr_index].chance_children[1] :
+            curr_index = rand(rb_rng) < 0.5 ? 
+                tree[curr_index].chance_children[1] :
                 tree[curr_index].chance_children[2]
         elseif chance != 0x00
             agent = chance < 0x03 ? 0x01 : 0x02

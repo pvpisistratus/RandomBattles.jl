@@ -89,8 +89,10 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
                 allow_overfarming = allow_overfarming,
                 sim_to_end = sim_to_end).payoff
         else
-            state_1 = play_turn(state_1, static_state, get_decisions(A, B, i, j))
-            state_2 = play_turn(state_2, static_state, get_decisions(A, B, i, j))
+            state_1 = play_turn(state_1, static_state, 
+                get_decisions(A, B, i, j))
+            state_2 = play_turn(state_2, static_state, 
+                get_decisions(A, B, i, j))
             @inbounds payoffs[i, j] = odds *
                 SM(state_1, static_state, depth - 1,
                     allow_nothing = allow_nothing,

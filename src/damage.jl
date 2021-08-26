@@ -126,6 +126,7 @@ function calculate_damage(
     charge::UInt8 = 0x64,
 )
     buff_num, buff_denom = get_buff_modifier(buff_atk, buff_def)
-    return UInt16((26 * attack * get_power(move) * get_STAB(move) * buff_num * charge) ÷ 
-        (get_eff(move.move_type, mon_typings[1], mon_typings[2]) * defense * buff_denom) + 1)
+    return UInt16((26 * attack * get_power(move) * get_STAB(move) * buff_num * 
+        charge) ÷ (get_eff(move.move_type, mon_typings[1], mon_typings[2]) * 
+        defense * buff_denom) + 1)
 end

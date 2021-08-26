@@ -91,8 +91,10 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
         types[2],
         stats,
         fast_move,
-        get_energy(chargedMove1) > get_energy(chargedMove2) ? chargedMove2 : chargedMove1,
-        get_energy(chargedMove1) > get_energy(chargedMove2) ? chargedMove1 : chargedMove2
+        get_energy(chargedMove1) > get_energy(chargedMove2) ? 
+            chargedMove2 : chargedMove1,
+        get_energy(chargedMove1) > get_energy(chargedMove2) ? 
+            chargedMove1 : chargedMove2
     )
 end
 
@@ -149,4 +151,5 @@ Construct a starting DynamicPokemon from a StaticPokemon. This is just setting
 the starting hp of the mon to the stat value, and the energy to zero.
 """
 DynamicPokemon(mon::StaticPokemon) = DynamicPokemon(mon.stats.hitpoints)
-DynamicPokemon(hp::UInt16, energy::UInt8) = DynamicPokemon((UInt16(energy) << 0x0009) + hp)
+DynamicPokemon(hp::UInt16, energy::UInt8) = 
+    DynamicPokemon((UInt16(energy) << 0x0009) + hp)

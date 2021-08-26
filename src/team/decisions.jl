@@ -34,11 +34,13 @@ function select_random_decision(d1::UInt8, d2::UInt8)
         a == 0x01 ? 0x01 : 
             a == 0x02 ? rand(rb_rng, (0x01, 0x02)) : 
             a == 0x03 ? rand(rb_rng, (0x01, 0x02, 0x03)) : 
-            a == 0x04 ? rand(rb_rng, (0x01, 0x02, 0x03, 0x04)) : rand(rb_rng, 0x01:a),
+            a == 0x04 ? rand(rb_rng, (0x01, 0x02, 0x03, 0x04)) : 
+            rand(rb_rng, 0x01:a),
         b == 0x01 ? 0x01 : 
             b == 0x02 ? rand(rb_rng, (0x01, 0x02)) : 
             b == 0x03 ? rand(rb_rng, (0x01, 0x02, 0x03)) : 
-            b == 0x04 ? rand(rb_rng, (0x01, 0x02, 0x03, 0x04)) : rand(rb_rng, 0x01:b),
+            b == 0x04 ? rand(rb_rng, (0x01, 0x02, 0x03, 0x04)) : 
+            rand(rb_rng, 0x01:b),
     )
 end
 
@@ -59,12 +61,13 @@ function get_possible_decisions(state::DynamicState, static_state::StaticState;
 
     if isodd(cmp) # if team 1 is using a charged move and has cmp
         return (get_energy(state[0x01][active[1]]) >=
-            get_energy(static_state[0x01][active[1]].charged_move_2) ? 0xc0 : 0x40,
-            has_shield(state[0x02]) ? 0x03 : 0x02)
+            get_energy(static_state[0x01][active[1]].charged_move_2) ? 0xc0 : 
+            0x40, has_shield(state[0x02]) ? 0x03 : 0x02)
     elseif !iszero(cmp) # if team 2 is using a charged move and has cmp
         return (has_shield(state[0x01]) ? 0x03 : 0x02,
             get_energy(state[0x02][active[2]]) >=
-            get_energy(static_state[0x02][active[2]].charged_move_2) ? 0xc0 : 0x40)
+            get_energy(static_state[0x02][active[2]].charged_move_2) ? 0xc0 : 
+            0x40)
     else
         d = 0x00, 0x00
         for i = 0x01:0x02
