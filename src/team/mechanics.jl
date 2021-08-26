@@ -9,7 +9,7 @@ As a result, the multiplier for no buff effect is 0. Inputs should be between -4
 julia> get_buff_modifier(Int8(0))
 12
 """
-@inline function get_buff_modifier(a::UInt8, d::UInt8)
+function get_buff_modifier(a::UInt8, d::UInt8)
     a1, a2 = a > UInt8(3) ? (a, UInt8(4)) : (UInt8(4), UInt8(8) - a)
     d1, d2 = d > UInt8(3) ? (d, UInt8(4)) : (UInt8(4), UInt8(8) - d)
     return a1 * d2, a2 * d1
@@ -27,7 +27,7 @@ end
 Takes in the dynamic state, the static state, and the attacking agent and returns
 the dynamic state after the fast move has occurred, with precisely one copy
 """
-@inline function evaluate_fast_move(static_state::StaticState, agent::UInt8, 
+function evaluate_fast_move(static_state::StaticState, agent::UInt8, 
     attacker_active::UInt8, attacker_energy::UInt8, 
     defender_hp::UInt16, fm_dmg::UInt16)
 
@@ -44,7 +44,7 @@ struct ApplyBuffOutput
     d2::UInt8
 end
 
-@inline apply_buff(a1::UInt8, d1::UInt8, a2::UInt8, d2::UInt8, move::ChargedMove) = 
+apply_buff(a1::UInt8, d1::UInt8, a2::UInt8, d2::UInt8, move::ChargedMove) = 
     ApplyBuffOutput(clamp(iszero(get_buff_target(move)) ? a1 + get_atk(move.buff) : a1, 0x00, 0x09),
                     clamp(iszero(get_buff_target(move)) ? d1 + get_def(move.buff) : d1, 0x00, 0x09), 
                     clamp(!iszero(get_buff_target(move)) ? a2 + get_atk(move.buff) : a2, 0x00, 0x09),
@@ -72,7 +72,7 @@ the charge, whether or not the opponent shields, and whether or not buffs are
 applied (say in the case of a random buff move) and returns
 the dynamic state after the charged move has occurred, with precisely one copy
 """
-@inline function evaluate_charged_move(static_state::StaticState, cmp::UInt8, move_id::UInt8, 
+function evaluate_charged_move(static_state::StaticState, cmp::UInt8, move_id::UInt8, 
     shielding::Bool, active_1::UInt8, active_2::UInt8, a1::UInt8, d1::UInt8, a2::UInt8, 
     d2::UInt8, attacker_energy::UInt8, defender_hp::UInt16, shields::UInt8, 
     fm_dmg_1::UInt16, fm_dmg_2::UInt16)
@@ -130,7 +130,7 @@ Takes in the dynamic state, the switching agent, which team member they switch t
 and the time in the switch (only applies in switches after a faint) and returns
 the dynamic state after the switch has occurred, with precisely one copy
 """
-@inline function evaluate_switch(static_state::StaticState, agent::UInt8, to_switch::UInt8, 
+function evaluate_switch(static_state::StaticState, agent::UInt8, to_switch::UInt8, 
     time::UInt8, active_1::UInt8, active_2::UInt8, switch_cooldown_1::UInt8, 
     switch_cooldown_2::UInt8)
 
@@ -174,7 +174,7 @@ Given the dynamic state and the fast move cooldowns, adjust the times so that
 one turn has elapsed, and reset fast move cooldowns as needed. This returns a
 new DynamicState using precisely one copy
 """
-@inline function step_timers(fm_cooldown_1::UInt8, fm_cooldown_2::UInt8, 
+function step_timers(fm_cooldown_1::UInt8, fm_cooldown_2::UInt8, 
     fm_pending_1::UInt8, fm_pending_2::UInt8, 
     switch_cooldown_1::UInt8, switch_cooldown_2::UInt8)
 
@@ -197,7 +197,7 @@ the PvPoke-like score that would occur if the first agent stopped attacking
 altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
-@inline min_score(s::DynamicState, static_s::StaticState) = 0.5 * mapreduce(x ->
+min_score(s::DynamicState, static_s::StaticState) = 0.5 * mapreduce(x ->
     static_s[0x02][x].stats.hitpoints - get_hp(s[0x02][x]), +, 0x01:0x03) /
     mapreduce(x -> static_s[0x02][x].stats.hitpoints, +, 0x01:0x03)
 
@@ -209,7 +209,7 @@ the PvPoke-like score that would occur if the second agent stopped attacking
 altogether. This is currently only used in computing the final score, but it
 could be used as strict bounds for α/β pruning, for example.
 """
-@inline max_score(s::DynamicState, static_s::StaticState) = 0.5 +
+max_score(s::DynamicState, static_s::StaticState) = 0.5 +
     0.5 * mapreduce(x -> get_hp(s[0x01][x]), +, 0x01:0x03) /
     mapreduce(x -> static_s[0x01][x].stats.hitpoints, +, 0x01:0x03)
 
@@ -220,5 +220,5 @@ Given the state and the static state (here just for starting hp values), compute
 the PvPoke-like score for the battle. Note that this can also be computed for
 battles in progress, and thus differs from PvPoke's use cases
 """
-@inline battle_score(s::DynamicState, static_s::StaticState) =
+battle_score(s::DynamicState, static_s::StaticState) =
     min_score(s, static_s) + max_score(s, static_s) - 0.5
