@@ -28,7 +28,7 @@ function StaticPokemon(i::Int64; league::String = "great", cup = "all",
     gm = gamemaster["pokemon"][gmid]
     type_strings = convert(Array{String}, gm["types"])
     types = UInt8(findfirst(x -> typings[x] == type_strings[1], 1:19)), 
-        UInt8(findfirst(x -> typings[x] == type_strings[1], 1:19))
+        UInt8(findfirst(x -> typings[x] == type_strings[2], 1:19))
     cp_limit = get_cp_limit(league)
     if custom_stats != ()
         level, atk, def, hp = parse.(Int8, custom_stats)
