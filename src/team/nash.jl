@@ -73,7 +73,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
                 allow_overfarming = allow_overfarming,
                 sim_to_end = sim_to_end).payoff
         else
-            @inbounds payoffs[i, j] = odds *
+            @inbounds payoffs[i, j] = turn_output.odds *
                 SM(turn_output.next_state_1, 
                     static_state, depth - 1,
                     allow_nothing = allow_nothing,
