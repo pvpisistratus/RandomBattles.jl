@@ -64,41 +64,22 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
 
     payoffs = zeros(Float64, Base.ctpop_int(A), Base.ctpop_int(B))
 
-    state_1, state_2 = state, state
-    odds = Int8(100)
-
-    chance = get_chance(state)
-    if chance == 0x05
-        odds = 0.5
-        state_1 = get_chance_state_1(state, static_state, chance)
-        state_2 = get_chance_state_2(state, chance)
-    elseif chance != 0x00
-        active1, active2 = get_active(state)
-        agent = chance < 0x03 ? 0x01 : 0x02
-        odds = get_buff_chance(isodd(chance) ?
-            static_state[agent][active1].charged_move_1 :
-            static_state[agent][active2].charged_move_2)
-        state_1 = get_chance_state_1(state, static_state, chance)
-        state_2 = get_chance_state_2(state, chance)
-    end
     for i = 0x01:Base.ctpop_int(A), j = 0x01:Base.ctpop_int(B)
-        if odds == 1.0
-            state = play_turn(state_1, static_state, get_decisions(A, B, i, j))
-            @inbounds payoffs[i, j] = SM(state, static_state, depth - 1,
+        turn_output = play_turn(state, static_state, get_decisions(A, B, i, j))
+        if turn_output.odds == 1.0
+            @inbounds payoffs[i, j] = SM(turn_output.next_state_1, 
+                static_state, depth - 1,
                 allow_nothing = allow_nothing,
                 allow_overfarming = allow_overfarming,
                 sim_to_end = sim_to_end).payoff
         else
-            state_1 = play_turn(state_1, static_state, 
-                get_decisions(A, B, i, j))
-            state_2 = play_turn(state_2, static_state, 
-                get_decisions(A, B, i, j))
             @inbounds payoffs[i, j] = odds *
-                SM(state_1, static_state, depth - 1,
+                SM(turn_output.next_state_1, 
+                    static_state, depth - 1,
                     allow_nothing = allow_nothing,
                     allow_overfarming = allow_overfarming,
                     sim_to_end = sim_to_end).payoff + (1 - odds) *
-                SM(state_2, static_state, depth - 1,
+                SM(turn_output.next_state_2, static_state, depth - 1,
                     allow_nothing = allow_nothing,
                     allow_overfarming = allow_overfarming,
                     sim_to_end = sim_to_end).payoff
@@ -147,7 +128,13 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
             end
             decision = get_decisions(A, B, decision1, decision2)
         end
-        s = play_turn(s, static_s, decision)
+        turn_output = play_turn(s, static_s, decision)
+        if turn_output.odds == 1.0
+            s = turn_output.next_state_1
+        else
+            s = rand(rb_rng) < turn_output.odds ? 
+                turn_output.next_state_1 : turn_output.next_state_2
+        end
         push!(strat.decisions, decision)
         push!(strat.scores, value + 0.5)
         push!(strat.activeMons, get_active(s))
