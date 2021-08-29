@@ -122,7 +122,8 @@ function evaluate_charged_move(static_state::StaticState, cmp::UInt8,
         (static_state[d_agent][d_active].primary_type, 
             static_state[d_agent][d_active].secondary_type), 
         agent == 0x01 ? a1 : a2, agent == 0x02 ? d1 : d2, 
-        static_state[agent][a_active].fast_move))
+        move_id == 0x01 ? static_state[agent][a_active].charged_move_1 : 
+            static_state[agent][a_active].charged_move_2))
     shields -= shielding ? 0x01 : 0x00
     cmp = defender_hp == 0x0000 || cmp < 0x03 ? 0x00 : cmp == 0x04 ? 0x01 : 0x02
     
