@@ -78,7 +78,7 @@ function SM(state::DynamicState, static_state::StaticState, depth::Int64;
                     static_state, depth - 1,
                     allow_nothing = allow_nothing,
                     allow_overfarming = allow_overfarming,
-                    sim_to_end = sim_to_end).payoff + (1 - odds) *
+                    sim_to_end = sim_to_end).payoff + (1 - turn_output.odds) *
                 SM(turn_output.next_state_2, static_state, depth - 1,
                     allow_nothing = allow_nothing,
                     allow_overfarming = allow_overfarming,
