@@ -127,13 +127,7 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
             end
             decision = get_decisions(A, B, decision1, decision2)
         end
-        turn_output = play_turn(s, static_s, decision)
-        if turn_output.odds == 1.0
-            s = turn_output.next_state_1
-        else
-            s = rand(rb_rng) < turn_output.odds ? 
-                turn_output.next_state_1 : turn_output.next_state_2
-        end
+        s = select_next_state(play_turn(s, static_s, decision))
         push!(strat.decisions, decision)
         push!(strat.scores, value + 0.5)
         push!(strat.activeMons, get_active(s))

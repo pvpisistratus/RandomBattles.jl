@@ -278,6 +278,23 @@ function play_turn(state::DynamicState, static_state::StaticState,
     return TurnOutput(next_state_1, next_state_2, odds)
 end
 
+function select_next_state(turn_output::TurnOutput)
+    return turn_output.odds == 1.0 ? turn_output.next_state_1 :
+        turn_output.odds == 0.5 ? 
+            rand((turn_output.next_state_1, turn_output.next_state_2)) :
+        turn_output.odds == 0.1 ? (rand(rb_rng, 1:10) == 1 ? 
+            turn_output.next_state_1 : turn_output.next_state_2) :
+        turn_output.odds == 0.125 ? rand(rb_rng, 
+            (turn_output.next_state_1, turn_output.next_state_2, 
+            turn_output.next_state_2, turn_output.next_state_2, 
+            turn_output.next_state_2, turn_output.next_state_2, 
+            turn_output.next_state_2, turn_output.next_state_2)) :
+        turn_output.odds == 0.2 ? (rand(rb_rng, 1:5) == 1 ? 
+            turn_output.next_state_1 : turn_output.next_state_2) :
+        (rand(rb_rng, 1:10) < 4 ? 
+            turn_output.next_state_1 : turn_output.next_state_2)
+end
+
 """
     play_battle(state, static_state)
 
@@ -292,14 +309,8 @@ function play_battle(state::DynamicState, static_state::StaticState;
             allow_overfarming = allow_overfarming)
         (iszero(d1) || iszero(d2)) &&
             return battle_score(state, static_state)
-        turn_output = play_turn(
-            state, static_state, select_random_decision(d1, d2))
-        if turn_output.odds == 1.0
-            state = turn_output.next_state_1
-        else
-            state = rand(rb_rng) < turn_output.odds ? 
-                turn_output.next_state_1 : turn_output.next_state_2
-        end
+        state = select_next_state(play_turn(
+            state, static_state, select_random_decision(d1, d2)))
     end
 end
 
