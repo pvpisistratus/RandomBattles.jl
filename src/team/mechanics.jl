@@ -201,8 +201,10 @@ function step_timers(fm_cooldown_1::UInt8, fm_cooldown_2::UInt8,
     fm_pending_2 = !iszero(fm_cooldown_2) ? fm_cooldown_2 : 
                    !iszero(fm_pending_2)  ? fm_pending_2 - 0x01 : 0x00
 
-    switch_cooldown_1 = max(0x00, switch_cooldown_1 - 0x01)
-    switch_cooldown_2 = max(0x00, switch_cooldown_2 - 0x01)
+    switch_cooldown_1 = switch_cooldown_1 == 0x00 ? 0x00 : 
+        switch_cooldown_1 - 0x01
+    switch_cooldown_2 = switch_cooldown_2 == 0x00 ? 0x00 : 
+        switch_cooldown_2 - 0x01
 
     return StepTimersOutput(
         fm_pending_1, fm_pending_2, switch_cooldown_1, switch_cooldown_2)
