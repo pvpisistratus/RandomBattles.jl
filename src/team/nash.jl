@@ -95,7 +95,6 @@ function solve_battle(s::DynamicState, static_s::StaticState, depth::Int64;
     decision = 0, 0
     strat = Strategy([], [], [], [])
     while true
-        s = resolve_chance(s, static_s)
         A, B = get_possible_decisions(s, static_s,
             allow_nothing = allow_nothing,
             allow_overfarming = allow_overfarming)
