@@ -1,9 +1,14 @@
 using StaticArrays, Distributions, Setfield
 
+# Following:
+# Lanctot, Marc, Viliam Lisý, and Mark HM Winands. "Monte Carlo tree search in 
+# simultaneous move games with applications to Goofspiel." In Workshop on 
+# Computer Games, pp. 28-43. Springer, Cham, 2013.
+
 struct MCTSNode
     A::UInt8
     B::UInt8
-    state::DynamicState
+    state::TurnOutput
     move::SVector{3, UInt8}
     index::UInt16
     parent::UInt16
@@ -20,9 +25,9 @@ end
 get_σ(decisions::UInt8, decision::UInt8) =
     is_possible(decisions, decision) ? (1 / Base.ctpop_int(decisions)) : 0.0
 
-function MCTSNode(s::DynamicState, static_s::StaticState, parent::UInt16,
+function MCTSNode(s::TurnOutput, static_s::StaticState, parent::UInt16,
     index::UInt16, move::SVector{3, UInt8})
-    A, B = get_possible_decisions(s, static_s)
+    A, B = get_possible_decisions(s.next_state_1, static_s)
     return MCTSNode(
         A,
         B,
@@ -42,34 +47,21 @@ function MCTSNode(s::DynamicState, static_s::StaticState, parent::UInt16,
 end
 
 function chance_node_in_tree(
-    tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}}, s::MCTSNode,
+    tree::SizedVector{4000, MCTSNode, Vector{MCTSNode}}, s::MCTSNode,
     i::UInt16, static_s::StaticState)
-    state_1, state_2 = s.state, s.state
-    odds = 1.0
-
-    chance = get_chance(s.state)
-    if chance == 0x05
-        odds = 0.5
-        state_1 = get_chance_state_1(s.state, static_s, chance)
-        state_2 = get_chance_state_2(s.state, chance)
-    elseif chance != 0x00
-        active1, active2 = get_active(s.state)
-        agent = chance < 0x03 ? 0x01 : 0x02
-        odds = get_buff_chance(isodd(chance) ?
-            static_s[agent][active1].charged_move_1 :
-            static_s[agent][active2].charged_move_2)
-        state_1 = get_chance_state_1(s.state, static_s, chance)
-        state_2 = get_chance_state_2(s.state, chance)
-    end
-
+    
     new_i = i
     while tree[new_i].index != 0x0000
         new_i += 0x0001
     end
-    chance_index = rand(rb_rng) < odds ? 1 : 2
+    chance_index = rand(rb_rng) < s.state.odds ? 1 : 2
     if s.chance_children[chance_index] == 0x0000
-        tree[new_i] = MCTSNode(chance_index == 1 ? state_1 : state_2, static_s,
-            s.index, new_i, @SVector [0x00, 0x00, UInt8(chance_index)])
+        tree[new_i] = MCTSNode(
+            chance_index == 1 ? 
+                TurnOutput(s.state.next_state_1, s.state.next_state_2, 1.0) : 
+                TurnOutput(s.state.next_state_2, s.state.next_state_1, 1.0), 
+            static_s, s.index, new_i, 
+            @SVector [0x00, 0x00, UInt8(chance_index)])
         s = @set s.chance_children[chance_index] = new_i
     end
     tree[s.index] = s
@@ -84,27 +76,29 @@ function chance_node_in_tree(
 end
 
 function fill_missing_children(
-    tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}}, s::MCTSNode,
+    tree::SizedVector{4000, MCTSNode, Vector{MCTSNode}}, s::MCTSNode,
     i::UInt16, static_s::StaticState)
     a = get_decisions(s.A, s.B,
         UInt8((length(findall(!iszero, s.dec_children))) %
             Base.ctpop_int(s.A) + 1),
         UInt8((length(findall(!iszero, s.dec_children))) ÷
             Base.ctpop_int(s.A) + 1))
-    state = play_turn(s.state, static_s, (a[1], a[2]))
+    turn_output = play_turn(s.state.next_state_1, static_s, (a[1], a[2]))
     new_i = i
     while tree[new_i].index != 0x0000
         new_i += 0x0001
     end
-    tree[new_i] = MCTSNode(state, static_s, s.index, new_i,
+    tree[new_i] = MCTSNode(turn_output, static_s, s.index, new_i,
         @SVector [a[1], a[2], 0x00])
-    u₁ = Base.cmp(0.5, play_battle(tree[new_i].state, static_s))
+    u₁ = Base.cmp(0.5, play_battle(
+        rand(rb_rng) < turn_output.odds ? tree[new_i].state.next_state_1 : 
+        tree[new_i].state.next_state_2, static_s))
     tree[s.index] = @set s.dec_children[Int64(a[1]), Int64(a[2])] = new_i
     update_mcts!(tree, tree[new_i], a[1], a[2], u₁)
     return u₁
 end
 
-function select_mcts(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
+function select_mcts(tree::SizedVector{4000, MCTSNode, Vector{MCTSNode}},
     s::MCTSNode, γ::Float64 = 0.1)
     η = γ / Base.ctpop_int(s.A)
     max_x1, max_x2 = -Inf, -Inf
@@ -139,7 +133,7 @@ function select_mcts(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
         Categorical(s.σ₂)))
 end
 
-function update_mcts!(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
+function update_mcts!(tree::SizedVector{4000, MCTSNode, Vector{MCTSNode}},
     s::MCTSNode, a₁::UInt8, a₂::UInt8, u₁::Int64)
     iszero(s.parent) && return
     parent = tree[s.parent]
@@ -154,12 +148,12 @@ function update_mcts!(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
         tree[s.parent].move[2], u₁)
 end
 
-function MCTS!(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
+function MCTS!(tree::SizedVector{4000, MCTSNode, Vector{MCTSNode}},
     s::MCTSNode, i::UInt16, static_s::StaticState)
     if Base.ctpop_int(s.A) == 0x00 || Base.ctpop_int(s.B) == 0x00
-        score = battle_score(s.state, static_s)
+        score = battle_score(s.state.next_state_1, static_s)
         return score > 0.5 ? 1 : score < 0.5 ? -1 : 0
-    elseif tree[s.index] == s && get_chance(s.state) != 0x0000
+    elseif tree[s.index] == s && s.state.odds < 1.
         return chance_node_in_tree(tree, s, i, static_s)
     elseif tree[s.index] == s &&
         length(findall(!iszero, s.dec_children)) !=
@@ -175,13 +169,16 @@ function MCTS!(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
 end
 
 const default_node = MCTSNode(0x00, 0x00,
-        DynamicState(StaticState(("mew", "mew", "mew", "mew", "mew", "mew"))),
+        TurnOutput(
+            DynamicState(StaticState(("mew", "mew", "mew", "mew", "mew", "mew"))), 
+            DynamicState(StaticState(("mew", "mew", "mew", "mew", "mew", "mew"))), 
+            1.0),
         (@SVector zeros(UInt8, 3)), 0x0000, 0x0000,
         (@SMatrix [0x0000 for i = 1:8, j = 1:8]), (@SVector zeros(UInt16, 2)),
         (@SVector zeros(8)), (@SVector zeros(8)), (@SVector zeros(UInt16, 8)),
         (@SVector zeros(8)), (@SVector zeros(8)), (@SVector zeros(UInt16, 8)))
 
-function delete_nodes!(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
+function delete_nodes!(tree::SizedVector{4000, MCTSNode, Vector{MCTSNode}},
     index::UInt16, to_keep::UInt16)
     for i = 1:8, j = 1:8
         if tree[index].dec_children[i, j] != 0x0000 &&
@@ -199,10 +196,10 @@ function delete_nodes!(tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}},
 end
 
 function update_tree_MCTS!(
-    tree::SizedVector{20000, MCTSNode, Vector{MCTSNode}}, curr_index::UInt16,
+    tree::SizedVector{4000, MCTSNode, Vector{MCTSNode}}, curr_index::UInt16,
     static_s::StaticState)
 
-    for i = 0x0001:0x2710
+    for i = 0x0001:UInt16(2000)
         if tree[i].index == 0x0000
             MCTS!(tree, tree[curr_index], i, static_s)
         end
@@ -211,9 +208,9 @@ end
 
 function select_decisions_MCTS(dynamic_state::DynamicState,
     static_s::StaticState)
-    tree = SizedVector{20_000}([default_node for i = 0x0001:0x4e20])
-    tree[0x0001] = MCTSNode(dynamic_state, static_s, 0x0000, 0x0001,
-        @SVector [0x00, 0x00, 0x00])
+    tree = SizedVector{4_000}([default_node for i = 0x0001:UInt16(4000)])
+    tree[0x0001] = MCTSNode(TurnOutput(dynamic_state, dynamic_state, 1.0), 
+        static_s, 0x0000, 0x0001, @SVector [0x00, 0x00, 0x00])
     curr_index = 0x0001
     strat = Strategy([], [], [], [])
 
@@ -221,35 +218,46 @@ function select_decisions_MCTS(dynamic_state::DynamicState,
         Base.ctpop_int(tree[curr_index].B) != 0x00
         update_tree_MCTS!(tree, curr_index, static_s)
         d1, d2 = select_mcts(tree, tree[curr_index])
+
+        mcts_score = (tree[curr_index].x₁[d1] / 8tree[curr_index].n₁[d1] + 0.5 + 
+            -tree[curr_index].x₂[d2] / 8tree[curr_index].n₂[d2] + 0.5) / 2
+    
         prev_index = curr_index
         curr_index = tree[curr_index].dec_children[d1, d2]
 
-        active = get_active(tree[curr_index].state)
-        chance = get_chance(tree[curr_index].state)
-        if chance == 0x05
-            curr_index = rand(rb_rng) < 0.5 ? 
-                tree[curr_index].chance_children[1] :
-                tree[curr_index].chance_children[2]
-        elseif chance != 0x00
-            agent = chance < 0x03 ? 0x01 : 0x02
-            move = isodd(chance) ?
-                static_s[agent][active[agent]].charged_move_1 :
-                static_s[agent][active[agent]].charged_move_2
-            curr_index = buff_applies(move) ?
-                tree[curr_index].chance_children[1] :
-                tree[curr_index].chance_children[2]
+        active = get_active(tree[curr_index].state.next_state_1)
+        odds = tree[curr_index].state.odds
+        if odds < 1.
+            chance_index = rand(rb_rng) < odds ? 1 : 2
+            
+            if tree[curr_index].chance_children[chance_index] == 0x0000
+                new_i = UInt16(findfirst(x -> x == default_node, tree))
+                tree[new_i] = MCTSNode(
+                    chance_index == 1 ? 
+                        TurnOutput(tree[curr_index].state.next_state_1, 
+                            tree[curr_index].state.next_state_2, 1.0) : 
+                        TurnOutput(tree[curr_index].state.next_state_2, 
+                            tree[curr_index].state.next_state_1, 1.0), 
+                    static_s, tree[curr_index].index, new_i, 
+                    @SVector [0x00, 0x00, UInt8(chance_index)])
+                s = tree[curr_index]
+                s = @set s.chance_children[chance_index] = new_i
+                curr_index = new_i
+            else
+                curr_index = tree[curr_index].chance_children[chance_index]
+            end
         end
 
         push!(strat.decisions, (d1, d2))
-        push!(strat.scores, battle_score(tree[curr_index].state, static_s))
+        push!(strat.scores, mcts_score)
         push!(strat.activeMons, active)
         push!(strat.hps,
-            ((get_hp(tree[curr_index].state[0x01][0x01]),
-            get_hp(tree[curr_index].state[0x01][0x02]),
-            get_hp(tree[curr_index].state[0x01][0x03])),
-            (get_hp(tree[curr_index].state[0x02][0x01]),
-            get_hp(tree[curr_index].state[0x02][0x02]),
-            get_hp(tree[curr_index].state[0x02][0x03]))))
+            ((get_hp(tree[curr_index].state.next_state_1[0x01][0x01]),
+            get_hp(tree[curr_index].state.next_state_1[0x01][0x02]),
+            get_hp(tree[curr_index].state.next_state_1[0x01][0x03])),
+            (get_hp(tree[curr_index].state.next_state_1[0x02][0x01]),
+            get_hp(tree[curr_index].state.next_state_1[0x02][0x02]),
+            get_hp(tree[curr_index].state.next_state_1[0x02][0x03]))))
 
         delete_nodes!(tree, prev_index, curr_index)
         new_s = tree[curr_index]
@@ -257,4 +265,16 @@ function select_decisions_MCTS(dynamic_state::DynamicState,
     end
 
     return strat
+end
+
+function select_decision_MCTS(dynamic_state::DynamicState,
+    static_s::StaticState)
+    tree = SizedVector{4_000}([default_node for i = 0x0001:UInt16(4000)])
+    tree[0x0001] = MCTSNode(TurnOutput(dynamic_state, dynamic_state, 1.0), 
+        static_s, 0x0000, 0x0001, @SVector [0x00, 0x00, 0x00])
+    curr_index = 0x0001
+
+    update_tree_MCTS!(tree, curr_index, static_s)
+    d1, d2 = select_mcts(tree, tree[curr_index])
+    return d1, d2
 end

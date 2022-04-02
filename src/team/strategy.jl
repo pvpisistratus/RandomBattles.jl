@@ -25,7 +25,8 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
     gr()
     plt1 = plot(1:length(strat.scores), strat.scores, width = 2,
         label = "possible battle scores", ylims = [0, 1],
-        ylabel = "Battle Score", xlabel = "Decisions", size = (950, 400))
+        ylabel = "Battle Score", background = :transparent, 
+        xlabel = "Decisions", size = (950, 400))
     plot!(plt1, 1:length(strat.scores),
         map(i -> strat.hps[i][1][1], 1:length(strat.scores)) ./
         static_s[0x01][0x01].stats.hitpoints, color = :green, label = "")
@@ -46,8 +47,8 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
         static_s[0x02][0x03].stats.hitpoints, color = :purple, label = "")
 
     hline!(plt1, [0.5], label = "win/loss")
-    plt2 = plot(xlims = [0, length(strat.scores)], ylims = [-3, 0],
-        legend = false, size = (950, 200), axis = nothing)
+    plt2 = plot(background = :transparent, xlims = [0, length(strat.scores)], 
+        ylims = [-3, 0], legend = false, size = (950, 200), axis = nothing)
     for i = 1:length(strat.scores), j = 0x01:0x02
         o_agent = j == 0x01 ? 0x02 : 0x01
         if strat.decisions[i][j] == 0x01
@@ -93,5 +94,5 @@ function plot_strategy(strat::Strategy, static_s::StaticState)
     end
 
     l = @layout [a; b{0.2h}]
-    plot(plt1, plt2, layout = l, size = (950, 600))
+    plot(plt1, plt2, layout = l, size = (950, 600), background = :transparent)
 end
